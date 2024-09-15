@@ -1,0 +1,82 @@
+﻿@page "/login"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject NavamiContext db
+@inject IJSRuntime js
+@inject NavigationManager navigationManager
+
+<div>
+    <EditForm Model="Model" OnValidSubmit="Authenticate" FormName="LoginForm">
+        <DataAnnotationsValidator />
+        <FluentCard Width="400px" Height="400px" style="display:flex;align-items:center;justify-content:center;flex-direction:column ;gap:1rem">
+            <h3>Login</h3>
+
+            <p class="text-danger fs-6">@errorMessage</p>
+            <div class="w-100 px-4">
+                <InputText @bind-Value="Model.Username" id="username" class="form-control w-100" placeholder="Enter username" />
+            </div>
+            <div class="w-100 px-4">
+                <InputText @bind-Value="Model.Password" id="password" type="password" class="form-control w-100" placeholder="Enter password" />
+            </div>
+       @*       <p class="text-danger fs-6">@errorMessage</p>
+             <div class="w-100  px-4">
+                 <FluentTextField @bind-Value=Model.Username Label="Username" class="w-100" Placeholder="Enter username" id="username"></FluentTextField>
+
+             </div>
+             <div class="w-100 px-4">
+                 <FluentTextField @bind-Value=Model.Password Label="Password" TextFieldType="TextFieldType.Password" Placeholder="Enter password" class="w-100" id="password"></FluentTextField>
+             </div> *@
+            <FluentButton Appearance="Appearance.Accent" Type="ButtonType.Submit" Class="w-100 px-4">Login</FluentButton>
+
+        </FluentCard>
+    </EditForm>
+
+
+</div>
+
+
+
+@code {
+    [CascadingParameter]
+    public HttpContext? httpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    public LoginModel Model { get; set; } = default!;
+    bool? canceled;
+    private string? errorMessage;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model ??= new();
+    }    
+
+    private async Task Authenticate()
+    {
+        var user = db.Users.FirstOrDefault(x => x.Username == Model.Username && x.Password == Model.Password);
+        if (user != null)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            if (httpContext != null)
+            {
+                await httpContext.SignInAsync(principal);
+                navigationManager.NavigateTo("/");
+
+            }
+        }
+        else
+        {
+            errorMessage = "Invalid username or password";
+        }
+    }
+
+}

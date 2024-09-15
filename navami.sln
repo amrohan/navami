@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35208.52
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "navami", "navami.csproj", "{8319FCB1-01AF-4A2E-8DBF-F174723945C9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8319FCB1-01AF-4A2E-8DBF-F174723945C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8319FCB1-01AF-4A2E-8DBF-F174723945C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8319FCB1-01AF-4A2E-8DBF-F174723945C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8319FCB1-01AF-4A2E-8DBF-F174723945C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {805C569E-003D-40D3-A1C8-2388CDD743E2}
+	EndGlobalSection
+EndGlobal

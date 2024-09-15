@@ -1,0 +1,54 @@
+﻿
+@page "/recepies"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using navami.Services
+@using navami.Models
+
+@inject RecipeService RecipeService
+@rendermode InteractiveServer
+
+
+<PageTitle>Recepies</PageTitle>
+<h3 >Recipes</h3>
+<div class="card " style="width:100%; height:8rem;">
+    <div style="display:flex;justify-content:start; align-items:start;gap:10px" class="card-body">
+        <div class="">
+            <FluentTextField @bind-Value=value2 Minlength="2" Maxlength="4" Label="RecepieId" Appearance="FluentInputAppearance.Outline" Placeholder="Enter name"></FluentTextField>
+        </div>
+
+        <div class="">
+            <FluentTextField @bind-Value=value2 Minlength="2" Maxlength="4" Label="RecepieId" Appearance="FluentInputAppearance.Outline" Placeholder="Enter name"></FluentTextField>
+        </div>
+
+        <div class="">
+        <FluentCombobox Placeholder="Make a selection..." Label="Best song" Autofocus="true" Items="@data" @bind-Value="@hit"    />
+        </div>
+    </div>
+
+
+</div>
+<FluentButton Appearance="Appearance.Accent" OnClick="@(() => ShowAddRecipe = true)">Add Recipe</FluentButton>
+
+
+<p>You entered: @value2</p>
+
+
+@code {
+    string? value2;
+    string? hit;
+    private List<Recipe> recipes;
+    private bool ShowAddRecipe = false;
+
+    protected override void OnInitialized()
+    {
+        RefreshRecipes();
+    }
+
+    private void RefreshRecipes()
+    {
+        recipes = RecipeService.GetAllRecipes();
+        ShowAddRecipe = false;
+    }
+
+    string[] data = new string[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
+}
