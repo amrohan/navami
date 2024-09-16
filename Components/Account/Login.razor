@@ -3,8 +3,7 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
-@inject NavamiContext db
-@inject IJSRuntime js
+@inject UserService userService
 @inject NavigationManager navigationManager
 
 <div>
@@ -56,13 +55,13 @@
 
     private async Task Authenticate()
     {
-        var user = db.Users.FirstOrDefault(x => x.Username == Model.Username && x.Password == Model.Password);
-        if (user != null)
+        var user = userService.LoginUser(Model);
+        if (user.Data != null)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Name, user.Data.Username),
+                new Claim(ClaimTypes.Role, user.Data.Role)
             };
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
@@ -75,7 +74,7 @@
         }
         else
         {
-            errorMessage = "Invalid username or password";
+            errorMessage = user.ErrorMessage;
         }
     }
 

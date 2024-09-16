@@ -1,0 +1,137 @@
+﻿@page "/adduser/{UserId:guid}"
+@page "/adduser"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.ComponentModel.DataAnnotations
+@using navami.Services
+@using navami.Models
+@inject UserService userService
+@rendermode InteractiveServer
+
+<h3>@(user.UserId == Guid.Empty ? "Add User" : "Edit User")</h3>
+
+<FluentCard Width="100%" Height="200px">
+    <div class="container text-start">
+        <div class="row row-cols-4 align-content-center">
+            <div class="col">
+                <FluentTextField @bind-Value=user.Username Label="Username" Placeholder="Enter username" Class="w-100">
+                </FluentTextField>
+            </div>
+            <div class="col">
+                <FluentTextField @bind-Value=user.Password TextFieldType="TextFieldType.Password" Label="Password"
+                    Placeholder="Enter password" Class="w-100"></FluentTextField>
+            </div>
+            <div class="col">
+                <FluentCombobox Placeholder="Select role" Label="Role" Items="@userRoles"
+                    OptionText="@(i => i.RoleName)" OptionValue="@(i => i.RoleId.ToString())"
+                    @bind-Value="@user.Role" />
+            </div>
+            <div class="col">
+                <FluentTextField @bind-Value=user.Mobile TextFieldType="TextFieldType.Tel" Label="Mobile"
+                    Placeholder="Enter mobile" Class="w-100" Pattern="^\+?\d{10,15}$"></FluentTextField>
+            </div>
+            <div class="col">
+                <FluentTextField @bind-Value=user.Email TextFieldType="TextFieldType.Email" Label="Email"
+                    Placeholder="Enter email" Class="w-100"></FluentTextField>
+            </div>
+
+            <div class="col d-flex justify-content-start align-items-end">
+                <FluentSwitch @bind-Value=deactive Label="Deactivate" Class="mb-1" />
+            </div>
+
+        </div>
+    </div>
+    <div class="col d-flex justify-content-end align-items-end w-100">
+        <p>@errorMessage</p>
+        <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@RegisterUser">
+            @(user.UserId == Guid.Empty ? "Register" : "Update")
+        </FluentButton>
+    </div>
+</FluentCard>
+
+@code {
+    [Parameter]
+    public Guid? UserId { get; set; }
+
+    public User user = new User();
+    bool deactive;
+    bool isLoading = false;
+    string errorMessage = string.Empty;
+    private List<Role>? userRoles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await userService.GetAllUserRolesAsync();
+
+        if (response.Success)
+        {
+            userRoles = response.Data; // Extract roles from the ApiResponse
+        }
+        else
+        {
+            // Handle the error, e.g., show a message or log the error
+            Console.WriteLine(response.ErrorMessage);
+        }
+
+        if (UserId.HasValue && UserId.Value != Guid.Empty)
+        {
+            var userResponse = await userService.GetUserByIdAsync(UserId.Value);
+            if (userResponse.Success)
+            {
+                user = userResponse.Data;
+                deactive = (user.IsDeactivated ?? false);
+            }
+            else
+            {
+                // Handle the error, e.g., show a message or log the error
+                Console.WriteLine(userResponse.ErrorMessage);
+            }
+        }
+    }
+
+
+    private async Task RegisterUser()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+        // Validate the user object
+        var validationResults = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(user, new ValidationContext(user), validationResults, true);
+
+        if (isValid)
+        {
+            user.IsDeactivated = deactive;
+            ApiResponse<User> response;
+
+            if (user.UserId == Guid.Empty)
+            {
+                // Add new user
+                response = userService.RegisterUser(user);
+            }
+            else
+            {
+                // Update existing user
+                response = await userService.UpdateUserAsync(user);
+            }
+
+            if (response.Success)
+            {
+                // Show a success message
+                isLoading = false;
+                Console.WriteLine("User saved successfully");
+            }
+            else
+            {
+                // Handle the error, e.g., show a message or log the error
+                isLoading = false;
+                errorMessage = response.ErrorMessage;
+                Console.WriteLine(response.ErrorMessage);
+            }
+        }
+        else
+        {
+            isLoading = false;
+            errorMessage = validationResults[0].ErrorMessage;
+            Console.WriteLine("Validation failed");
+        }
+    }
+}

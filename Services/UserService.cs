@@ -1,51 +1,213 @@
-﻿using navami.Models;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.EntityFrameworkCore;
+using navami.Dto;
+using navami.Models;
+using BC = BCrypt.Net.BCrypt;
 
 namespace navami.Services
 {
-    //public class UserService
-    //{
-    //    private readonly List<User> _users = new()
-    //    {
-    //        new User { UserId = 9, Username = "user1", Email = "user1@example.com", Role = "User", Mobile = "0987654321", Password = "password123" },
+    public class UserService
+    {
+        private readonly NavamiContext dbContext;
 
-    //        new User { UserId = 1, Username = "admin", Email = "admin@example.com", Role = "Admin", Mobile = "1234567890", Password = "password123" },
-    //        new User { UserId = 2, Username = "dev", Email = "dev@example.com", Role = "Dev", Mobile = "1234567890", Password = "password123" }
+        public UserService(NavamiContext context)
+        {
+            dbContext = context;
+        }
 
-    //    };
+        public ApiResponse<User> RegisterUser(User model)
+        {
+            try
+            {
+                // Check if the username already exists
+                var existingUser = dbContext.Users.FirstOrDefault(u => u.Username == model.Username);
+                if (existingUser != null)
+                {
+                    return new ApiResponse<User>("Username already exists.");
+                }
 
-    //    // Get all users
-    //    public List<User> GetAllUsers() => _users;
+                // Check if the email already exists
+                existingUser = dbContext.Users.FirstOrDefault(u => u.Email == model.Email);
+                if (existingUser != null)
+                {
+                    return new ApiResponse<User>("Email already exists.");
+                }
 
-    //    // Get a user by ID
-    //    public User GetUserById(int id)
-    //    {
-    //        return _users.FirstOrDefault(r => r.UserId == id);
-    //    }
+                // Hash the password using BCrypt
+                model.Password = BC.HashPassword(model.Password);
 
-    //    // Add a new user
-    //    public void AddUser(User user)
-    //    {
-    //        user.UserId = _users.Count > 0 ? _users.Max(u => u.UserId) + 1 : 1; // Ensure unique UserId
-    //        _users.Add(user);
-    //    }
+                // Add the user to the database
+                dbContext.Users.Add(model);
+                dbContext.SaveChanges();
 
-    //    // Update an existing user
-    //    public void UpdateUser(User user)
-    //    {
-    //        var existingUser = GetUserById(user.UserId);
-    //        if (existingUser != null)
-    //        {
-    //            existingUser.Username = user.Username;
-    //            existingUser.Email = user.Email;
-    //            existingUser.Role = user.Role;
-    //            existingUser.Mobile = user.Mobile;
-    //            existingUser.Password = user.Password;
-    //        }
-    //    }
+                return new ApiResponse<User>(model); // Return the registered user
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<User>(ex.Message); // Return any exception message
+            }
+        }
 
-    //    // Delete a user by ID
-    //    public void DeleteUser(int id) => _users.RemoveAll(r => r.UserId == id);
-    //}
+        public ApiResponse<User> LoginUser(LoginModel model)
+        {
+            try
+            {
+                // Find the user by email
+                var user = dbContext.Users.FirstOrDefault(u => u.Username == model.Username);
+                if (user == null)
+                {
+                    return new ApiResponse<User>("Invalid email or password.");
+                }
+
+                // Verify the password
+                if (!BC.Verify(model.Password, user.Password))
+                {
+                    return new ApiResponse<User>("Invalid email or password.");
+                }
+
+                return new ApiResponse<User>(user);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<User>(ex.Message); // Return any exception message
+            }
+        }
+
+        public async Task<ApiResponse<List<Role>>> GetAllUserRolesAsync()
+        {
+            try
+            {
+                // Fetch the list of roles asynchronously
+                var roles = await dbContext.Roles.ToListAsync();
+
+                // Check if roles are found
+                if (roles == null || roles.Count == 0)
+                {
+                    return new ApiResponse<List<Role>>("No roles found.");
+                }
+                var role = roles.Select(r => r.RoleName);
+
+                // Return the list of roles
+                return new ApiResponse<List<Role>>(roles);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here (if you have a logging mechanism)
+                return new ApiResponse<List<Role>>($"An error occurred while fetching roles: {ex.Message}");
+            }
+        }
+
+
+        public async Task<ApiResponse<List<User>>> GetAllUsersAsync()
+        {
+            try
+            {
+                // Fetch the list of users asynchronously
+                var users = await dbContext.Users.ToListAsync();
+
+                // Check if users are found
+                if (users == null || users.Count == 0)
+                {
+                    return new ApiResponse<List<User>>("No users found.");
+                }
+
+                // Return the list of users
+                return new ApiResponse<List<User>>(users);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here (if you have a logging mechanism)
+                return new ApiResponse<List<User>>($"An error occurred while fetching users: {ex.Message}");
+            }
+        }
+
+        //  update user
+        public async Task<ApiResponse<User>> UpdateUserAsync(User model)
+        {
+            try
+            {
+                // Find the user by ID
+                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == model.UserId);
+                if (user == null)
+                {
+                    return new ApiResponse<User>("User not found.");
+                }
+                // check if password is hash or not
+                if (!model.Password.StartsWith("$2a$"))
+                {
+                    // Hash the password using BCrypt
+                    model.Password = BC.HashPassword(model.Password);
+                }
+
+                // validate username and email 
+                var existingUser = dbContext.Users.FirstOrDefault(u => u.Username == model.Username);
+                if (existingUser != null && existingUser.UserId != model.UserId)
+                {
+                    return new ApiResponse<User>("Username already exists.");
+                }
+                existingUser = dbContext.Users.FirstOrDefault(u => u.Email == model.Email);
+                if (existingUser != null && existingUser.UserId != model.UserId)
+                {
+                    return new ApiResponse<User>("Email already exists.");
+                }
+                user.Username = model.Username;
+                user.Password = model.Password;
+                user.Email = model.Email;
+                user.Role = model.Role;
+                user.IsDeactivated = model.IsDeactivated;
+
+
+                // Save the changes
+                await dbContext.SaveChangesAsync();
+
+                return new ApiResponse<User>(user);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<User>($"An error occurred while updating the user: {ex.Message}");
+            }
+        }
+        public async Task<ApiResponse<User>> GetUserByIdAsync(Guid userId)
+        {
+            try
+            {
+                // Find the user by ID
+                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+                if (user == null)
+                {
+                    return new ApiResponse<User>("User not found.");
+                }
+
+                return new ApiResponse<User>(user);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here (if you have a logging mechanism)
+                return new ApiResponse<User>($"An error occurred while fetching the user: {ex.Message}");
+            }
+        }
+
+        // delete user 
+        public async Task<ApiResponse<User>> DeleteUserAsync(Guid userId)
+        {
+            try
+            {
+                // Find the user by ID
+                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+                if (user == null)
+                {
+                    return new ApiResponse<User>("User not found.");
+                }
+
+                // Remove the user
+                dbContext.Users.Remove(user);
+                await dbContext.SaveChangesAsync();
+
+                return new ApiResponse<User>(user);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<User>($"An error occurred while deleting the user: {ex.Message}");
+            }
+        }
+    }
 }

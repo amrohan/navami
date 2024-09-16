@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFluentUIComponents();
 builder.Services.AddDataGridEntityFrameworkAdapter();
 builder.Services.AddSingleton<RecipeService>();
-//builder.Services.AddSingleton<UserService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddHttpClient();
 
 

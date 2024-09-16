@@ -1,13 +1,81 @@
 ﻿@page "/users"
 @using Microsoft.FluentUI.AspNetCore.Components
+@using System.ComponentModel.DataAnnotations
 @using navami.Services
 @using navami.Models
+@inject UserService userService
+@inject NavigationManager navigationManager
 
 @rendermode InteractiveServer
 
-
-
 <h3>Users</h3>
-@code{
+
+
+<FluentCard Width="100%" Height="500px">
+    <FluentDataGrid Items="@users">
+        <PropertyColumn Property="@(u => u.Username)" Sortable="true" />
+        <PropertyColumn Property="@(u => u.Role)" Sortable="true" />
+        <PropertyColumn Property="@(u => u.Mobile)" Sortable="true" />
+        <PropertyColumn Property="@(u => u.Email)" Sortable="true" />
+        <PropertyColumn Property="@(u => u.IsDeactivated)" Sortable="true" />
+        <TemplateColumn Title="Actions" Align="@Align.End">
+            <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                OnClick="@(()=>EditUser(context))" />
+            <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                OnClick="@(() => DeleteUser(context))" />
+        </TemplateColumn>
+    </FluentDataGrid>
+</FluentCard>
+
+
+
+@code {
+
+    //private List<User> users;
+    private IQueryable<User> users;
+    string errorMessage = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await userService.GetAllUsersAsync();
+        if (response.Success)
+        {
+            users = response.Data.AsQueryable();
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+            Console.WriteLine(response.ErrorMessage);
+        }
+
+    }
+
+    // navigate to add user page
+    private void AddUser()
+    {
+        navigationManager.NavigateTo("/adduser");
+    }
+
+    // navigate to edit user page
+    private void EditUser(User context)
+    {
+        navigationManager.NavigateTo($"/adduser/{context.UserId}");
+    }
+
+    // delete user
+    private async Task DeleteUser(User context)
+    {
+        var response = await userService.DeleteUserAsync(context.UserId);
+        if (response.Success)
+        {
+
+            users = users.Where(u => u.UserId != context.UserId).AsQueryable();
+            Console.WriteLine("User deleted successfully");
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+            Console.WriteLine(response.ErrorMessage);
+        }
+    }
 
 }
