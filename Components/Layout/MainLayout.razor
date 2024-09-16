@@ -2,12 +2,6 @@
 @inherits LayoutComponentBase
 
 
-<FluentToastProvider />
-<FluentDialogProvider />
-<FluentTooltipProvider />
-<FluentMessageBarProvider />
-<FluentMenuProvider />
-
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -36,6 +30,12 @@
         <article class="content px-4">
             @Body
         </article>
+
+        <FluentToastProvider @rendermode="InteractiveServer" Timeout="4000" />
+        <FluentDialogProvider />
+        <FluentTooltipProvider />
+        <FluentMessageBarProvider />
+        <FluentMenuProvider />
     </main>
 </div>
 

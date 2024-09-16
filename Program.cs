@@ -6,12 +6,10 @@ using navami.Models;
 using navami.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHttpClient();
 builder.Services.AddFluentUIComponents();
 builder.Services.AddDataGridEntityFrameworkAdapter();
-builder.Services.AddSingleton<RecipeService>();
-builder.Services.AddScoped<UserService>();
-builder.Services.AddHttpClient();
-
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -26,6 +24,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.MaxAge = TimeSpan.FromMinutes(30);
         options.AccessDeniedPath = "/accessdenied";
     });
+
+builder.Services.AddSingleton<RecipeService>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();

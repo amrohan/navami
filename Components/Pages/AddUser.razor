@@ -1,11 +1,13 @@
 ﻿@page "/adduser/{UserId:guid}"
 @page "/adduser"
+@rendermode InteractiveServer
+
 @using Microsoft.FluentUI.AspNetCore.Components
 @using System.ComponentModel.DataAnnotations
 @using navami.Services
 @using navami.Models
 @inject UserService userService
-@rendermode InteractiveServer
+@inject IToastService ToastService
 
 <h3>@(user.UserId == Guid.Empty ? "Add User" : "Edit User")</h3>
 
@@ -117,14 +119,15 @@
             {
                 // Show a success message
                 isLoading = false;
-                Console.WriteLine("User saved successfully");
+                ToastService.ShowSuccess("User updated successfully");
+
             }
             else
             {
                 // Handle the error, e.g., show a message or log the error
                 isLoading = false;
                 errorMessage = response.ErrorMessage;
-                Console.WriteLine(response.ErrorMessage);
+                ToastService.ShowError(response.ErrorMessage);
             }
         }
         else
