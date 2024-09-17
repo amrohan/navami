@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using navami.Dto;
 using navami.Models;
 using BC = BCrypt.Net.BCrypt;
@@ -8,10 +9,12 @@ namespace navami.Services
     public class UserService
     {
         private readonly NavamiContext dbContext;
+        private readonly IMapper _mapper;
 
-        public UserService(NavamiContext context)
+        public UserService(NavamiContext context, IMapper mapper)
         {
             dbContext = context;
+            _mapper = mapper;
         }
 
         public ApiResponse<User> RegisterUser(User model)
@@ -97,7 +100,7 @@ namespace navami.Services
         }
 
 
-        public async Task<ApiResponse<List<User>>> GetAllUsersAsync()
+        public async Task<ApiResponse<List<UserDto>>> GetAllUsersAsync()
         {
             try
             {
@@ -107,16 +110,16 @@ namespace navami.Services
                 // Check if users are found
                 if (users == null || users.Count == 0)
                 {
-                    return new ApiResponse<List<User>>("No users found.");
+                    return new ApiResponse<List<UserDto>>("No users found.");
                 }
 
                 // Return the list of users
-                return new ApiResponse<List<User>>(users);
+                return new ApiResponse<List<UserDto>>(_mapper.Map<List<UserDto>>(users));
             }
             catch (Exception ex)
             {
                 // Log the exception here (if you have a logging mechanism)
-                return new ApiResponse<List<User>>($"An error occurred while fetching users: {ex.Message}");
+                return new ApiResponse<List<UserDto>>($"An error occurred while fetching users: {ex.Message}");
             }
         }
 
@@ -187,7 +190,7 @@ namespace navami.Services
         }
 
         // delete user 
-        public async Task<ApiResponse<User>> DeleteUserAsync(Guid userId)
+        public async Task<ApiResponse<UserDto>> DeleteUserAsync(Guid userId)
         {
             try
             {
@@ -195,18 +198,18 @@ namespace navami.Services
                 var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
                 if (user == null)
                 {
-                    return new ApiResponse<User>("User not found.");
+                    return new ApiResponse<UserDto>("User not found.");
                 }
 
                 // Remove the user
                 dbContext.Users.Remove(user);
                 await dbContext.SaveChangesAsync();
-
-                return new ApiResponse<User>(user);
+                var userDto = _mapper.Map<UserDto>(user);
+                return new ApiResponse<UserDto>(userDto);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<User>($"An error occurred while deleting the user: {ex.Message}");
+                return new ApiResponse<UserDto>($"An error occurred while deleting the user: {ex.Message}");
             }
         }
     }

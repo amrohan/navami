@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.FluentUI.AspNetCore.Components;
+using navami;
 using navami.Components;
+using navami.mapper;
 using navami.Models;
 using navami.Services;
 
@@ -25,13 +27,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/accessdenied";
     });
 
-builder.Services.AddSingleton<RecipeService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<RecipeCategoryService>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddDbContext<NavamiContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddAutoMapper(typeof(NavamiProfile));
 
 var app = builder.Build();
 

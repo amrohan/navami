@@ -6,38 +6,49 @@
 @inject UserService userService
 @inject NavigationManager navigationManager
 
+@attribute [StreamRendering]
 @rendermode InteractiveServer
 
-<div class="d-flex justify-content-between align-items-center mb-1">
-    <h3>Users</h3>
+ <FluentCard Width="100%" Height="500px">
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h3 class="fs-4">Users</h3>
     <FluentButton Appearance="Appearance.Accent" IconEnd="@(new Icons.Regular.Size16.Add())" OnClick="@AddUser">Add User
     </FluentButton>
 </div>
 
-
-<FluentCard Width="100%" Height="500px">
-    <FluentDataGrid Items="@users">
-        <PropertyColumn Property="@(u => u.Username)" Sortable="true" />
-        <PropertyColumn Property="@(u => u.Role)" Sortable="true" />
-        <PropertyColumn Property="@(u => u.Mobile)" Sortable="true" />
-        <PropertyColumn Property="@(u => u.Email)" Sortable="true" />
-        <PropertyColumn Property="@(u => u.IsDeactivated)" Sortable="true" />
-        <TemplateColumn Title="Actions" Align="@Align.End">
-            <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-                OnClick="@(()=>EditUser(context))" />
-            <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                OnClick="@(() => DeleteUser(context))" />
-        </TemplateColumn>
-    </FluentDataGrid>
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+        <div class="d-flex justify-content-end align-items-center mb-1">
+            <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+                @bind-Value=searchTerm @bind-Value:after=SearchUsers Immediate=true />
+        </div>
+        <FluentDataGrid Items="@users" GenerateHeader="GenerateHeaderOption.Sticky" >
+            <PropertyColumn Property="@(u => u.Username)" Sortable="true"  />
+            <PropertyColumn Property="@(u => u.Role)" Sortable="true" />
+            <PropertyColumn Property="@(u => u.Mobile)" Sortable="true" />
+            <PropertyColumn Property="@(u => u.Email)" Sortable="true" />
+            <PropertyColumn Property="@(u => (u.IsDeactivated ?? false) ? "Deactivated" : "Active")" title="Account Status"
+                Sortable="true" />
+            <TemplateColumn Title="Actions" Align="@Align.End">
+                <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                    OnClick="@(()=>EditUser(context))" />
+                <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                    OnClick="@(() => DeleteUser(context))" />
+            </TemplateColumn>
+        </FluentDataGrid>
+} 
 </FluentCard>
 
 
-
 @code {
-
-    //private List<User> users;
-    private IQueryable<User> users;
+    private IQueryable<UserDto> users;
+    private IQueryable<UserDto> originalUsers;
     string errorMessage = string.Empty;
+    string searchTerm = string.Empty;
     protected override async Task OnInitializedAsync()
     {
         var response = await userService.GetAllUsersAsync();
@@ -60,13 +71,13 @@
     }
 
     // navigate to edit user page
-    private void EditUser(User context)
+    private void EditUser(UserDto context)
     {
         navigationManager.NavigateTo($"/adduser/{context.UserId}");
     }
 
     // delete user
-    private async Task DeleteUser(User context)
+    private async Task DeleteUser(UserDto context)
     {
         var response = await userService.DeleteUserAsync(context.UserId);
         if (response.Success)
@@ -79,6 +90,27 @@
         {
             errorMessage = response.ErrorMessage;
             Console.WriteLine(response.ErrorMessage);
+        }
+    }
+
+    private void SearchUsers()
+    {
+        if (originalUsers == null)
+        {
+            // Store the original query
+            originalUsers = users;
+        }
+
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            // Reset to the original query when search term is cleared
+            users = originalUsers;
+        }
+        else
+        {
+            // Apply filtering on the original query
+            users = originalUsers.Where(u => u.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || u.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
         }
     }
 
