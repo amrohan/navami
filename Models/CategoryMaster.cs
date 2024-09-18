@@ -19,5 +19,7 @@ public partial class CategoryMaster
 
     public bool IsActive { get; set; }
 
+    public virtual ICollection<Rmmaster> Rmmasters { get; set; } = new List<Rmmaster>();
+
     public virtual ICollection<SubCategoryMaster> SubCategoryMasters { get; set; } = new List<SubCategoryMaster>();
 }

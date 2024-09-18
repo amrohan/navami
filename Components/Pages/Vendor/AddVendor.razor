@@ -1,0 +1,94 @@
+@page "/vendor/add"
+@page "/vendor/edit/{VendorId:guid}"
+
+@using System.Security.Claims
+
+@rendermode InteractiveServer
+
+@inject VendorMasterService vendorService
+@inject IToastService ToastService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<FluentCard Width="100%" Height="200px">
+
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="fs-5">@(vendor.VendorId != Guid.Empty ? "Update Category" : "Add Category")</h3>
+    </div>
+
+    <div class="container mt-2">
+        <div class="row row-cols-1 align-content-center justify-content-start">
+            <div class="w-50">
+                <FluentTextField @bind-Value=vendor.VendorName Label="Vendor" Placeholder="Enter vendor name"
+                    Class="w-100">
+                </FluentTextField>
+            </div>
+
+            <div class="d-flex justify-content-start align-items-center ml-4">
+
+                <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@OnVendorAdd">
+                    @(vendor.VendorId != Guid.Empty ? "Update" : "Add")
+                </FluentButton>
+            </div>
+        </div>
+    </div>
+</FluentCard>
+
+
+@code {
+    [CascadingParameter]
+    public HttpContext? httpContext { get; set; } = default!;
+
+    [Parameter]
+    public Guid VendorId { get; set; }
+    private VendorMasterDto vendor = new VendorMasterDto();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    protected override void OnInitialized()
+    {
+        if (VendorId != Guid.Empty)
+        {
+            var response = vendorService.GetVendorMasterById(VendorId);
+            if (response.Success)
+            {
+                vendor = response.Data;
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+            }
+        }
+    }
+    private void OnVendorAdd()
+    {
+        isLoading = true;
+        if (vendor.VendorId != Guid.Empty)
+        {
+            var response = vendorService.UpdateVendorMaster(vendor);
+            if (response.Success)
+            {
+                ToastService.ShowSuccess("Vendor updated successfully");
+            }
+            else
+            {
+                ToastService.ShowError(response.ErrorMessage);
+            }
+        }
+        else
+        {
+            var response = vendorService.CreateVendorMaster(vendor);
+            if (response.Success)
+            {
+                ToastService.ShowSuccess("Vendor added successfully");
+                NavigationManager.NavigateTo("/vendor");
+            }
+            else
+            {
+                ToastService.ShowError(response.ErrorMessage);
+            }
+        }
+        isLoading = false;
+    }
+
+}

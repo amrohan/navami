@@ -9,7 +9,7 @@
 @attribute [StreamRendering]
 @rendermode InteractiveServer
 
- <FluentCard Width="100%" Height="500px">
+ <FluentCard Width="100%" Height="600px">
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h3 class="fs-4">Users</h3>
     <FluentButton Appearance="Appearance.Accent" IconEnd="@(new Icons.Regular.Size16.Add())" OnClick="@AddUser">Add User
@@ -26,6 +26,7 @@ else
             <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
                 @bind-Value=searchTerm @bind-Value:after=SearchUsers Immediate=true />
         </div>
+         <div style="height: 450px; overflow:auto;" class="border rounded">
         <FluentDataGrid Items="@users" GenerateHeader="GenerateHeaderOption.Sticky" >
             <PropertyColumn Property="@(u => u.Username)" Sortable="true"  />
             <PropertyColumn Property="@(u => u.Role)" Sortable="true" />
@@ -40,6 +41,7 @@ else
                     OnClick="@(() => DeleteUser(context))" />
             </TemplateColumn>
         </FluentDataGrid>
+         </div>
 } 
 </FluentCard>
 
