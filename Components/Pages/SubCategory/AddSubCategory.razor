@@ -1,0 +1,123 @@
+@page "/subcategory/add"
+@page "/subcategory/edit/{SubCategoryId:int}"
+
+@using System.Security.Claims
+
+@rendermode InteractiveServer
+@inject SubCategoryMasterService subCategoryMasterService
+@inject CategoryMasterServie categoryMasterService
+@inject IToastService ToastService
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<FluentCard Width="100%" Height="200px" AreaRestricted="false">
+
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="fs-5">@(subCategory.CategoryId != 0 ? "Update Sub Category" : "Add Sub Category")</h3>
+    </div>
+
+    <div class="container mt-2">
+        <div class="row row-cols-1 align-content-center justify-content-start">
+            <div class="w-50">
+                <FluentTextField @bind-Value=subCategory.SubCategoryName Label="Sub Category"
+                    Placeholder="Enter recipe category name" Class="w-100">
+                </FluentTextField>
+            </div>
+            <div class="w-50">
+                <FluentSelect Height="300px" TOption="CategoryMasterDto" Items="@category"
+                    @bind-Value="subCategory.CategoryName" Label="Category" Placeholder="Select Category"
+                    Options="@category" OptionText="@(c=>c.CategoryName)" OptionValue="@(c=>c.CategoryName)"
+                    Class="w-100">
+                </FluentSelect>
+            </div>
+            <div class="d-flex justify-content-start align-items-center ml-4">
+                <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddSubCategoryMaster">
+                    @(subCategory.SubCategoryId != 0 ? "Update" : "Add")
+                </FluentButton>
+            </div>
+        </div>
+
+
+    </div>
+</FluentCard>
+
+
+@code {
+
+    [CascadingParameter]
+    public HttpContext? httpContext { get; set; } = default!;
+    [Parameter]
+    public int SubCategoryId { get; set; }
+
+    private SubCategoryMasterDto subCategory = new SubCategoryMasterDto();
+    private List<CategoryMasterDto> category = new List<CategoryMasterDto>();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+    private string selectedCategoryName = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (SubCategoryId != 0)
+        {
+            var response = subCategoryMasterService.GetSubCategoryMasterById(SubCategoryId);
+            if (response.Success)
+            {
+                subCategory = response.Data;
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+            }
+        }
+        var res = categoryMasterService.GetCategoryMaster();
+        if (res.Success)
+        {
+            category = res.Data;
+        }
+        else
+        {
+            errorMessage = res.ErrorMessage;
+        }
+    }
+
+    private void AddSubCategoryMaster()
+    {
+        isLoading = true;
+        var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
+        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        ApiResponse<SubCategoryMasterDto> response;
+        if (userId == null)
+        {
+            errorMessage = "User not found";
+            ToastService.ShowError("User not found");
+            isLoading = false;
+            return;
+        }
+        subCategory.CreatedBy = userId;
+        subCategory.UpdatedBy = userId;
+        subCategory.CategoryId = category.FirstOrDefault(c => c.CategoryName == subCategory.CategoryName).CategoryId;
+
+        if (subCategory.SubCategoryId != 0)
+        {
+            subCategory.CategoryName = category.FirstOrDefault(c => c.CategoryId == subCategory.CategoryId).CategoryName;
+            response = subCategoryMasterService.UpdateSubCategoryMaster(subCategory);
+        }
+        else
+        {
+            response = subCategoryMasterService.AddSubCategoryMaster(subCategory);
+        }
+
+        if (response.Success)
+        {
+            ToastService.ShowSuccess("Sub Category added successfully");
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+            ToastService.ShowError(response.ErrorMessage);
+        }
+        isLoading = false;
+    }
+
+}

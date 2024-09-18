@@ -1,7 +1,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace navami
+namespace navami.Dto
 {
     public class RecipeCategoryDto
     {

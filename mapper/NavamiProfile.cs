@@ -12,6 +12,10 @@ namespace navami.mapper
             CreateMap<UserDto, User>();
             CreateMap<RecipeCategory, RecipeCategoryDto>();
             CreateMap<RecipeCategoryDto, RecipeCategory>();
+            CreateMap<CategoryMaster, CategoryMasterDto>();
+            CreateMap<CategoryMasterDto, CategoryMaster>();
+            CreateMap<SubCategoryMaster, SubCategoryMasterDto>();
+            CreateMap<SubCategoryMasterDto, SubCategoryMaster>();
         }
     }
 }

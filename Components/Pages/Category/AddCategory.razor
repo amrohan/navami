@@ -1,9 +1,9 @@
-@page "/recipe-category/add"
-@page "/recipe-category/edit/{RecipeCategoryId:int}"
+@page "/category/add"
+@page "/category/edit/{CategoryId:int}"
 @using System.Security.Claims
 
 @rendermode InteractiveServer
-@inject RecipeCategoryService recipeCategoryService
+@inject CategoryMasterServie categoryMasterService
 @inject IToastService ToastService
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -12,21 +12,21 @@
 <FluentCard Width="100%" Height="200px">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(recipeCategory.Id != 0 ? "Update Recipe Category" : "Add Recipe Category")</h3>
+        <h3 class="fs-5">@(category.CategoryId != 0 ? "Update Category" : "Add Category")</h3>
     </div>
 
     <div class="container mt-2">
         <div class="row row-cols-1 align-content-center justify-content-start">
             <div class="w-50">
-                <FluentTextField @bind-Value=recipeCategory.RecipeCategoryName Label="Recipe Category Name"
+                <FluentTextField @bind-Value=category.CategoryName Label="Category Name"
                     Placeholder="Enter recipe category name" Class="w-100">
                 </FluentTextField>
             </div>
 
             <div class="d-flex justify-content-start align-items-center ml-4">
 
-                <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddRecipe">
-                    @(recipeCategory.Id != 0 ? "Update" : "Add")
+                <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddCategoryMaster">
+                    @(category.CategoryId != 0 ? "Update" : "Add")
                 </FluentButton>
             </div>
         </div>
@@ -34,26 +34,23 @@
 </FluentCard>
 
 
-
 @code {
-
     [CascadingParameter]
     public HttpContext? httpContext { get; set; } = default!;
-
     [Parameter]
-    public int RecipeCategoryId { get; set; }
-    private RecipeCategoryDto recipeCategory = new RecipeCategoryDto();
+    public int CategoryId { get; set; }
+    private CategoryMasterDto category = new CategoryMasterDto();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
     protected override void OnInitialized()
     {
-        if (RecipeCategoryId != 0)
+        if (CategoryId != 0)
         {
-            var response = recipeCategoryService.GetRecipeCategoryById(RecipeCategoryId);
+            var response = categoryMasterService.GetCategoryMasterById(CategoryId);
             if (response.Success)
             {
-                recipeCategory = response.Data;
+                category = response.Data;
             }
             else
             {
@@ -62,13 +59,12 @@
         }
     }
 
-    private void AddRecipe()
+    private void AddCategoryMaster()
     {
         isLoading = true;
-        //
         var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
         var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-        ApiResponse<RecipeCategoryDto> response;
+        ApiResponse<CategoryMasterDto> response;
         if (userId == null)
         {
             errorMessage = "User not found";
@@ -76,13 +72,13 @@
             isLoading = false;
             return;
         }
-        recipeCategory.CreatedBy = userId;
-        recipeCategory.UpdatedBy = userId;
+        category.CreatedBy = userId;
+        category.UpdatedBy = userId;
 
-        if (recipeCategory.Id != 0)
+        if (category.CategoryId != 0)
         {
-            recipeCategory.UpdatedAt = DateTime.UtcNow.ToString();
-            response = recipeCategoryService.UpdateRecipeCategory(recipeCategory);
+            category.UpdatedDate = DateTime.UtcNow.ToString();
+            response = categoryMasterService.UpdateCategoryMaster(category);
 
             if (response.Success)
             {
@@ -97,7 +93,7 @@
             return;
         }
 
-        response = recipeCategoryService.AddRecipeCategory(recipeCategory);
+        response = categoryMasterService.AddCategoryMaster(category);
         if (response.Success)
         {
             ToastService.ShowSuccess("Recipe Category added successfully");
@@ -107,7 +103,11 @@
             errorMessage = response.ErrorMessage;
         }
         isLoading = false;
+
     }
+
+
+
 
 
 }

@@ -24,6 +24,10 @@
     }
     else
     {
+        <div class="d-flex justify-content-end align-items-center mb-1">
+            <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+                @bind-Value=searchTerm @bind-Value:after=SearchRecipe Immediate=true />
+        </div>
         <FluentDataGrid Items="@recipes" GenerateHeader="GenerateHeaderOption.Sticky">
             <PropertyColumn Property="@(u => u.RecipeCategoryName)" Sortable="true" title="Recipe Category" />
 
@@ -53,6 +57,7 @@
         if (response.Success)
         {
             recipes = response.Data.AsQueryable();
+            originalRecipes = recipes;
         }
         else
         {
@@ -62,12 +67,12 @@
 
     private void AddRecipe()
     {
-        navigationManager.NavigateTo("/add");
+        navigationManager.NavigateTo("/recipe-category/add");
     }
 
     private void EditRecipeCategory(RecipeCategoryDto context)
     {
-        navigationManager.NavigateTo($"/add/{context.Id}");
+        navigationManager.NavigateTo($"/recipe-category/edit/{context.Id}");
     }
 
     private void DeleteRecipeCategory(RecipeCategoryDto context)
@@ -83,6 +88,18 @@
         {
             errorMessage = response.ErrorMessage;
             Console.WriteLine(response.ErrorMessage);
+        }
+    }
+
+    private void SearchRecipe()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            recipes = originalRecipes;
+        }
+        else
+        {
+            recipes = originalRecipes.Where(r => r.RecipeCategoryName.Contains(searchTerm)).AsQueryable();
         }
     }
 

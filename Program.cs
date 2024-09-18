@@ -29,6 +29,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RecipeCategoryService>();
+builder.Services.AddScoped<CategoryMasterServie>();
+builder.Services.AddScoped<SubCategoryMasterService>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();

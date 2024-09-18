@@ -15,9 +15,13 @@ public partial class NavamiContext : DbContext
     {
     }
 
+    public virtual DbSet<CategoryMaster> CategoryMasters { get; set; }
+
     public virtual DbSet<RecipeCategory> RecipeCategories { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
+
+    public virtual DbSet<SubCategoryMaster> SubCategoryMasters { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
@@ -27,6 +31,21 @@ public partial class NavamiContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CategoryMaster>(entity =>
+        {
+            entity.HasKey(e => e.CategoryId).HasName("PK__Category__19093A2BED41A08B");
+
+            entity.ToTable("CategoryMaster");
+
+            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
+            entity.Property(e => e.CategoryName).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+        });
+
         modelBuilder.Entity<RecipeCategory>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__RecipeCa__3214EC07631F7B21");
@@ -55,6 +74,28 @@ public partial class NavamiContext : DbContext
             entity.HasKey(e => e.RoleId).HasName("PK__Roles__8AFACE1AA27C259B");
 
             entity.Property(e => e.RoleName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<SubCategoryMaster>(entity =>
+        {
+            entity.HasKey(e => e.SubCategoryId).HasName("PK__SubCateg__26BE5BF96D9788D4");
+
+            entity.ToTable("SubCategoryMaster");
+
+            entity.Property(e => e.SubCategoryId).HasColumnName("SubCategoryID");
+            entity.Property(e => e.CategoryId).HasColumnName("CategoryID");
+            entity.Property(e => e.CategoryName).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.SubCategoryName).HasMaxLength(150);
+            entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.SubCategoryMasters)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SubCategoryMaster_CategoryMaster");
         });
 
         modelBuilder.Entity<User>(entity =>

@@ -1,0 +1,111 @@
+@page "/category"
+
+@using Microsoft.FluentUI.AspNetCore.Components
+@using navami.Services
+@using navami.Models
+@inject IToastService ToastService
+@inject NavigationManager navigationManager
+@inject CategoryMasterServie categoryMasterService
+@rendermode InteractiveServer
+
+
+<PageTitle>Category</PageTitle>
+<FluentCard Width="100%" Height="500px">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h3 class="fs-4">Category</h3>
+        <FluentButton Appearance="Appearance.Accent" IconEnd="@(new Icons.Regular.Size16.Add())" OnClick="@AddCategory">
+            Add
+        </FluentButton>
+    </div>
+
+    @if (categoryList == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div class="d-flex justify-content-end align-items-center mb-1">
+            <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+                @bind-Value=searchTerm @bind-Value:after=SearchCategory Immediate=true />
+        </div>
+        <div style="height: 400px; overflow:auto;">
+            <FluentDataGrid Items="@categoryList" GenerateHeader="GenerateHeaderOption.Sticky" Virtualize="true"
+                ItemSize="43">
+                <PropertyColumn Property="@(c=>c.CategoryName)" Sortable="true" title="Recipe Category" />
+                <TemplateColumn Title="Actions" Align="@Align.End">
+                    <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                        OnClick="@(()=>EditCategory(context) )" />
+                    <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                        OnClick="@(() => DeleteRecipeCategory(context))" />
+                </TemplateColumn>
+            </FluentDataGrid>
+        </div>
+
+
+    }
+
+</FluentCard>
+
+
+
+
+@code {
+    // categoryList
+    private IQueryable<CategoryMasterDto> categoryList;
+    private IQueryable<CategoryMasterDto> originalCategoryList;
+
+    string errorMessage = string.Empty;
+    string searchTerm = string.Empty;
+    protected override void OnInitialized()
+    {
+        var response = categoryMasterService.GetCategoryMaster();
+        if (response.Success)
+        {
+            categoryList = response.Data.AsQueryable();
+            originalCategoryList = categoryList;
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+        }
+    }
+
+    private void AddCategory()
+    {
+        navigationManager.NavigateTo("/category/add");
+    }
+
+    private void EditCategory(CategoryMasterDto context)
+    {
+        navigationManager.NavigateTo($"/category/edit/{context.CategoryId}");
+    }
+
+    private void DeleteRecipeCategory(CategoryMasterDto context)
+    {
+        var response = categoryMasterService.DeleteCategoryMaster(context.CategoryId);
+        if (response.Success)
+        {
+            categoryList = categoryList.Where(c => c.CategoryId != context.CategoryId).AsQueryable();
+            ToastService.ShowSuccess("Category deleted successfully");
+        }
+        else
+        {
+            ToastService.ShowError(response.ErrorMessage);
+        }
+    }
+
+
+    private void SearchCategory()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            categoryList = originalCategoryList;
+        }
+        else
+        {
+            categoryList = originalCategoryList.Where(c => c.CategoryName.ToLower().Contains(searchTerm.ToLower())).AsQueryable();
+        }
+    }
+
+
+}
