@@ -108,6 +108,7 @@ namespace navami
                 subCategoryMaster.CategoryId = model.CategoryId;
                 subCategoryMaster.CategoryName = model.CategoryName;
                 subCategoryMaster.IsActive = model.IsActive;
+                subCategoryMaster.UpdatedDate = DateTime.Now;
                 dbContext.SaveChanges();
                 return new ApiResponse<SubCategoryMasterDto>(_mapper.Map<SubCategoryMasterDto>(subCategoryMaster));
             }
