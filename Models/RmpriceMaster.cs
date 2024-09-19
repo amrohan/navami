@@ -21,5 +21,7 @@ public partial class RmpriceMaster
 
     public Guid? UpdatedBy { get; set; }
 
+    public Guid? VendorId { get; set; }
+
     public virtual Rmmaster Rm { get; set; } = null!;
 }

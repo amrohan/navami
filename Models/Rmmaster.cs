@@ -39,6 +39,8 @@ public partial class Rmmaster
 
     public bool IsActive { get; set; }
 
+    public Guid? VendorId { get; set; }
+
     public virtual CategoryMaster Category { get; set; } = null!;
 
     public virtual ICollection<RmpriceMaster> RmpriceMasters { get; set; } = new List<RmpriceMaster>();

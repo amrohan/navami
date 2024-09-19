@@ -18,6 +18,10 @@ namespace navami.mapper
             CreateMap<SubCategoryMasterDto, SubCategoryMaster>();
             CreateMap<VendorMaster, VendorMasterDto>();
             CreateMap<VendorMasterDto, VendorMaster>();
+            CreateMap<Rmmaster, RmmasterDto>();
+            CreateMap<RmmasterDto, Rmmaster>();
+            CreateMap<RmpriceMasterDto, RmpriceMaster>();
+            CreateMap<RmpriceMaster, RmpriceMasterDto>();
         }
     }
 }

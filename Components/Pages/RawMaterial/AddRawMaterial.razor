@@ -1,0 +1,169 @@
+@page "/rawmaterial/add"
+@page "/rawmaterial/edit/{RmId:int}"
+
+@rendermode InteractiveServer
+
+@using System.Security.Claims
+@inject IToastService ToastService
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject RawMaterialService rawMaterialService
+@inject CategoryMasterServie categoryService
+@inject SubCategoryMasterService subCategoryService
+@inject VendorMasterService vendorMasterService
+
+
+<FluentCard Width="100%" Height="300px" AreaRestricted="false">
+
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="fs-5">@(rawMaterial.Rmid != 0 ? "Update RM" : "Add RM")</h3>
+    </div>
+
+    <div class="container text-start">
+        <div class="row row-cols-4 align-content-center">
+            <div class="col">
+                <FluentTextField @bind-Value=rawMaterial.Rmcode Label="Code" Placeholder="Enter raw material code"
+                    Class="w-100" />
+            </div>
+            <div class="col">
+                <FluentTextField @bind-Value=rawMaterial.Rmname Label="Raw Material" Placeholder="Enter raw material"
+                    Class="w-100" />`
+            </div>
+            <div class="col">
+                <FluentNumberField @bind-Value=rawMaterial.Price Label="Price" Placeholder="Enter raw material price"
+                    Class="w-100" @oninput="@(e => rawMaterial.Price = Convert.ToDecimal(e.Value))" />
+            </div>
+            @* vendor *@
+            <div class="col">
+                <FluentSelect Height="300px" TOption="VendorMasterDto" Items="@vendorList"
+                    @bind-Value="rawMaterial.Party" Label="Vendor" Placeholder="Select Vendor"
+                    OptionText="@(c => c.VendorName)" OptionValue="@(c =>c.VendorName)" Class="w-100" />
+            </div>
+
+            <div class="col">
+                <FluentTextField @bind-Value=rawMaterial.Description Label="Description" Placeholder="Enter description"
+                    Class="w-100" />
+            </div>
+            <div class="col">
+                <FluentTextField @bind-Value=rawMaterial.SpecificationNo Label="Specificiation"
+                    Placeholder="Enter specification no..." Class="w-100" />
+            </div>
+            <div class="col">
+                <FluentSelect Height="300px" TOption="CategoryMasterDto" Items="@categoryList"
+                    @bind-Value="rawMaterial.CategoryName" Label="Category" Placeholder="Select Category"
+                    OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100" />
+            </div>
+
+            <div class="col">
+                <FluentSelect Height="300px" TOption="SubCategoryMasterDto" Items="@subCategoryList"
+                    @bind-Value="rawMaterial.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
+                    OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100" />
+            </div>
+
+            <div class="co d-flex align-content-center align-items-end mt-4">
+                <div class="col d-flex justify-content-start align-items-end">
+                    <FluentSwitch @bind-Value=rawMaterial.IsNewRm Label="New Rm" Class="mb-1" />
+                </div>
+                <div class="col d-flex justify-content-start align-items-end">
+                    <FluentSwitch @bind-Value=rawMaterial.IsDiscontinued Label="Discontinued" Class="mb-1" />
+                </div>
+            </div>
+        </div>
+        <div class="col d-flex justify-content-between align-items-start w-100 mt-2">
+            <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
+            <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial">
+                @(rawMaterial.Rmid == 0 ? "Add" : "Update")
+            </FluentButton>
+        </div>
+    </div>
+
+</FluentCard>
+
+
+@code {
+    [CascadingParameter]
+    public HttpContext? httpContext { get; set; } = default!;
+    [Parameter]
+    public int RmId { get; set; }
+
+    private RmmasterDto rawMaterial = new RmmasterDto();
+    private List<CategoryMasterDto> categoryList = new List<CategoryMasterDto>();
+    private List<SubCategoryMasterDto> subCategoryList = new List<SubCategoryMasterDto>();
+    private List<VendorMasterDto> vendorList = new List<VendorMasterDto>();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    protected override void OnInitialized()
+    {
+        var response = categoryService.GetCategoryMaster();
+        var responseSubCategory = subCategoryService.GetSubCategoryMaster();
+        var responseVendor = vendorMasterService.GetVendorMaster();
+        if (responseVendor.Success)
+        {
+            vendorList = responseVendor.Data;
+        }
+        if (responseSubCategory.Success)
+        {
+            subCategoryList = responseSubCategory.Data;
+        }
+
+        if (response.Success)
+        {
+            categoryList = response.Data;
+        }
+
+        if (RmId != 0)
+        {
+            isLoading = true;
+            var responseRawMaterial = rawMaterialService.GetRawMaterialById(RmId);
+            if (responseRawMaterial.Success)
+            {
+                rawMaterial = responseRawMaterial.Data;
+            }
+            isLoading = false;
+        }
+    }
+
+    private void OnAddRawMaterial()
+    {
+        isLoading = true;
+        var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
+        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        ApiResponse<RmmasterDto> response;
+        if (userId == null)
+        {
+            errorMessage = "User not found";
+            isLoading = false;
+            return;
+        }
+        rawMaterial.AddedBy = Guid.Parse(userId);
+        rawMaterial.AddedOn = DateTime.Now;
+        rawMaterial.CategoryId = categoryList.FirstOrDefault(c => c.CategoryName == rawMaterial.CategoryName).CategoryId;
+        rawMaterial.SubCategoryId = subCategoryList.FirstOrDefault(c => c.SubCategoryName ==
+        rawMaterial.SubCategoryName).SubCategoryId;
+        rawMaterial.VendorId = vendorList.FirstOrDefault(c => c.VendorName == rawMaterial.Party).VendorId;
+
+        if (rawMaterial.Rmid == 0)
+        {
+
+            response = rawMaterialService.AddRawMaterial(rawMaterial);
+        }
+        else
+        {
+            response = rawMaterialService.UpdateRawMaterial(rawMaterial);
+        }
+        if (response.Success)
+        {
+            ToastService.ShowSuccess("Raw Material added successfully");
+
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+        }
+        isLoading = false;
+
+
+    }
+
+}
