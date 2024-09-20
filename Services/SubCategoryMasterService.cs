@@ -77,6 +77,34 @@ namespace navami
             }
         }
 
+        // GetSubCategoryMasterByCategory
+        public ApiResponse<List<SubCategoryMasterDto>> GetSubCategoryMasterByCategory(int categoryId)
+        {
+            try
+            {
+                var subCategoryMaster = (from subCategory in dbContext.SubCategoryMasters
+                                         join category in dbContext.CategoryMasters on subCategory.CategoryId equals category.CategoryId
+                                         where subCategory.CategoryId == categoryId
+                                         select new SubCategoryMasterDto
+                                         {
+                                             SubCategoryId = subCategory.SubCategoryId,
+                                             SubCategoryName = subCategory.SubCategoryName,
+                                             IsActive = subCategory.IsActive,
+                                             CategoryId = subCategory.CategoryId,
+                                             CategoryName = category.CategoryName,
+                                             CreatedBy = subCategory.CreatedBy.ToString(),
+                                             UpdatedBy = subCategory.UpdatedBy.ToString(),
+                                             CreatedDate = subCategory.CreatedDate.ToString("dd/MM/yyyy"),
+                                         }).ToList();
+
+                return new ApiResponse<List<SubCategoryMasterDto>>(_mapper.Map<List<SubCategoryMasterDto>>(subCategoryMaster));
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<SubCategoryMasterDto>>(ex.Message);
+            }
+        }
+
         // add
         public ApiResponse<SubCategoryMasterDto> AddSubCategoryMaster(SubCategoryMasterDto model)
         {

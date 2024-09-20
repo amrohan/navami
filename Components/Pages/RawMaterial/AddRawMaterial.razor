@@ -51,7 +51,8 @@
             <div class="col">
                 <FluentSelect Height="300px" TOption="CategoryMasterDto" Items="@categoryList"
                     @bind-Value="rawMaterial.CategoryName" Label="Category" Placeholder="Select Category"
-                    OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100" />
+                    OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
+                    @onchange="OnCategoryChange" />
             </div>
 
             <div class="col">
@@ -126,44 +127,116 @@
 
     private void OnAddRawMaterial()
     {
-        isLoading = true;
-        var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
-        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-        ApiResponse<RmmasterDto> response;
-        if (userId == null)
+        try
         {
-            errorMessage = "User not found";
+            isLoading = true;
+            var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
+            var userId = user?.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                errorMessage = "User not found";
+                isLoading = false;
+                return;
+            }
+
+            rawMaterial.AddedBy = Guid.Parse(userId);
+            rawMaterial.AddedOn = DateTime.Now;
+
+            var category = categoryList.FirstOrDefault(c => c.CategoryName == rawMaterial.CategoryName);
+            if (category == null)
+            {
+                errorMessage = "Category not found";
+                isLoading = false;
+                return;
+            }
+            rawMaterial.CategoryId = category.CategoryId;
+
+            var subCategory = subCategoryList.FirstOrDefault(c => c.SubCategoryName == rawMaterial.SubCategoryName);
+            if (subCategory == null)
+            {
+                errorMessage = "SubCategory not found";
+                isLoading = false;
+                return;
+            }
+            rawMaterial.SubCategoryId = subCategory.SubCategoryId;
+
+            var vendor = vendorList.FirstOrDefault(c => c.VendorName == rawMaterial.Party);
+            if (vendor == null)
+            {
+                errorMessage = "Vendor not found";
+                isLoading = false;
+                return;
+            }
+            rawMaterial.VendorId = vendor.VendorId;
+
+            ApiResponse<RmmasterDto> response;
+            if (rawMaterial.Rmid == 0)
+            {
+                response = rawMaterialService.AddRawMaterial(rawMaterial);
+            }
+            else
+            {
+                response = rawMaterialService.UpdateRawMaterial(rawMaterial);
+            }
+
+            if (response.Success)
+            {
+                ToastService.ShowSuccess("Raw Material added successfully");
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it accordingly
+            errorMessage = "An error occurred while adding raw material.";
+            ToastService.ShowError(errorMessage);
+        }
+        finally
+        {
             isLoading = false;
-            return;
         }
-        rawMaterial.AddedBy = Guid.Parse(userId);
-        rawMaterial.AddedOn = DateTime.Now;
-        rawMaterial.CategoryId = categoryList.FirstOrDefault(c => c.CategoryName == rawMaterial.CategoryName).CategoryId;
-        rawMaterial.SubCategoryId = subCategoryList.FirstOrDefault(c => c.SubCategoryName ==
-        rawMaterial.SubCategoryName).SubCategoryId;
-        rawMaterial.VendorId = vendorList.FirstOrDefault(c => c.VendorName == rawMaterial.Party).VendorId;
+    }
 
-        if (rawMaterial.Rmid == 0)
+
+    private void OnCategoryChange(ChangeEventArgs e)
+    {
+        try
         {
+            if (e.Value == null)
+            {
+                return;
+            }
 
-            response = rawMaterialService.AddRawMaterial(rawMaterial);
+            var category = e.Value.ToString();
+            var categoryItem = categoryList.FirstOrDefault(c => c.CategoryName == category);
+
+            if (categoryItem == null)
+            {
+                return;
+            }
+
+            var categoryId = int.Parse(categoryItem.CategoryId.ToString());
+            var response = subCategoryService.GetSubCategoryMasterByCategory(categoryId);
+
+            if (response.Success)
+            {
+                subCategoryList = response.Data;
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+                ToastService.ShowError(errorMessage);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            response = rawMaterialService.UpdateRawMaterial(rawMaterial);
+            errorMessage = ex.Message;
+            ToastService.ShowError(errorMessage);
         }
-        if (response.Success)
-        {
-            ToastService.ShowSuccess("Raw Material added successfully");
-
-        }
-        else
-        {
-            errorMessage = response.ErrorMessage;
-        }
-        isLoading = false;
-
-
     }
 
 }
