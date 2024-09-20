@@ -38,7 +38,7 @@ namespace navami
         {
             try
             {
-                var recipeCategory = dbContext.RecipeCategories.FirstOrDefault(u => u.Id == id);
+                var recipeCategory = dbContext.RecipeCategories.FirstOrDefault(u => u.RecipeCategoryId == id);
                 if (recipeCategory == null)
                 {
                     return new ApiResponse<RecipeCategoryDto>("Recipe Category does not exists.");
@@ -105,7 +105,7 @@ namespace navami
             {
                 // Fetch the existing entity from the database
                 var existingRecipeCategory = dbContext.RecipeCategories
-                    .FirstOrDefault(u => u.Id == model.Id);
+                    .FirstOrDefault(u => u.RecipeCategoryId == model.RecipeCategoryId);
 
                 if (existingRecipeCategory == null)
                 {
@@ -114,7 +114,7 @@ namespace navami
 
                 // Check if the RecipeCategoryName already exists (excluding the current entity)
                 var nameExists = dbContext.RecipeCategories
-                    .Any(u => u.RecipeCategoryName == model.RecipeCategoryName && u.Id != model.Id);
+                    .Any(u => u.RecipeCategoryName == model.RecipeCategoryName && u.RecipeCategoryId != model.RecipeCategoryId);
 
                 if (nameExists)
                 {
@@ -141,14 +141,12 @@ namespace navami
             try
             {
                 // Check if the RecipeCategoryName already exists
-                var existingRecipeCategory = dbContext.RecipeCategories.FirstOrDefault(u => u.Id == id);
+                var existingRecipeCategory = dbContext.RecipeCategories.FirstOrDefault(u => u.RecipeCategoryId == id);
                 if (existingRecipeCategory == null)
                 {
                     return new ApiResponse<RecipeCategory>("Recipe Category does not exists.");
                 }
 
-                // Add the RecipeCategory to the database
-                // dbContext.RecipeCategories.Remove(existingRecipeCategory);
                 existingRecipeCategory.IsActive = true;
 
                 dbContext.SaveChanges();

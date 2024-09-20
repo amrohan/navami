@@ -5,7 +5,7 @@ namespace navami.Models;
 
 public partial class RecipeCategory
 {
-    public int Id { get; set; }
+    public int RecipeCategoryId { get; set; }
 
     public string RecipeCategoryName { get; set; } = null!;
 
@@ -20,6 +20,8 @@ public partial class RecipeCategory
     public bool IsActive { get; set; }
 
     public virtual User CreatedByNavigation { get; set; } = null!;
+
+    public virtual ICollection<RecipeCategoryMapping> RecipeCategoryMappings { get; set; } = new List<RecipeCategoryMapping>();
 
     public virtual User? UpdatedByNavigation { get; set; }
 }

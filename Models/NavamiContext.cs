@@ -17,7 +17,13 @@ public partial class NavamiContext : DbContext
 
     public virtual DbSet<CategoryMaster> CategoryMasters { get; set; }
 
+    public virtual DbSet<RawMaterialUsage> RawMaterialUsages { get; set; }
+
     public virtual DbSet<RecipeCategory> RecipeCategories { get; set; }
+
+    public virtual DbSet<RecipeCategoryMapping> RecipeCategoryMappings { get; set; }
+
+    public virtual DbSet<RecipeMaster> RecipeMasters { get; set; }
 
     public virtual DbSet<Rmmaster> Rmmasters { get; set; }
 
@@ -52,10 +58,34 @@ public partial class NavamiContext : DbContext
             entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
         });
 
+        modelBuilder.Entity<RawMaterialUsage>(entity =>
+        {
+            entity.HasKey(e => e.RmusageId).HasName("PK__RawMater__CD8B6DE33B12C828");
+
+            entity.ToTable("RawMaterialUsage");
+
+            entity.Property(e => e.RmusageId).HasColumnName("RMUsageID");
+            entity.Property(e => e.Cost).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.Quantity).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.RecipeId).HasColumnName("RecipeID");
+            entity.Property(e => e.Rmid).HasColumnName("RMID");
+
+            entity.HasOne(d => d.Recipe).WithMany(p => p.RawMaterialUsages)
+                .HasForeignKey(d => d.RecipeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__RawMateri__Recip__787EE5A0");
+
+            entity.HasOne(d => d.Rm).WithMany(p => p.RawMaterialUsages)
+                .HasForeignKey(d => d.Rmid)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__RawMateria__RMID__797309D9");
+        });
+
         modelBuilder.Entity<RecipeCategory>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__RecipeCa__3214EC07631F7B21");
+            entity.HasKey(e => e.RecipeCategoryId).HasName("PK__RecipeCa__3214EC07631F7B21");
 
+            entity.Property(e => e.RecipeCategoryId).HasColumnName("RecipeCategoryID");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
@@ -73,6 +103,46 @@ public partial class NavamiContext : DbContext
             entity.HasOne(d => d.UpdatedByNavigation).WithMany(p => p.RecipeCategoryUpdatedByNavigations)
                 .HasForeignKey(d => d.UpdatedBy)
                 .HasConstraintName("FK__RecipeCat__Updat__4E88ABD4");
+        });
+
+        modelBuilder.Entity<RecipeCategoryMapping>(entity =>
+        {
+            entity.HasKey(e => e.RecipeCategoryMappingId).HasName("PK__RecipeCa__37A8E59F5F00ACA4");
+
+            entity.ToTable("RecipeCategoryMapping");
+
+            entity.Property(e => e.RecipeCategoryMappingId).HasColumnName("RecipeCategoryMappingID");
+            entity.Property(e => e.RecipeCategoryId).HasColumnName("RecipeCategoryID");
+            entity.Property(e => e.RecipeId).HasColumnName("RecipeID");
+
+            entity.HasOne(d => d.RecipeCategory).WithMany(p => p.RecipeCategoryMappings)
+                .HasForeignKey(d => d.RecipeCategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__RecipeCat__Recip__71D1E811");
+
+            entity.HasOne(d => d.Recipe).WithMany(p => p.RecipeCategoryMappings)
+                .HasForeignKey(d => d.RecipeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__RecipeCat__Recip__70DDC3D8");
+        });
+
+        modelBuilder.Entity<RecipeMaster>(entity =>
+        {
+            entity.HasKey(e => e.RecipeId).HasName("PK__RecipeMa__FDD988D043DEE369");
+
+            entity.ToTable("RecipeMaster");
+
+            entity.Property(e => e.RecipeId).HasColumnName("RecipeID");
+            entity.Property(e => e.AdjustedCost).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Profile).HasMaxLength(100);
+            entity.Property(e => e.RecipeName).HasMaxLength(200);
+            entity.Property(e => e.TotalCost).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            entity.Property(e => e.Username).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Rmmaster>(entity =>

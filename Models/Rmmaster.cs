@@ -43,6 +43,8 @@ public partial class Rmmaster
 
     public virtual CategoryMaster Category { get; set; } = null!;
 
+    public virtual ICollection<RawMaterialUsage> RawMaterialUsages { get; set; } = new List<RawMaterialUsage>();
+
     public virtual ICollection<RmpriceMaster> RmpriceMasters { get; set; } = new List<RmpriceMaster>();
 
     public virtual SubCategoryMaster SubCategory { get; set; } = null!;

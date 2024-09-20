@@ -33,6 +33,9 @@ builder.Services.AddScoped<CategoryMasterServie>();
 builder.Services.AddScoped<SubCategoryMasterService>();
 builder.Services.AddScoped<VendorMasterService>();
 builder.Services.AddScoped<RawMaterialService>();
+builder.Services.AddScoped<RecipeMasterService>();
+builder.Services.AddScoped<RawMaterialUsageService>();
+builder.Services.AddScoped<RecipeCategoryMappingService>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();

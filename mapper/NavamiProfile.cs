@@ -22,6 +22,12 @@ namespace navami.mapper
             CreateMap<RmmasterDto, Rmmaster>();
             CreateMap<RmpriceMasterDto, RmpriceMaster>();
             CreateMap<RmpriceMaster, RmpriceMasterDto>();
+            CreateMap<RecipeMaster, RecipeMasterDto>();
+            CreateMap<RecipeMasterDto, RecipeMaster>();
+            CreateMap<RawMaterialUsage, RawMaterialUsageDto>();
+            CreateMap<RawMaterialUsageDto, RawMaterialUsage>();
+            CreateMap<RecipeCategoryMapping, RecipeCategoryMappingDto>();
+            CreateMap<RecipeCategoryMappingDto, RecipeCategoryMapping>();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace navami.Dto
 {
     public class RecipeCategoryDto
     {
-        public int Id { get; set; }
+        public int RecipeCategoryId { get; set; }
         [Required(ErrorMessage = "Recipe Category Name is required")]
         public string RecipeCategoryName { get; set; } = null!;
         public string CreatedAt { get; set; } = null!;

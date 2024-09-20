@@ -1,0 +1,305 @@
+@page "/recipe/add"
+@page "/recipe/edit/{RecipeID:int}"
+
+@using System.Security.Claims
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Text.Json;
+
+
+@rendermode InteractiveServer
+@inject RecipeMasterService recipeMasterService
+@inject CategoryMasterServie categoryService
+@inject RawMaterialService rawMaterialService
+@inject RecipeCategoryService recipeCategoryService
+@inject RecipeCategoryMappingService recipeCategoryMappingService
+@inject RawMaterialUsageService rawMaterialUsageService
+@inject IToastService ToastService
+@inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<FluentCard Width="100%" Height="800px" AreaRestricted="false">
+
+    <div class="d-flex justify-content-between align-items-center">
+        <h3 class="fs-5">@(recipeMasterDto.RecipeId != 0 ? "Update Recipe" : "New Recipe ")</h3>
+    </div>
+
+    <div class="container text-start">
+        <div class="row row-cols-3 align-content-center">
+            @* <div class="col">
+            <FluentTextField Label="Recipe Code" @bind-Value="recipeMasterDto.RecipeCode" Placeholder=""
+            Class="w-100" ReadOnly=true />
+            </div> *@
+            <div class="col">
+                <FluentTextField Label="Recipe Name" @bind-Value="recipeMasterDto.RecipeName"
+                    Placeholder="Enter recipe name" Class="w-100" />
+            </div>
+            <div class="col">
+                <FluentTextField Label="Profile" @bind-Value="recipeMasterDto.Profile" Placeholder="Enter profile"
+                    Class="w-100" />
+            </div>
+            <div class="col">
+                <FluentAutocomplete TOption="RecipeCategoryDto" Label="Recipe Category" OnOptionsSearch="OnRecipeSearch"
+                    Placeholder="Select recipe category" Virtualize="true"
+                    OptionText="@(item => item.RecipeCategoryName)" MaximumSelectedOptions=20 Width="350px"
+                    @bind-SelectedOptions="@selectedRecipeCategory" />
+
+
+            </div>
+        </div>
+        <div class="row row-cols-4 align-content-center mt-4">
+            <div class="col">
+                <FluentSelect Height="300px" TOption="RmmasterDto" Items="@rawMaterialList"
+                    @bind-Value="rawMaterialDto.Rmname" Label="Raw Material" Placeholder="Select Raw Material"
+                    OptionText="@(c => c.Rmname)" OptionValue="@(c =>c.Rmname)" Class="w-100"
+                    @onchange="OnRawMaterialChange" />
+            </div>
+            <div class="col">
+                <FluentNumberField Label="Cost" @bind-Value="rawMaterialDto.Price" Placeholder="Enter quantity"
+                    Class="w-100" ReadOnly="true" />
+            </div>
+            <div class="">
+                <FluentNumberField Label="Quantity" @bind-Value="rawMaterialUsageDto.Quantity"
+                    Placeholder="Enter quantity" Class="w-100" />
+            </div>
+            <div class="col">
+                <FluentButton Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial" Class="w-25 mt-4 ml-4">Add
+                </FluentButton>
+            </div>
+
+        </div>
+        @* Raw Material Usage use FluentDataGrid *@
+
+        <main class="mt-4">
+            <div style="display:flex;justify-content: end; align-items: end;font-size: small;">
+                <p>TOTAL COST <span class="fs-6">@(rawMaterialUsageList.Sum(item => item.Cost))</span></p>
+            </div>
+            <div class="align-content-start border rounded" style="height: 450px; overflow:auto;">
+                <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()"
+                    GenerateHeader="GenerateHeaderOption.Sticky">
+                    <PropertyColumn Property="@(u => u.Rmname)" Sortable="true" />
+                    <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" />
+                    <PropertyColumn Property="@(u => u.Cost)" Sortable="true" />
+
+                    <TemplateColumn Title="Actions" Align="@Align.End">
+                        <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                            OnClick="@(() => OnDeleteRawMaterial(context))" />
+                    </TemplateColumn>
+                </FluentDataGrid>
+            </div>
+        </main>
+        @* save btn *@
+        <div class="d-flex justify-content-between align-items-start w-100 mt-2">
+            <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
+            <FluentButton Appearance="Appearance.Accent" OnClick="@OnSaveRecipe">Save Recipe</FluentButton>
+        </div>
+
+    </div>
+
+</FluentCard>
+
+
+@code {
+
+    [Parameter]
+    public int RecipeID { get; set; }
+    private RecipeMasterDto recipeMasterDto = new RecipeMasterDto();
+
+    // list to store RawMaterialUsageDto item
+    private List<RawMaterialUsageDto> rawMaterialUsageList = new List<RawMaterialUsageDto>();
+    private RawMaterialUsageDto rawMaterialUsageDto = new RawMaterialUsageDto();
+    // list Recipe Category
+    private List<RecipeCategoryDto> recipeCategoryList;
+    private RecipeCategoryDto recipeCategoryDto = new RecipeCategoryDto();
+    // list Raw Material
+    private List<RmmasterDto> rawMaterialList = new List<RmmasterDto>();
+    private RmmasterDto rawMaterialDto = new RmmasterDto();
+    private string errorMessage = string.Empty;
+    private List<RecipeCategoryDto> previousSelectedRecipeCategory = new List<RecipeCategoryDto>();
+    private IEnumerable<RecipeCategoryDto> selectedRecipeCategory = Array.Empty<RecipeCategoryDto>();
+    private bool isLoading = false;
+    protected override async Task OnInitializedAsync()
+    {
+        recipeMasterDto = new RecipeMasterDto();
+        var rawMaterialListRes = rawMaterialService.GetAllRawMaterials();
+        if (rawMaterialListRes.Success)
+        {
+            rawMaterialList = rawMaterialListRes.Data;
+        }
+        var recipeCategoryListRes = recipeCategoryService.GetRecipeCategories();
+        if (recipeCategoryListRes.Success)
+        {
+            recipeCategoryList = recipeCategoryListRes.Data;
+        }
+        if (RecipeID != 0)
+        {
+            var response = await recipeMasterService.GetRecipeMasterById(RecipeID);
+            if (response.Success)
+            {
+                recipeMasterDto = response.Data;
+                rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
+                previousSelectedRecipeCategory = recipeMasterDto.RecipeCategory.Select(c => new RecipeCategoryDto
+                    {
+                        RecipeCategoryId = c.RecipeCategoryId,
+                        RecipeCategoryName = recipeCategoryList.FirstOrDefault(r => r.RecipeCategoryId ==
+                        c.RecipeCategoryId)?.RecipeCategoryName
+                    }).ToList();
+                // also map the raw rawMaterialUsageList to have Rmname
+                foreach (var item in rawMaterialUsageList)
+                {
+                    item.Rmname = rawMaterialList.FirstOrDefault(r => r.Rmid == item.Rmid)?.Rmname;
+                }
+                var ids = recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategoryId).ToList();
+                selectedRecipeCategory = recipeCategoryList.Where(c => ids.Contains(c.RecipeCategoryId));
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+            }
+
+        }
+    }
+
+    public void OnAddRawMaterial()
+    {
+        var model = new RawMaterialUsageDto
+            {
+                Rmid = rawMaterialDto.Rmid,
+                Rmname = rawMaterialDto.Rmname,
+                Quantity = rawMaterialUsageDto.Quantity,
+                Cost = rawMaterialDto.Price * rawMaterialUsageDto.Quantity ?? 0,
+                RecipeId = recipeMasterDto.RecipeId ?? 0
+            };
+        rawMaterialUsageList.Add(model);
+    }
+
+    public async Task OnDeleteRawMaterial(RawMaterialUsageDto rawMaterialUsageDto)
+    {
+        if (rawMaterialUsageDto.RmusageId != 0)
+        {
+            var response = await rawMaterialUsageService.DeleteRawMaterialUsage(rawMaterialUsageDto.RmusageId);
+            if (response.Success)
+            {
+                ToastService.ShowSuccess("Raw Material deleted successfully");
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+                ToastService.ShowError(response.ErrorMessage);
+            }
+        }
+        rawMaterialUsageList.Remove(rawMaterialUsageDto);
+
+    }
+
+    public void OnRawMaterialChange(ChangeEventArgs e)
+    {
+        var rawMaterialName = e.Value.ToString();
+        rawMaterialDto = rawMaterialList.FirstOrDefault(r => r.Rmname == rawMaterialName);
+    }
+
+    public async void OnSaveRecipe()
+    {
+        isLoading = true;
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        var username = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+        {
+            errorMessage = "User not found";
+            ToastService.ShowError("User not found");
+            isLoading = false;
+            return;
+        }
+
+        // Store the current user info
+        recipeMasterDto.UpdatedBy = Guid.Parse(userId);
+        recipeMasterDto.Username = username ?? string.Empty;
+
+        // Check if we are updating an existing recipe
+        if (recipeMasterDto.RecipeId != 0)
+        {
+            recipeMasterDto.UpdatedAt = DateTime.UtcNow;
+            recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
+
+            // Create new RecipeCategoryMappingDtos for the current selection
+            var recipeCategoryMappingDtos = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
+                {
+                    RecipeId = recipeMasterDto.RecipeId ?? 0,
+                    RecipeCategoryId = c.RecipeCategoryId,
+                }).ToList();
+
+            // Find removed categories and delete them
+            var removedRecipeCategories = previousSelectedRecipeCategory
+            .Where(c => !selectedRecipeCategory.Any(sc => sc.RecipeCategoryId == c.RecipeCategoryId))
+            .ToList();
+
+            foreach (var removedCategory in removedRecipeCategories)
+            {
+                await recipeMasterService.DeleteRecipeCategoryMapping(recipeMasterDto.RecipeId.Value, removedCategory.RecipeCategoryId);
+            }
+
+            // Update the recipe with new categories
+            recipeMasterDto.RecipeCategory = recipeCategoryMappingDtos;
+
+            // Call update service
+            var response = await recipeMasterService.UpdateRecipeMaster(recipeMasterDto);
+
+            if (response.Success)
+            {
+                ToastService.ShowSuccess("Recipe updated successfully");
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+                ToastService.ShowError(response.ErrorMessage);
+            }
+
+            isLoading = false;
+            return;
+        }
+
+        // Check for empty selection when adding a new recipe
+        if (!selectedRecipeCategory.Any())
+        {
+            errorMessage = "Please select a recipe category";
+            isLoading = false;
+            return;
+        }
+
+        // Prepare to add a new recipe
+        recipeMasterDto.CreatedBy = Guid.Parse(userId);
+        recipeMasterDto.CreatedAt = DateTime.UtcNow;
+        recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
+
+        // Create mapping for new categories
+        var newRecipeCategoryMappings = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
+            {
+                RecipeId = 0,
+                RecipeCategoryId = c.RecipeCategoryId,
+            }).ToList();
+
+        recipeMasterDto.RecipeCategory = newRecipeCategoryMappings;
+
+        // Call add service
+        var addResponse = await recipeMasterService.AddRecipeMaster(recipeMasterDto);
+
+        if (addResponse.Success)
+        {
+            ToastService.ShowSuccess("Recipe added successfully");
+            // navigationManager.NavigateTo("/recipe");
+        }
+        else
+        {
+            errorMessage = addResponse.ErrorMessage;
+            ToastService.ShowError(errorMessage);
+        }
+
+        isLoading = false;
+    }
+    public void OnRecipeSearch(OptionsSearchEventArgs<RecipeCategoryDto> e)
+    {
+        e.Items = recipeCategoryList.Where(c => c.RecipeCategoryName.Contains(e.Text));
+    }
+
+}

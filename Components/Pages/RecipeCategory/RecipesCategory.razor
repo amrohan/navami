@@ -74,16 +74,16 @@
 
     private void EditRecipeCategory(RecipeCategoryDto context)
     {
-        navigationManager.NavigateTo($"/recipe-category/edit/{context.Id}");
+        navigationManager.NavigateTo($"/recipe-category/edit/{context.RecipeCategoryId}");
     }
 
     private void DeleteRecipeCategory(RecipeCategoryDto context)
     {
-        var response = recipeCategoryService.DeleteRecipeCategory(context.Id);
+        var response = recipeCategoryService.DeleteRecipeCategory(context.RecipeCategoryId);
         if (response.Success)
         {
 
-            recipes = recipes.Where(r => r.Id != context.Id).AsQueryable();
+            recipes = recipes.Where(r => r.RecipeCategoryId != context.RecipeCategoryId).AsQueryable();
             Console.WriteLine("User deleted successfully");
         }
         else
