@@ -1,11 +1,12 @@
 @page "/recipe"
 
 
-@rendermode InteractiveServer
 @inject RecipeMasterService recipeMasterService
 @inject NavigationManager navigationManager
 @inject IToastService ToastService
 
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 
 
@@ -17,17 +18,17 @@
             Add
         </FluentButton>
     </div>
-
+    <div class="d-flex justify-content-end align-items-center mb-1">
+        <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
+            @bind-Value=searchTerm @bind-Value:after=OnSearchRecipe Immediate=true />
+    </div>
     @if (recipeMastList == null)
     {
-        <p><em>Loading...</em></p>
+        <TableLoader />
     }
     else
     {
-        <div class="d-flex justify-content-end align-items-center mb-1">
-            <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
-                @bind-Value=searchTerm @bind-Value:after=OnSearchRecipe Immediate=true />
-        </div>
+
         <div class="border rounded" style="height: 450px; overflow:auto;">
 
             <FluentDataGrid Items="@recipeMastList" GenerateHeader="GenerateHeaderOption.Sticky">
@@ -98,7 +99,12 @@
         }
         else
         {
-            recipeMastList = originalRecipeMastList.Where(c => c.RecipeName.Contains(searchTerm));
+            recipeMastList = originalRecipeMastList.Where(c =>
+            c.RecipeName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            c.Username.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            c.Profile.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            c.RecipeCategories.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            c.RecipeId.ToString().Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).AsQueryable();
         }
     }
 

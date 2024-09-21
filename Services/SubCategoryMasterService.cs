@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using navami.Dto;
 using navami.Models;
 
@@ -15,32 +16,60 @@ namespace navami
         }
 
         // get all
-        public ApiResponse<List<SubCategoryMasterDto>> GetSubCategoryMaster()
+        // public ApiResponse<List<SubCategoryMasterDto>> GetSubCategoryMaster()
+        // {
+        //     try
+        //     {
+        //         // var subCategoryMaster = dbContext.SubCategoryMasters.Where(u => u.IsActive != true).ToList();
+        //         //  join table use linq and return the list of SubCategoryMasters as SubCategoryMasterDto objects use mapper
+        //         var subCategoryMaster = (from subCategory in dbContext.SubCategoryMasters
+        //                                  join category in dbContext.CategoryMasters on subCategory.CategoryId equals category.CategoryId
+        //                                  select new SubCategoryMasterDto
+        //                                  {
+        //                                      SubCategoryId = subCategory.SubCategoryId,
+        //                                      SubCategoryName = subCategory.SubCategoryName,
+        //                                      IsActive = subCategory.IsActive,
+        //                                      CategoryId = subCategory.CategoryId,
+        //                                      CategoryName = category.CategoryName,
+        //                                      CreatedBy = subCategory.CreatedBy.ToString(),
+        //                                      UpdatedBy = subCategory.UpdatedBy.ToString(),
+        //                                      CreatedDate = subCategory.CreatedDate.ToString("dd/MM/yyyy"),
+        //                                  }).ToList();
+
+
+        //         // return the list of SubCategoryMasters as SubCategoryMasterDto objects use mapper
+        //         return new ApiResponse<List<SubCategoryMasterDto>>(_mapper.Map<List<SubCategoryMasterDto>>(subCategoryMaster));
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return new ApiResponse<List<SubCategoryMasterDto>>(ex.Message);
+        //     }
+        // }
+        public async Task<ApiResponse<List<SubCategoryMasterDto>>> GetSubCategoryMasterAsync()
         {
             try
             {
-                // var subCategoryMaster = dbContext.SubCategoryMasters.Where(u => u.IsActive != true).ToList();
-                //  join table use linq and return the list of SubCategoryMasters as SubCategoryMasterDto objects use mapper
-                var subCategoryMaster = (from subCategory in dbContext.SubCategoryMasters
-                                         join category in dbContext.CategoryMasters on subCategory.CategoryId equals category.CategoryId
-                                         select new SubCategoryMasterDto
-                                         {
-                                             SubCategoryId = subCategory.SubCategoryId,
-                                             SubCategoryName = subCategory.SubCategoryName,
-                                             IsActive = subCategory.IsActive,
-                                             CategoryId = subCategory.CategoryId,
-                                             CategoryName = category.CategoryName,
-                                             CreatedBy = subCategory.CreatedBy.ToString(),
-                                             UpdatedBy = subCategory.UpdatedBy.ToString(),
-                                             CreatedDate = subCategory.CreatedDate.ToString("dd/MM/yyyy"),
-                                         }).ToList();
+                var subCategoryMasters = await (from subCategory in dbContext.SubCategoryMasters
+                                                join category in dbContext.CategoryMasters on subCategory.CategoryId equals category.CategoryId
+                                                where !subCategory.IsActive
+                                                select new SubCategoryMasterDto
+                                                {
+                                                    SubCategoryId = subCategory.SubCategoryId,
+                                                    SubCategoryName = subCategory.SubCategoryName,
+                                                    IsActive = subCategory.IsActive,
+                                                    CategoryId = subCategory.CategoryId,
+                                                    CategoryName = category.CategoryName,
+                                                    CreatedBy = subCategory.CreatedBy.ToString(),
+                                                    UpdatedBy = subCategory.UpdatedBy.ToString(),
+                                                    CreatedDate = subCategory.CreatedDate.ToString("dd/MM/yyyy"),
+                                                }).ToListAsync();
 
-
-                // return the list of SubCategoryMasters as SubCategoryMasterDto objects use mapper
-                return new ApiResponse<List<SubCategoryMasterDto>>(_mapper.Map<List<SubCategoryMasterDto>>(subCategoryMaster));
+                return new ApiResponse<List<SubCategoryMasterDto>>(subCategoryMasters);
             }
             catch (Exception ex)
             {
+                // Log the exception (consider using a logging framework)
+                Console.WriteLine(ex); // Replace with proper logging
                 return new ApiResponse<List<SubCategoryMasterDto>>(ex.Message);
             }
         }

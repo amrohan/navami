@@ -6,43 +6,44 @@
 @inject UserService userService
 @inject NavigationManager navigationManager
 
-@attribute [StreamRendering]
-@rendermode InteractiveServer
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
- <FluentCard Width="100%" Height="600px">
-<div class="d-flex justify-content-between align-items-center mb-2">
-    <h3 class="fs-4">Users</h3>
-    <FluentButton Appearance="Appearance.Accent" IconEnd="@(new Icons.Regular.Size16.Add())" OnClick="@AddUser">Add User
-    </FluentButton>
-</div>
+<FluentCard Width="100%" Height="600px">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h3 class="fs-4">Users</h3>
+        <FluentButton Appearance="Appearance.Accent" IconEnd="@(new Icons.Regular.Size16.Add())" OnClick="@AddUser">
+            Add User
+        </FluentButton>
+    </div>
+    <div class="d-flex justify-content-end align-items-center mb-1">
+        <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+                      @bind-Value=searchTerm @bind-Value:after=SearchUsers Immediate=true />
+    </div>
 
-@if (users == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-        <div class="d-flex justify-content-end align-items-center mb-1">
-            <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
-                @bind-Value=searchTerm @bind-Value:after=SearchUsers Immediate=true />
+    @if (users == null)
+    {
+        <TableLoader />
+    }
+    else
+    {
+        <div style="height: 450px; overflow:auto;" class="border rounded">
+            <FluentDataGrid Items="@users" GenerateHeader="GenerateHeaderOption.Sticky">
+                <PropertyColumn Property="@(u => u.Username)" Sortable="true" />
+                <PropertyColumn Property="@(u => u.Role)" Sortable="true" />
+                <PropertyColumn Property="@(u => u.Mobile)" Sortable="true" />
+                <PropertyColumn Property="@(u => u.Email)" Sortable="true" />
+                <PropertyColumn Property="@(u => (u.IsDeactivated ?? false) ? "Deactivated" : "Active")" title="Account Status"
+                                Sortable="true" />
+                <TemplateColumn Title="Actions" Align="@Align.End">
+                    <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                  OnClick="@(()=>EditUser(context))" />
+                    <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                  OnClick="@(() => DeleteUser(context))" />
+                </TemplateColumn>
+            </FluentDataGrid>
         </div>
-         <div style="height: 450px; overflow:auto;" class="border rounded">
-        <FluentDataGrid Items="@users" GenerateHeader="GenerateHeaderOption.Sticky" >
-            <PropertyColumn Property="@(u => u.Username)" Sortable="true"  />
-            <PropertyColumn Property="@(u => u.Role)" Sortable="true" />
-            <PropertyColumn Property="@(u => u.Mobile)" Sortable="true" />
-            <PropertyColumn Property="@(u => u.Email)" Sortable="true" />
-            <PropertyColumn Property="@(u => (u.IsDeactivated ?? false) ? "Deactivated" : "Active")" title="Account Status"
-                Sortable="true" />
-            <TemplateColumn Title="Actions" Align="@Align.End">
-                <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-                    OnClick="@(()=>EditUser(context))" />
-                <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                    OnClick="@(() => DeleteUser(context))" />
-            </TemplateColumn>
-        </FluentDataGrid>
-         </div>
-} 
+    }
 </FluentCard>
 
 

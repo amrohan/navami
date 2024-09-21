@@ -94,34 +94,16 @@
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
-    protected override void OnInitialized()
-    {
-        var response = categoryService.GetCategoryMaster();
-        var responseSubCategory = subCategoryService.GetSubCategoryMaster();
-        var responseVendor = vendorMasterService.GetVendorMaster();
-        if (responseVendor.Success)
-        {
-            vendorList = responseVendor.Data;
-        }
-        if (responseSubCategory.Success)
-        {
-            subCategoryList = responseSubCategory.Data;
-        }
+    protected override async Task OnInitializedAsync()
 
-        if (response.Success)
-        {
-            categoryList = response.Data;
-        }
+    {
+        await LoadCategoryDataAsync();
+        await LoadVendorDataAsync();
+        await LoadSubCategoryDataAsync();
 
         if (RmId != 0)
         {
-            isLoading = true;
-            var responseRawMaterial = rawMaterialService.GetRawMaterialById(RmId);
-            if (responseRawMaterial.Success)
-            {
-                rawMaterial = responseRawMaterial.Data;
-            }
-            isLoading = false;
+            await LoadRawMaterialDataAsync(RmId);
         }
     }
 
@@ -192,7 +174,7 @@
         catch (Exception ex)
         {
             // Log the exception or handle it accordingly
-            errorMessage = "An error occurred while adding raw material.";
+            errorMessage = ex.Message;
             ToastService.ShowError(errorMessage);
         }
         finally
@@ -237,6 +219,47 @@
             errorMessage = ex.Message;
             ToastService.ShowError(errorMessage);
         }
+    }
+
+
+    private async Task LoadCategoryDataAsync()
+    {
+        var response = await categoryService.GetCategoryMasterAsync();
+        if (response.Success)
+        {
+            categoryList = response.Data;
+        }
+    }
+
+    private async Task LoadVendorDataAsync()
+    {
+        var responseVendor = await vendorMasterService.GetVendorMasterAsync();
+        if (responseVendor.Success)
+        {
+            vendorList = responseVendor.Data;
+        }
+    }
+
+    private async Task LoadSubCategoryDataAsync()
+    {
+        var responseSubCategory = await subCategoryService.GetSubCategoryMasterAsync();
+        if (responseSubCategory.Success)
+        {
+            subCategoryList = responseSubCategory.Data;
+        }
+    }
+
+    private async Task LoadRawMaterialDataAsync(int rmId)
+    {
+        isLoading = true;
+        var responseRawMaterial = await rawMaterialService.GetRawMaterialByIdAsync(rmId);
+
+        if (responseRawMaterial.Success)
+        {
+            rawMaterial = responseRawMaterial.Data;
+        }
+
+        isLoading = false;
     }
 
 }

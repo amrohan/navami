@@ -1,0 +1,24 @@
+<div style="height: 450px; overflow: auto;" class="border rounded">
+    <div class="table w-100">
+        <div class="table-header">
+            <div class="d-flex justify-content-between align-items-center gap-2 border-bottom pb-2 mb-2"
+                style="background-color: #e7f3ff;">
+                <FluentSkeleton Height="25px" Width="25%" Shimmer="true" />
+                <FluentSkeleton Height="25px" Width="25%" Shimmer="true" />
+                <FluentSkeleton Height="25px" Width="25%" Shimmer="true" />
+                <FluentSkeleton Height="25px" Width="25%" Shimmer="true" />
+            </div>
+        </div>
+        @for (int i = 0; i < 10; i++)
+        {
+            <div class="table-row border-bottom py-2">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <FluentSkeleton Height="20px" Width="25%" Shimmer="true" />
+                    <FluentSkeleton Height="20px" Width="25%" Shimmer="true" />
+                    <FluentSkeleton Height="20px" Width="25%" Shimmer="true" />
+                    <FluentSkeleton Height="20px" Width="25%" Shimmer="true" />
+                </div>
+            </div>
+        }
+    </div>
+</div>

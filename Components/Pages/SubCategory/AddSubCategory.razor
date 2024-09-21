@@ -56,7 +56,7 @@
     private bool isLoading = false;
     private string selectedCategoryName = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (SubCategoryId != 0)
         {
@@ -70,7 +70,7 @@
                 errorMessage = response.ErrorMessage;
             }
         }
-        var res = categoryMasterService.GetCategoryMaster();
+        var res = await categoryMasterService.GetCategoryMasterAsync();
         if (res.Success)
         {
             category = res.Data;

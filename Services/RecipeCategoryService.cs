@@ -1,5 +1,6 @@
 
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using navami.Dto;
 using navami.Models;
 
@@ -18,16 +19,23 @@ namespace navami
         }
 
         // get all
-        public ApiResponse<List<RecipeCategoryDto>> GetRecipeCategories()
+        public async Task<ApiResponse<List<RecipeCategoryDto>>> GetRecipeCategoriesAsync()
         {
             try
             {
-                var recipeCategories = dbContext.RecipeCategories.Where(u => u.IsActive != true).ToList();
-                // return the list of RecipeCategories as RecipeCategoryDto objects use mapper
-                return new ApiResponse<List<RecipeCategoryDto>>(_mapper.Map<List<RecipeCategoryDto>>(recipeCategories));
+
+                var recipeCategories = await dbContext.RecipeCategories
+                    .Where(u => !u.IsActive)
+                    .ToListAsync();
+
+                // Map the list of RecipeCategories to RecipeCategoryDto objects
+                var recipeCategoryDtos = _mapper.Map<List<RecipeCategoryDto>>(recipeCategories);
+
+                return new ApiResponse<List<RecipeCategoryDto>>(recipeCategoryDtos);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 return new ApiResponse<List<RecipeCategoryDto>>(ex.Message);
             }
         }

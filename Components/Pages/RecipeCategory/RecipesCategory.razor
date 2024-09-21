@@ -5,8 +5,9 @@
 @inject NavigationManager navigationManager
 
 @inject RecipeCategoryService recipeCategoryService
-@rendermode InteractiveServer
 
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 <PageTitle>Recepies</PageTitle>
 
@@ -17,18 +18,16 @@
             Add Recipe
         </FluentButton>
     </div>
-
-    @if (recipes == null)
+    <div class="d-flex justify-content-end align-items-center mb-1">
+        <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+            @bind-Value=searchTerm @bind-Value:after=SearchRecipe Immediate=true />
+    </div>
+    @if (recipes is null)
     {
-        <p><em>Loading...</em></p>
+        <TableLoader />
     }
     else
     {
-        <div class="d-flex justify-content-end align-items-center mb-1">
-            <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
-                @bind-Value=searchTerm @bind-Value:after=SearchRecipe Immediate=true />
-        </div>
-
         <div style="height: 450px; overflow:auto;" class="border rounded">
             <FluentDataGrid Items="@recipes" GenerateHeader="GenerateHeaderOption.Sticky">
                 <PropertyColumn Property="@(u => u.RecipeCategoryName)" Sortable="true" title="Recipe Category" />
@@ -40,7 +39,6 @@
                 </TemplateColumn>
             </FluentDataGrid>
         </div>
-
     }
 
 
@@ -53,18 +51,10 @@
     private IQueryable<RecipeCategoryDto> originalRecipes;
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
-    protected override void OnInitialized()
+
+    protected override async Task OnInitializedAsync()
     {
-        var response = recipeCategoryService.GetRecipeCategories();
-        if (response.Success)
-        {
-            recipes = response.Data.AsQueryable();
-            originalRecipes = recipes;
-        }
-        else
-        {
-            errorMessage = response.ErrorMessage;
-        }
+        await LoadRecipeCategories();
     }
 
     private void AddRecipe()
@@ -105,4 +95,18 @@
         }
     }
 
+
+    private async Task LoadRecipeCategories()
+    {
+        var response = await recipeCategoryService.GetRecipeCategoriesAsync();
+        if (response.Success)
+        {
+            recipes = response.Data.AsQueryable();
+            originalRecipes = recipes;
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+        }
+    }
 }

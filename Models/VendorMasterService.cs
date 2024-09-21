@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using navami.Dto;
 using navami.Models;
 
@@ -15,16 +16,22 @@ namespace navami
         }
 
         // get all
-        public ApiResponse<List<VendorMasterDto>> GetVendorMaster()
+        public async Task<ApiResponse<List<VendorMasterDto>>> GetVendorMasterAsync()
         {
             try
             {
-                var vendorMaster = dbContext.VendorMasters.Where(u => u.IsActive != true).ToList();
-                return new ApiResponse<List<VendorMasterDto>>(_mapper.Map<List<VendorMasterDto>>(vendorMaster));
+                var vendorMasters = await dbContext.VendorMasters
+                    .Where(u => !u.IsActive)
+                    .ToListAsync();
+
+                // Map the list of VendorMasters to VendorMasterDto objects
+                var vendorMasterDtos = _mapper.Map<List<VendorMasterDto>>(vendorMasters);
+
+                return new ApiResponse<List<VendorMasterDto>>(vendorMasterDtos);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<VendorMasterDto>>(ex.Message);
+                Console.WriteLine(ex); return new ApiResponse<List<VendorMasterDto>>(ex.Message);
             }
         }
         // get by id

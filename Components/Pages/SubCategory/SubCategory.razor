@@ -7,7 +7,9 @@
 @inject NavigationManager navigationManager
 @inject SubCategoryMasterService subCategoryMasterService
 
-@rendermode InteractiveServer
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+
 
 
 <PageTitle>Sub Category</PageTitle>
@@ -19,17 +21,17 @@
             Add
         </FluentButton>
     </div>
-
+    <div class="d-flex justify-content-end align-items-center mb-1">
+        <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
+            @bind-Value=searchTerm @bind-Value:after=SearchSubCategory Immediate=true />
+    </div>
     @if (categoryList == null)
     {
-        <p><em>Loading...</em></p>
+        <TableLoader />
     }
     else
     {
-        <div class="d-flex justify-content-end align-items-center mb-1">
-            <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
-                @bind-Value=searchTerm @bind-Value:after=SearchSubCategory Immediate=true />
-        </div>
+
         <div class="border rounded" style="height: 450px; overflow:auto;">
 
             <FluentDataGrid Items="@categoryList" GenerateHeader="GenerateHeaderOption.Sticky">
@@ -56,19 +58,9 @@
 
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var response = subCategoryMasterService.GetSubCategoryMaster();
-        if (response.Success)
-        {
-            categoryList = response.Data.AsQueryable();
-            originalCategoryList = categoryList;
-        }
-        else
-        {
-            ToastService.ShowError(response.ErrorMessage);
-            errorMessage = response.ErrorMessage;
-        }
+        await LoadSubCategoryDataAsync();
     }
 
     private void AddSubCategory()
@@ -105,6 +97,22 @@
         {
             categoryList = originalCategoryList.Where(c => c.SubCategoryName.Contains(searchTerm,
             StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    //loadsubCategory
+    private async Task LoadSubCategoryDataAsync()
+    {
+        var response = await subCategoryMasterService.GetSubCategoryMasterAsync();
+        if (response.Success)
+        {
+            categoryList = response.Data.AsQueryable();
+            originalCategoryList = categoryList;
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+            ToastService.ShowError(errorMessage);
         }
     }
 }

@@ -7,7 +7,8 @@
 @inject IToastService ToastService
 @inject NavigationManager navigationManager
 @inject RawMaterialService rawMaterialService
-@rendermode InteractiveServer
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 
 <PageTitle>Raw Material</PageTitle>
@@ -18,17 +19,17 @@
             Add
         </FluentButton>
     </div>
-
+    <div class="d-flex justify-content-end align-items-center mb-1">
+        <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+            @bind-Value=searchTerm @bind-Value:after=SearchRawMaterial Immediate=true />
+    </div>
     @if (rawMaterialList == null)
     {
-        <p><em>Loading...</em></p>
+        <TableLoader />
     }
     else
     {
-        <div class="d-flex justify-content-end align-items-center mb-1">
-            <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
-                @bind-Value=searchTerm @bind-Value:after=SearchRawMaterial Immediate=true />
-        </div>
+
         <div style="height: 450px; overflow:auto;" class="border rounded">
             <FluentDataGrid Items="@rawMaterialList" GenerateHeader="GenerateHeaderOption.Sticky" Virtualize="true"
                 ItemSize="43">
@@ -63,19 +64,11 @@
 
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
-    protected override void OnInitialized()
+
+    protected override async Task OnInitializedAsync()
     {
-        var response = rawMaterialService.GetAllRawMaterials();
-        if (response.Success)
-        {
-            rawMaterialList = response.Data.AsQueryable();
-            originalRawMaterialList = rawMaterialList;
-        }
-        else
-        {
-            errorMessage = response.ErrorMessage;
-            ToastService.ShowError(errorMessage);
-        }
+        await LoadRawMaterials();
+
     }
 
 
@@ -108,6 +101,21 @@
         {
             ToastService.ShowSuccess("Raw Material deleted successfully");
             rawMaterialList = rawMaterialList.Where(c => c.Rmid != rawMaterial.Rmid);
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+            ToastService.ShowError(errorMessage);
+        }
+    }
+
+    private async Task LoadRawMaterials()
+    {
+        var response = await rawMaterialService.GetAllRawMaterials();
+        if (response.Success)
+        {
+            rawMaterialList = response.Data.AsQueryable();
+            originalRawMaterialList = rawMaterialList;
         }
         else
         {

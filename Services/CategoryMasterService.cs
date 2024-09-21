@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using navami.Dto;
 using navami.Models;
 
@@ -18,16 +19,36 @@ namespace navami
 
         // get all
 
-        public ApiResponse<List<CategoryMasterDto>> GetCategoryMaster()
+        // public ApiResponse<List<CategoryMasterDto>> GetCategoryMaster()
+        // {
+        //     try
+        //     {
+        //         var categoryMaster = dbContext.CategoryMasters.Where(u => u.IsActive != true).ToList();
+        //         // return the list of CategoryMasters as CategoryMasterDto objects use mapper
+        //         return new ApiResponse<List<CategoryMasterDto>>(_mapper.Map<List<CategoryMasterDto>>(categoryMaster));
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return new ApiResponse<List<CategoryMasterDto>>(ex.Message);
+        //     }
+        // }
+
+        public async Task<ApiResponse<List<CategoryMasterDto>>> GetCategoryMasterAsync()
         {
             try
             {
-                var categoryMaster = dbContext.CategoryMasters.Where(u => u.IsActive != true).ToList();
-                // return the list of CategoryMasters as CategoryMasterDto objects use mapper
-                return new ApiResponse<List<CategoryMasterDto>>(_mapper.Map<List<CategoryMasterDto>>(categoryMaster));
+                var categoryMasters = await dbContext.CategoryMasters
+                    .Where(u => !u.IsActive)
+                    .ToListAsync();
+                // Map the list of CategoryMasters to CategoryMasterDto objects
+                var categoryMasterDtos = _mapper.Map<List<CategoryMasterDto>>(categoryMasters);
+
+                return new ApiResponse<List<CategoryMasterDto>>(categoryMasterDtos);
             }
             catch (Exception ex)
             {
+                // Log the exception (consider using a logging framework)
+                Console.WriteLine(ex); // Replace with proper logging
                 return new ApiResponse<List<CategoryMasterDto>>(ex.Message);
             }
         }

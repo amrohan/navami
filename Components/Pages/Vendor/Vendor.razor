@@ -7,8 +7,8 @@
 @inject NavigationManager NavigationManager
 @inject VendorMasterService vendorService
 
-
-@rendermode InteractiveServer
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 
 <FluentCard Width="100%" Height="600px">
@@ -18,18 +18,20 @@
             Add
         </FluentButton>
     </div>
+    <div class="d-flex justify-content-end align-items-center mb-1">
+        <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+            @bind-Value=searchTerm @bind-Value:after=SearchVendor Immediate=true />
+    </div>
 
     @if (vendor == null)
     {
-        <p><em>Loading...</em></p>
+        <TableLoader />
+
     }
     else
     {
 
-        <div class="d-flex justify-content-end align-items-center mb-1">
-            <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
-                @bind-Value=searchTerm @bind-Value:after=SearchVendor Immediate=true />
-        </div>
+
         <div class="border rounded" style="height: 450px; overflow:auto;">
             <FluentDataGrid Items="@vendor" GenerateHeader="GenerateHeaderOption.Sticky" Virtualize="true" ItemSize="43">
                 <PropertyColumn Property="@(c => c.VendorName)" Sortable="true" title="Vendor Name" />
@@ -51,18 +53,9 @@
     private IQueryable<VendorMasterDto> originalVendor;
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var response = vendorService.GetVendorMaster();
-        if (response.Success)
-        {
-            vendor = response.Data.AsQueryable();
-            originalVendor = vendor;
-        }
-        else
-        {
-            errorMessage = response.ErrorMessage;
-        }
+        await LoadVendor();
     }
 
     private void AddVendor()
@@ -98,6 +91,19 @@
         else
         {
             ToastService.ShowError(response.ErrorMessage);
+        }
+    }
+
+    private async Task LoadVendor()
+    {
+        var response = await vendorService.GetVendorMasterAsync();
+        if (response.Success)
+        {
+            vendor = response.Data.AsQueryable();
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
         }
     }
 }

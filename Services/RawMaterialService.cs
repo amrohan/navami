@@ -32,87 +32,128 @@ namespace navami
             }
         }
 
-        //GetRawMaterialById 
-        public ApiResponse<RmmasterDto> GetRawMaterialById(int id)
+        // //GetRawMaterialById 
+        // public ApiResponse<RmmasterDto> GetRawMaterialById(int id)
+        // {
+        //     try
+        //     {
+        //         var rawMaterial = dbContext.Rmmasters
+        //             .Where(u => u.Rmid == id && u.IsActive != true)
+        //             .Include(u => u.Category)
+        //             .Include(u => u.SubCategory)
+        //             .FirstOrDefault();
+        //         if (rawMaterial == null)
+        //         {
+        //             return new ApiResponse<RmmasterDto>("RawMaterial not found");
+        //         }
+        //         var rawMaterialDto = _mapper.Map<RmmasterDto>(rawMaterial);
+        //         rawMaterialDto.CategoryName = rawMaterial.Category?.CategoryName;
+        //         rawMaterialDto.SubCategoryName = rawMaterial.SubCategory?.SubCategoryName;
+        //         var price = dbContext.RmpriceMasters.Where(u => u.Rmid == rawMaterial.Rmid).OrderByDescending(u => u.CreatedAt).FirstOrDefault();
+        //         if (price != null)
+        //         {
+        //             rawMaterialDto.Price = price.Price;
+        //             rawMaterialDto.PriceDate = price.CreatedAt;
+        //         }
+        //         return new ApiResponse<RmmasterDto>(rawMaterialDto);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return new ApiResponse<RmmasterDto>(ex.Message);
+        //     }
+        // }
+        public async Task<ApiResponse<RmmasterDto>> GetRawMaterialByIdAsync(int id)
         {
             try
             {
-                var rawMaterial = dbContext.Rmmasters
-                    .Where(u => u.Rmid == id && u.IsActive != true)
+                var rawMaterial = await dbContext.Rmmasters
+                    .Where(u => u.Rmid == id && !u.IsActive) // Use !u.IsActive for clarity
                     .Include(u => u.Category)
                     .Include(u => u.SubCategory)
-                    .FirstOrDefault();
+                    .Select(rm => new
+                    {
+                        Rm = rm,
+                        PriceInfo = dbContext.RmpriceMasters
+                            .Where(pm => pm.Rmid == rm.Rmid)
+                            .OrderByDescending(pm => pm.CreatedAt)
+                            .FirstOrDefault()
+                    })
+                    .FirstOrDefaultAsync(); // Use FirstOrDefaultAsync for asynchronous execution
+
                 if (rawMaterial == null)
                 {
                     return new ApiResponse<RmmasterDto>("RawMaterial not found");
                 }
-                var rawMaterialDto = _mapper.Map<RmmasterDto>(rawMaterial);
-                rawMaterialDto.CategoryName = rawMaterial.Category?.CategoryName;
-                rawMaterialDto.SubCategoryName = rawMaterial.SubCategory?.SubCategoryName;
-                var price = dbContext.RmpriceMasters.Where(u => u.Rmid == rawMaterial.Rmid).OrderByDescending(u => u.CreatedAt).FirstOrDefault();
-                if (price != null)
+
+                var rawMaterialDto = _mapper.Map<RmmasterDto>(rawMaterial.Rm);
+                rawMaterialDto.CategoryName = rawMaterial.Rm.Category?.CategoryName;
+                rawMaterialDto.SubCategoryName = rawMaterial.Rm.SubCategory?.SubCategoryName;
+
+                if (rawMaterial.PriceInfo != null)
                 {
-                    rawMaterialDto.Price = price.Price;
-                    rawMaterialDto.PriceDate = price.CreatedAt;
+                    rawMaterialDto.Price = rawMaterial.PriceInfo.Price;
+                    rawMaterialDto.PriceDate = rawMaterial.PriceInfo.CreatedAt;
                 }
+
                 return new ApiResponse<RmmasterDto>(rawMaterialDto);
             }
             catch (Exception ex)
             {
+                // Log the exception (consider using a logging framework)
+                Console.WriteLine(ex); // Replace with proper logging
                 return new ApiResponse<RmmasterDto>(ex.Message);
             }
         }
-
-        public ApiResponse<List<RmmasterDto>> GetAllRawMaterials()
+        public async Task<ApiResponse<List<RmmasterDto>>> GetAllRawMaterials()
         {
             try
             {
-                // Join Rmmasters with CategoryMasters and SubCategoryMasters
-                var rawMaterials = dbContext.Rmmasters
-                    .Where(u => u.IsActive != true)
-                    .Include(u => u.Category)
-                    .Include(u => u.SubCategory)
-                    .Select(rm => new RmmasterDto
+                var rawMaterials = await dbContext.Rmmasters
+                    .Where(rm => !rm.IsActive)
+                    .Include(rm => rm.Category)
+                    .Include(rm => rm.SubCategory)
+                    .Select(rm => new
                     {
-                        Rmid = rm.Rmid,
-                        Rmcode = rm.Rmcode,
-                        Rmname = rm.Rmname,
-                        IsNewRm = rm.IsNewRm,
-                        CategoryId = rm.CategoryId,
-                        CategoryName = rm.Category.CategoryName,
-                        SubCategoryId = rm.SubCategoryId,
-                        SubCategoryName = rm.SubCategory.SubCategoryName,
-                        SpecificationNo = rm.SpecificationNo,
-                        Description = rm.Description,
-                        IsDiscontinued = rm.IsDiscontinued,
-                        AddedOn = rm.AddedOn,
-                        AddedBy = rm.AddedBy,
-                        LastModifiedOn = rm.LastModifiedOn,
-                        LastModifiedBy = rm.LastModifiedBy,
-                        Party = rm.Party,
-                        VendorId = rm.VendorId,
-                        Price = dbContext.RmpriceMasters
+                        Rm = rm,
+                        PriceInfo = dbContext.RmpriceMasters
                             .Where(pm => pm.Rmid == rm.Rmid)
                             .OrderByDescending(pm => pm.CreatedAt)
-                            .Select(pm => pm.Price)
-                            .FirstOrDefault(),
-                        PriceDate = dbContext.RmpriceMasters
-                            .Where(pm => pm.Rmid == rm.Rmid)
-                            .OrderByDescending(pm => pm.CreatedAt)
-                            .Select(pm => pm.CreatedAt)
-                            .FirstOrDefault(),
-                        IsActive = rm.IsActive
-                    }).ToList();
+                            .FirstOrDefault()
+                    })
+                    .Select(result => new RmmasterDto
+                    {
+                        Rmid = result.Rm.Rmid,
+                        Rmcode = result.Rm.Rmcode,
+                        Rmname = result.Rm.Rmname,
+                        IsNewRm = result.Rm.IsNewRm,
+                        CategoryId = result.Rm.CategoryId,
+                        CategoryName = result.Rm.Category.CategoryName,
+                        SubCategoryId = result.Rm.SubCategoryId,
+                        SubCategoryName = result.Rm.SubCategory.SubCategoryName,
+                        SpecificationNo = result.Rm.SpecificationNo,
+                        Description = result.Rm.Description,
+                        IsDiscontinued = result.Rm.IsDiscontinued,
+                        AddedOn = result.Rm.AddedOn,
+                        AddedBy = result.Rm.AddedBy,
+                        LastModifiedOn = result.Rm.LastModifiedOn,
+                        LastModifiedBy = result.Rm.LastModifiedBy,
+                        Party = result.Rm.Party,
+                        VendorId = result.Rm.VendorId,
+                        Price = result.PriceInfo.Price,
+                        PriceDate = result.PriceInfo.CreatedAt,
+                        IsActive = result.Rm.IsActive
+                    })
+                    .ToListAsync();
 
                 return new ApiResponse<List<RmmasterDto>>(rawMaterials);
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 return new ApiResponse<List<RmmasterDto>>(ex.Message);
             }
         }
 
-        // AddRawMaterial
         public ApiResponse<RmmasterDto> AddRawMaterial(RmmasterDto rawMaterialDto)
         {
             try

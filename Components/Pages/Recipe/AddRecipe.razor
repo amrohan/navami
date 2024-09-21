@@ -120,12 +120,12 @@
     protected override async Task OnInitializedAsync()
     {
         recipeMasterDto = new RecipeMasterDto();
-        var rawMaterialListRes = rawMaterialService.GetAllRawMaterials();
+        var rawMaterialListRes = await rawMaterialService.GetAllRawMaterials();
         if (rawMaterialListRes.Success)
         {
             rawMaterialList = rawMaterialListRes.Data;
         }
-        var recipeCategoryListRes = recipeCategoryService.GetRecipeCategories();
+        var recipeCategoryListRes = await recipeCategoryService.GetRecipeCategoriesAsync();
         if (recipeCategoryListRes.Success)
         {
             recipeCategoryList = recipeCategoryListRes.Data;

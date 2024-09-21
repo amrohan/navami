@@ -6,7 +6,9 @@
 @inject IToastService ToastService
 @inject NavigationManager navigationManager
 @inject CategoryMasterServie categoryMasterService
-@rendermode InteractiveServer
+
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 
 <PageTitle>Category</PageTitle>
@@ -17,17 +19,17 @@
             Add
         </FluentButton>
     </div>
+    <div class="d-flex justify-content-end align-items-center mb-1">
+        <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+            @bind-Value=searchTerm @bind-Value:after=SearchCategory Immediate=true />
+    </div>
 
     @if (categoryList == null)
     {
-        <p><em>Loading...</em></p>
+        <TableLoader />
     }
     else
     {
-        <div class="d-flex justify-content-end align-items-center mb-1">
-            <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
-                @bind-Value=searchTerm @bind-Value:after=SearchCategory Immediate=true />
-        </div>
         <div style="height: 450px; overflow:auto;" class="border rounded">
             <FluentDataGrid Items="@categoryList" GenerateHeader="GenerateHeaderOption.Sticky" Virtualize="true"
                 ItemSize="43">
@@ -50,24 +52,15 @@
 
 
 @code {
-    // categoryList
     private IQueryable<CategoryMasterDto> categoryList;
     private IQueryable<CategoryMasterDto> originalCategoryList;
 
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var response = categoryMasterService.GetCategoryMaster();
-        if (response.Success)
-        {
-            categoryList = response.Data.AsQueryable();
-            originalCategoryList = categoryList;
-        }
-        else
-        {
-            errorMessage = response.ErrorMessage;
-        }
+        await loadCategory();
+
     }
 
     private void AddCategory()
@@ -104,6 +97,20 @@
         else
         {
             categoryList = originalCategoryList.Where(c => c.CategoryName.ToLower().Contains(searchTerm.ToLower())).AsQueryable();
+        }
+    }
+
+    private async Task loadCategory()
+    {
+        var response = await categoryMasterService.GetCategoryMasterAsync();
+        if (response.Success)
+        {
+            categoryList = response.Data.AsQueryable();
+            originalCategoryList = categoryList;
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
         }
     }
 
