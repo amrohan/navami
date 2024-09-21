@@ -1,5 +1,8 @@
 ﻿@page "/adduser/{UserId:guid}"
 @page "/adduser"
+
+@attribute [Authorize]
+
 @rendermode InteractiveServer
 
 @using Microsoft.FluentUI.AspNetCore.Components
@@ -9,51 +12,15 @@
 @inject UserService userService
 @inject IToastService ToastService
 
-<h3>@(user.UserId == Guid.Empty ? "Add User" : "Edit User")</h3>
 
-@* <FluentCard Width="100%" Height="200px">
-<div class="container text-start">
-<div class="row row-cols-4 align-content-center">
-<div class="col">
-<FluentTextField @bind-Value=user.Username Label="Username" Placeholder="Enter username" Class="w-100">
-</FluentTextField>
-</div>
-<div class="col">
-<FluentTextField @bind-Value=user.Password TextFieldType="TextFieldType.Password" Label="Password"
-Placeholder="Enter password" Class="w-100"></FluentTextField>
-</div>
-<div class="col">
-<FluentCombobox Placeholder="Select role" Label="Role" Items="@userRoles"
-OptionText="@(i => i.RoleName)" OptionValue="@(i => i.RoleId.ToString())"
-@bind-Value="@user.Role" />
-</div>
-<div class="col">
-<FluentTextField @bind-Value=user.Mobile TextFieldType="TextFieldType.Tel" Label="Mobile"
-Placeholder="Enter mobile" Class="w-100" Pattern="^\+?\d{10,15}$"></FluentTextField>
-</div>
-<div class="col">
-<FluentTextField @bind-Value=user.Email TextFieldType="TextFieldType.Email" Label="Email"
-Placeholder="Enter email" Class="w-100"></FluentTextField>
-</div>
+<FluentCard Width="100%" Height="200px" style="box-shadow: none;">
 
-<div class="col d-flex justify-content-start align-items-end">
-<FluentSwitch @bind-Value=deactive Label="Deactivate" Class="mb-1" />
-</div>
+    <h3 class="fs-5">@(user.UserId == Guid.Empty ? "Add User" : "Edit User")</h3>
 
-</div>
-</div>
-<div class="col d-flex justify-content-between align-items-center w-100">
-<p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5 rem;">@errorMessage</p>
-<FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@RegisterUser">
-@(user.UserId == Guid.Empty ? "Register" : "Update")
-</FluentButton>
-</div>
-</FluentCard> *@
-<EditForm Model="@user" OnValidSubmit="@RegisterUser">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+    <EditForm Model="@user" OnValidSubmit="@RegisterUser">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <FluentCard Width="100%" Height="200px">
         <div class="container text-start">
             <div class="row row-cols-4 align-content-center">
                 <div class="col">
@@ -98,8 +65,8 @@ Placeholder="Enter email" Class="w-100"></FluentTextField>
                 @(user.UserId == Guid.Empty ? "Register" : "Update")
             </FluentButton>
         </div>
-    </FluentCard>
-</EditForm>
+    </EditForm>
+</FluentCard>
 
 @code {
     [Parameter]

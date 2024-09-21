@@ -1,6 +1,8 @@
 @page "/recipe/add"
 @page "/recipe/edit/{RecipeId:int}"
 
+@attribute [Authorize]
+
 @using System.Security.Claims
 @using Microsoft.FluentUI.AspNetCore.Components
 @using System.Text.Json;
@@ -17,7 +19,7 @@
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<FluentCard Width="100%" Height="800px" AreaRestricted="false">
+<FluentCard Width="100%" Height="800px" AreaRestricted="false" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
         <h3 class="fs-5">@(recipeMasterDto.RecipeId != 0 ? "Update Recipe" : "New Recipe ")</h3>

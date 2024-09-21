@@ -1,6 +1,8 @@
 @page "/subcategory/add"
 @page "/subcategory/edit/{SubCategoryId:int}"
 
+@attribute [Authorize]
+
 @using System.Security.Claims
 
 @rendermode InteractiveServer
@@ -11,7 +13,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 
-<FluentCard Width="100%" Height="200px" AreaRestricted="false">
+<FluentCard Width="100%" Height="200px" AreaRestricted="false" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
         <h3 class="fs-5">@(subCategory.CategoryId != 0 ? "Update Sub Category" : "Add Sub Category")</h3>

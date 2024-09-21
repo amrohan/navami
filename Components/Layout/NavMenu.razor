@@ -1,53 +1,194 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@* <div style="background: var(--bg);">
+<div style="width:250px; padding: 10px; display:flex;justify-content: start;align-items: center;">
+<a class="" href="">Navami</a>
+</div>
+</div>
+
+<div class="h-100 mt-5">
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="2" style="background-color: var(--bg);">
+
+<FluentNavMenu @bind-Expanded="@expanded" Width="250" Title="Custom navigation menu"
+style="background-color: var(--bg);">
+<FluentNavLink Icon="@(new Icons.Regular.Size16.Home())" Href="/" Match="NavLinkMatch.All">Home
+</FluentNavLink>
+<FluentNavLink Icon="@(new Icons.Regular.Size16.Person())" Href="users" Match="NavLinkMatch.All">Users
+</FluentNavLink>
+</FluentNavMenu>
+<FluentNavMenu @bind-Expanded="@expanded" Width="250" Title="Custom navigation menu"
+style="background-color: var(--bg);">
+</FluentNavMenu>
+@code
+{
+bool expanded = true;
+}
+
+</FluentStack>
+</div>
+
+@code
+{
+void OnClick(MouseEventArgs e)
+{
+Console.WriteLine("Clicked");
+}
+} *@
+
+@rendermode InteractiveServer
+
+@code {
+    private bool expanded = true; // Control the expanded state of the menu
+}
+
+<div class="top-row ps-3 navbar" style="background-color: var(--bg);">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Navami</a>
+        <a class="navbar-brand" href="" style="text-decoration: none;color:#333;font-weight:600;">Navami</a>
     </div>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="users" Match="NavLinkMatch.All">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Users
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="recipe">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Recepie Master
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="recipe-category">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Recepie Category
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="rawmaterial">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Raw Material
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="category">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span>Category Master
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="subcategory">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span>Sub Category
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="vendor">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span>Vendors
-            </NavLink>
-        </div>
+<FluentNavMenu @bind-Expanded="@expanded" Width="250" Title="Custom navigation menu"
+    style="background-color: var(--bg);">
+    <FluentNavLink Icon="@(new Icons.Regular.Size16.Home())" Href="/" Match="NavLinkMatch.All">
+        Home
+    </FluentNavLink>
+    <FluentNavLink Icon="@(new Icons.Regular.Size16.Person())" Href="/users" Match="NavLinkMatch.All">
+        Users
+    </FluentNavLink>
 
-    </nav>
+    <FluentNavGroup Title="Recipe" Icon="@(new Icons.Regular.Size16.Folder())">
+        <ChildContent>
+            <FluentNavLink Icon="@(new Icons.Regular.Size16.Book())" Href="/recipe" Match="NavLinkMatch.All">
+                Recipe Master
+            </FluentNavLink>
+            <FluentNavLink Icon="@(new Icons.Regular.Size16.Tag())" Href="/recipe-category" Match="NavLinkMatch.All">
+                Recipe Category
+            </FluentNavLink>
+        </ChildContent>
+    </FluentNavGroup>
+
+    <FluentNavLink Icon="@(new Icons.Regular.Size16.Backpack())" Href="/rawmaterial" Match="NavLinkMatch.All">
+        Raw Material
+    </FluentNavLink>
+
+    <FluentNavGroup Title="Category" Icon="@(new Icons.Regular.Size16.Folder())">
+        <ChildContent>
+            <FluentNavLink Icon="@(new Icons.Regular.Size16.PageFit())" Href="/category" Match="NavLinkMatch.All">
+                Category Master
+            </FluentNavLink>
+
+            <FluentNavLink Icon="@(new Icons.Regular.Size16.DataUsageSettings())" Href="/subcategory"
+                Match="NavLinkMatch.All">
+                Sub Category
+            </FluentNavLink>
+        </ChildContent>
+    </FluentNavGroup>
+
+
+
+    <FluentNavLink Icon="@(new Icons.Regular.Size16.PersonBoard())" Href="/vendor" Match="NavLinkMatch.All">
+        Vendors
+    </FluentNavLink>
+</FluentNavMenu>
+
+<style>
+    :root {
+        --bg: #f3f6f9;
+        --active: #d4e3fa;
+        --hover: #e9f0fa;
+        --text: #333;
+    }
+</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*
+<div class="top-row ps-3 navbar navbar-dark">
+<div class="container-fluid">
+<a class="navbar-brand" href="">Navami</a>
 </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+<nav class="flex-column">
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+<span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+</NavLink>
+</div>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="users" Match="NavLinkMatch.All">
+<span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Users
+</NavLink>
+</div>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="recipe" ActiveClass="nav-active">
+<span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Recepie Master
+</NavLink>
+</div>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="recipe-category">
+<span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Recepie Category
+</NavLink>
+</div>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="rawmaterial">
+<span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Raw Material
+</NavLink>
+</div>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="category">
+<span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span>Category Master
+</NavLink>
+</div>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="subcategory">
+<span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span>Sub Category
+</NavLink>
+</div>
+<div class="nav-item px-3">
+<NavLink class="nav-link" href="vendor">
+<span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span>Vendors
+</NavLink>
+</div>
+
+</nav>
+</div> *@

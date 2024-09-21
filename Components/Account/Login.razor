@@ -6,17 +6,20 @@
 @inject UserService userService
 @inject NavigationManager navigationManager
 
-<div>
+<div class="login-overlay">
+
     <EditForm Model="Model" OnValidSubmit="Authenticate" FormName="LoginForm">
         <DataAnnotationsValidator />
         <FluentCard Width="400px" Height="400px" style="display:flex;align-items:center;justify-content:center;flex-direction:column ;gap:1rem">
-            <h3>Login</h3>
+            <h3>Welcome Back</h3>
 
             <p class="text-danger fs-6">@errorMessage</p>
             <div class="w-100 px-4">
+                <label for="">Username</label>
                 <InputText @bind-Value="Model.Username" id="username" class="form-control w-100" placeholder="Enter username" />
             </div>
             <div class="w-100 px-4">
+                <label for="">Password</label>
                 <InputText @bind-Value="Model.Password" id="password" type="password" class="form-control w-100" placeholder="Enter password" />
             </div>
        @*       <p class="text-danger fs-6">@errorMessage</p>
@@ -31,7 +34,6 @@
 
         </FluentCard>
     </EditForm>
-
 
 </div>
 

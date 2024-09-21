@@ -1,6 +1,8 @@
 @page "/rawmaterial/add"
 @page "/rawmaterial/edit/{RmId:int}"
 
+@attribute [Authorize]
+
 @rendermode InteractiveServer
 
 @using System.Security.Claims
@@ -13,7 +15,7 @@
 @inject VendorMasterService vendorMasterService
 
 
-<FluentCard Width="100%" Height="300px" AreaRestricted="false">
+<FluentCard Width="100%" Height="300px" AreaRestricted="false" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
         <h3 class="fs-5">@(rawMaterial.Rmid != 0 ? "Update RM" : "Add RM")</h3>

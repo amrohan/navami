@@ -1,4 +1,7 @@
 ﻿@page "/recipe-category"
+
+@attribute [Authorize]
+
 @using Microsoft.FluentUI.AspNetCore.Components
 @using navami.Services
 @using navami.Models
@@ -11,9 +14,9 @@
 
 <PageTitle>Recepies</PageTitle>
 
-<FluentCard Width="100%" Height="600px">
+<FluentCard Width="100%" Height="600px" style="box-shadow: none;">
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <h3 class="fs-4">Recipe Category</h3>
+        <h3 class="fs-5">Recipe Category</h3>
         <FluentButton Appearance="Appearance.Accent" IconEnd="@(new Icons.Regular.Size16.Add())" OnClick="@AddRecipe">
             Add Recipe
         </FluentButton>
