@@ -1,0 +1,105 @@
+@page "/recipe"
+
+
+@rendermode InteractiveServer
+@inject RecipeMasterService recipeMasterService
+@inject NavigationManager navigationManager
+@inject IToastService ToastService
+
+
+
+
+<PageTitle>Sub Category</PageTitle>
+<FluentCard Width="100%" Height="600px">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h3 class="fs-4">Recipe</h3>
+        <FluentButton Appearance="Appearance.Accent" IconEnd="@(new Icons.Regular.Size16.Add())" OnClick="@OnAddRecipe">
+            Add
+        </FluentButton>
+    </div>
+
+    @if (recipeMastList == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <div class="d-flex justify-content-end align-items-center mb-1">
+            <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
+                @bind-Value=searchTerm @bind-Value:after=OnSearchRecipe Immediate=true />
+        </div>
+        <div class="border rounded" style="height: 450px; overflow:auto;">
+
+            <FluentDataGrid Items="@recipeMastList" GenerateHeader="GenerateHeaderOption.Sticky">
+                <PropertyColumn Property="@(c => c.RecipeId)" Sortable="true" title="Recipe Code" />
+                <PropertyColumn Property="@(c => c.RecipeName)" Sortable="true" title="Recipe" />
+                <PropertyColumn Property="@(c => c.Profile)" Sortable="true" title="Profile" />
+                <PropertyColumn Property="@(c => c.RecipeCategories)" Sortable="true" title="Category" />
+                <PropertyColumn Property="@(c => c.Username)" Sortable="true" title="Username" />
+                <TemplateColumn Title="Actions" Align="@Align.End">
+                    <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                        OnClick="@(() =>EditRecipe(context))" />
+                    <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                        OnClick="@(() => DeleteRecipe(context))" />
+                </TemplateColumn>
+            </FluentDataGrid>
+        </div>
+
+
+    }
+</FluentCard>
+
+@code {
+    private IQueryable<RecipeMasterDto> recipeMastList;
+    private IQueryable<RecipeMasterDto> originalRecipeMastList;
+    string errorMessage = string.Empty;
+    string searchTerm = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await recipeMasterService.GetAllRecipeMasters();
+        if (response.Success)
+        {
+            recipeMastList = response.Data.AsQueryable();
+            originalRecipeMastList = recipeMastList;
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+        }
+    }
+
+    private void OnAddRecipe()
+    {
+        navigationManager.NavigateTo("/recipe/add");
+    }
+    private void EditRecipe(RecipeMasterDto context)
+    {
+        navigationManager.NavigateTo($"/recipe/edit/{context.RecipeId}");
+    }
+
+    private async Task DeleteRecipe(RecipeMasterDto context)
+    {
+        var response = await recipeMasterService.DeleteRecipeMaster(context.RecipeId ?? 0);
+        if (response.Success)
+        {
+            ToastService.ShowSuccess("Recipe deleted successfully");
+        }
+        else
+        {
+            ToastService.ShowError(response.ErrorMessage);
+        }
+    }
+
+    public void OnSearchRecipe()
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            recipeMastList = originalRecipeMastList;
+        }
+        else
+        {
+            recipeMastList = originalRecipeMastList.Where(c => c.RecipeName.Contains(searchTerm));
+        }
+    }
+
+}

@@ -8,6 +8,5 @@ namespace navami.Dto
         public int RecipeId { get; set; }
 
         public int RecipeCategoryId { get; set; }
-
     }
 }

@@ -6,11 +6,9 @@ namespace navami.Dto
         public int? RecipeId { get; set; }
         public string? RecipeCode { get; set; }
         public string RecipeName { get; set; } = null!;
-
         public string? Profile { get; set; }
-
         public string Username { get; set; } = null!;
-
+        public string? RecipeCategories { get; set; }
         public decimal AdjustedCost { get; set; }
 
         public decimal TotalCost { get; set; }
