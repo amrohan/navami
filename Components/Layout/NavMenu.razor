@@ -1,37 +1,4 @@
-﻿@* <div style="background: var(--bg);">
-<div style="width:250px; padding: 10px; display:flex;justify-content: start;align-items: center;">
-<a class="" href="">Navami</a>
-</div>
-</div>
-
-<div class="h-100 mt-5">
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="2" style="background-color: var(--bg);">
-
-<FluentNavMenu @bind-Expanded="@expanded" Width="250" Title="Custom navigation menu"
-style="background-color: var(--bg);">
-<FluentNavLink Icon="@(new Icons.Regular.Size16.Home())" Href="/" Match="NavLinkMatch.All">Home
-</FluentNavLink>
-<FluentNavLink Icon="@(new Icons.Regular.Size16.Person())" Href="users" Match="NavLinkMatch.All">Users
-</FluentNavLink>
-</FluentNavMenu>
-<FluentNavMenu @bind-Expanded="@expanded" Width="250" Title="Custom navigation menu"
-style="background-color: var(--bg);">
-</FluentNavMenu>
-@code
-{
-bool expanded = true;
-}
-
-</FluentStack>
-</div>
-
-@code
-{
-void OnClick(MouseEventArgs e)
-{
-Console.WriteLine("Clicked");
-}
-} *@
+﻿
 
 @rendermode InteractiveServer
 

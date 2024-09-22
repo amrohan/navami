@@ -50,21 +50,48 @@ namespace navami.Services
             }
         }
 
-        public ApiResponse<User> LoginUser(LoginModel model)
+        /*        public ApiResponse<User> LoginUser(LoginModel model)
+                {
+                    try
+                    {
+                        // Find the user by email
+                        var user = dbContext.Users.FirstOrDefault(u => u.Username == model.Username);
+                        if (user == null)
+                        {
+                            return new ApiResponse<User>("Invalid email or password.");
+                        }
+
+                        // Verify the password
+                        if (!BC.Verify(model.Password, user.Password))
+                        {
+                            return new ApiResponse<User>("Invalid email or password.");
+                        }
+
+                        return new ApiResponse<User>(user);
+                    }
+                    catch (Exception ex)
+                    {
+                        return new ApiResponse<User>(ex.Message); // Return any exception message
+                    }
+                }
+        */
+        public async Task<ApiResponse<User>> LoginUserAsync(LoginModel model)
         {
             try
             {
-                // Find the user by email
-                var user = dbContext.Users.FirstOrDefault(u => u.Username == model.Username);
+                // Find the user by username asynchronously
+                var user = await dbContext.Users
+                    .FirstOrDefaultAsync(u => u.Username == model.Username);
+
                 if (user == null)
                 {
-                    return new ApiResponse<User>("Invalid email or password.");
+                    return new ApiResponse<User>("Invalid username or password.");
                 }
 
                 // Verify the password
                 if (!BC.Verify(model.Password, user.Password))
                 {
-                    return new ApiResponse<User>("Invalid email or password.");
+                    return new ApiResponse<User>("Invalid username or password.");
                 }
 
                 return new ApiResponse<User>(user);
@@ -74,7 +101,6 @@ namespace navami.Services
                 return new ApiResponse<User>(ex.Message); // Return any exception message
             }
         }
-
         public async Task<ApiResponse<List<Role>>> GetAllUserRolesAsync()
         {
             try

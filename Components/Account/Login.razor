@@ -44,34 +44,37 @@
 
     [SupplyParameterFromForm]
     public LoginModel Model { get; set; } = default!;
-    bool? canceled;
     private string? errorMessage;
 
 
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         Model ??= new();
     }    
 
     private async Task Authenticate()
     {
-        var user = userService.LoginUser(Model);
+        var user = await userService.LoginUserAsync(Model);
         if (user.Data != null)
         {
+            var username = user.Data.Username ?? throw new ArgumentNullException(nameof(user.Data.Username), "Username cannot be null.");
+            var role = user.Data.Role ?? throw new ArgumentNullException(nameof(user.Data.Role), "Role cannot be null.");
+            var userId = user.Data.UserId.ToString() ?? throw new ArgumentNullException(nameof(user.Data.UserId), "UserId cannot be null.");
+
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Data.Username),
-                new Claim(ClaimTypes.Role, user.Data.Role),
-                new Claim(ClaimTypes.NameIdentifier, user.Data.UserId.ToString())
-            };
+    {
+        new Claim(ClaimTypes.Name, username),
+        new Claim(ClaimTypes.Role, role),
+        new Claim(ClaimTypes.NameIdentifier, userId)
+    };
+
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
+
             if (httpContext != null)
             {
                 await httpContext.SignInAsync(principal);
                 navigationManager.NavigateTo("/");
-
             }
         }
         else
