@@ -50,11 +50,13 @@ Console.WriteLine("Clicked");
 <FluentNavMenu @bind-Expanded="@expanded" Width="250" Title="Custom navigation menu"
     style="background-color: var(--bg);">
     <FluentNavLink Icon="@(new Icons.Regular.Size16.Home())" Href="/" Match="NavLinkMatch.All">
-        Home
+        Dashboard
     </FluentNavLink>
-    <FluentNavLink Icon="@(new Icons.Regular.Size16.Person())" Href="/users" Match="NavLinkMatch.All">
-        Users
-    </FluentNavLink>
+    <AuthorizeView Roles="Admin">
+        <FluentNavLink Icon="@(new Icons.Regular.Size16.Person())" Href="/users" Match="NavLinkMatch.All">
+            Users
+        </FluentNavLink>
+    </AuthorizeView>
 
     <FluentNavGroup Title="Recipe" Icon="@(new Icons.Regular.Size16.Folder())">
         <ChildContent>

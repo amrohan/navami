@@ -1,8 +1,6 @@
 @page "/recipe/add"
 @page "/recipe/edit/{RecipeId:int}"
 
-@attribute [Authorize]
-
 @using System.Security.Claims
 @using Microsoft.FluentUI.AspNetCore.Components
 @using System.Text.Json;
@@ -19,10 +17,10 @@
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<FluentCard Width="100%" Height="800px" AreaRestricted="false" style="box-shadow: none;">
+<FluentCard Width="100%" Height="800px" AreaRestricted="false">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(recipeMasterDto.RecipeId != 0 ? "Update Recipe" : "New Recipe ")</h3>
+        <h3 class="fs-5">@(RecipeId != 0 ? "Update Recipe" : "New Recipe ")</h3>
     </div>
 
     <div class="container text-start">
@@ -119,9 +117,9 @@
     private List<RecipeCategoryDto> previousSelectedRecipeCategory = new List<RecipeCategoryDto>();
     private IEnumerable<RecipeCategoryDto> selectedRecipeCategory = Array.Empty<RecipeCategoryDto>();
     private bool isLoading = false;
+
     protected override async Task OnInitializedAsync()
     {
-        recipeMasterDto = new RecipeMasterDto();
         var rawMaterialListRes = await rawMaterialService.GetAllRawMaterials();
         if (rawMaterialListRes.Success)
         {
@@ -219,7 +217,7 @@
         recipeMasterDto.Username = username ?? string.Empty;
 
         // Check if we are updating an existing recipe
-        if (recipeMasterDto.RecipeId != 0)
+        if (recipeMasterDto.RecipeId != null)
         {
             recipeMasterDto.UpdatedAt = DateTime.UtcNow;
             recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
@@ -301,7 +299,19 @@
     }
     public void OnRecipeSearch(OptionsSearchEventArgs<RecipeCategoryDto> e)
     {
-        e.Items = recipeCategoryList.Where(c => c.RecipeCategoryName.Contains(e.Text));
+        // Ensure that the search text is not null or empty before filtering
+        if (!string.IsNullOrEmpty(e.Text))
+        {
+            e.Items = recipeCategoryList
+                .Where(c => c.RecipeCategoryName
+                .IndexOf(e.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToList();
+        }
+        else
+        {
+            // If the search text is empty, return all items or clear the list
+            e.Items = recipeCategoryList.ToList();
+        }
     }
 
 }

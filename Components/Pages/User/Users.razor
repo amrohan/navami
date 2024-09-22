@@ -73,13 +73,13 @@
     // navigate to add user page
     private void AddUser()
     {
-        navigationManager.NavigateTo("/adduser");
+        navigationManager.NavigateTo("/user/add");
     }
 
     // navigate to edit user page
     private void EditUser(UserDto context)
     {
-        navigationManager.NavigateTo($"/adduser/{context.UserId}");
+        navigationManager.NavigateTo($"/user/edit/{context.UserId}");
     }
 
     // delete user

@@ -22,6 +22,7 @@ namespace navami
         {
             // Fetch all recipe masters along with their raw materials and category mappings
             var recipeMasters = await dbContext.RecipeMasters
+                .Where(r => r.IsActive != true)
                 .Include(rm => rm.RawMaterialUsages)
                 .Include(rm => rm.RecipeCategoryMappings)
                     .ThenInclude(rcm => rcm.RecipeCategory) // Assuming you have a navigation property for RecipeCategory
@@ -210,10 +211,6 @@ namespace navami
         {
             try
             {
-                // var recipeMaster = dbContext.RecipeMasters
-                //     .Include(r => r.RawMaterialUsages)
-                //     .Include(r => r.RecipeCategoryMappings)
-                //     .FirstOrDefault(u => u.RecipeId == recipeId);
                 var recipeMaster = await dbContext.RecipeMasters.FirstOrDefaultAsync(u => u.RecipeId == recipeId);
                 if (recipeMaster == null)
                 {
@@ -221,7 +218,7 @@ namespace navami
                 }
 
                 // dbContext.RecipeMasters.Remove(recipeMaster);
-                recipeMaster.IsActive = false;
+                recipeMaster.IsActive = true;
                 await dbContext.SaveChangesAsync();
 
                 return new ApiResponse<RecipeMasterDto>(_mapper.Map<RecipeMasterDto>(recipeMaster));

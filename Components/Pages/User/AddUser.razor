@@ -1,5 +1,5 @@
-﻿@page "/adduser/{UserId:guid}"
-@page "/adduser"
+﻿@page "/user"
+@page "/user/edit/{UserId:guid}"
 
 @attribute [Authorize]
 
@@ -13,7 +13,7 @@
 @inject IToastService ToastService
 
 
-<FluentCard Width="100%" Height="200px" style="box-shadow: none;">
+<FluentCard Width="100%" Height="230px" style="box-shadow: none;">
 
     <h3 class="fs-5">@(user.UserId == Guid.Empty ? "Add User" : "Edit User")</h3>
 
@@ -146,12 +146,11 @@
             {
                 // Show a success message
                 isLoading = false;
-                ToastService.ShowSuccess("User updated successfully");
+                ToastService.ShowSuccess("User created successfully");
 
             }
             else
             {
-                // Handle the error, e.g., show a message or log the error
                 isLoading = false;
                 errorMessage = response.ErrorMessage;
                 ToastService.ShowError(response.ErrorMessage);

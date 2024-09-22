@@ -39,6 +39,7 @@
                 <PropertyColumn Property="@(c => c.Profile)" Sortable="true" title="Profile" />
                 <PropertyColumn Property="@(c => c.RecipeCategories)" Sortable="true" title="Category" />
                 <PropertyColumn Property="@(c => c.Username)" Sortable="true" title="Username" />
+                <PropertyColumn Property="@(c => c.TotalCost)" Sortable="true" title="Cost" />
                 <TemplateColumn Title="Actions" Align="@Align.End">
                     <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
                         OnClick="@(() =>EditRecipe(context))" />
@@ -91,6 +92,10 @@
         {
             ToastService.ShowError(response.ErrorMessage);
         }
+        // remove the deleted item from the list
+        recipeMastList = recipeMastList.Where(c => c.RecipeId != context.RecipeId).AsQueryable();
+        originalRecipeMastList = originalRecipeMastList.Where(c => c.RecipeId != context.RecipeId).AsQueryable();
+
     }
 
     public void OnSearchRecipe()
