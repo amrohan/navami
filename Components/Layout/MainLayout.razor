@@ -29,12 +29,12 @@
 
         </div>
         <article class="content px-4">
+            <FluentMessageBarProvider Section="MESSAGES_TOP" @rendermode="InteractiveServer" />
             @Body
         </article>
         <FluentToastProvider @rendermode="InteractiveServer" Timeout="4000" />
         <FluentDialogProvider />
         <FluentTooltipProvider />
-        <FluentMessageBarProvider />
         <FluentMenuProvider />
     </main>
 </div>

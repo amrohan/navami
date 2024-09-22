@@ -29,7 +29,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<RecipeCategoryService>();
-builder.Services.AddScoped<CategoryMasterServie>();
+builder.Services.AddScoped<CategoryMasterService>();
 builder.Services.AddScoped<SubCategoryMasterService>();
 builder.Services.AddScoped<VendorMasterService>();
 builder.Services.AddScoped<RawMaterialService>();

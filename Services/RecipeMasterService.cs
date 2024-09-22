@@ -71,6 +71,22 @@ namespace navami
             // Map the recipe master entity to DTO
             var recipeMasterDto = _mapper.Map<RecipeMasterDto>(recipeMaster.Recipe);
             recipeMasterDto.RawMaterialUsage = _mapper.Map<List<RawMaterialUsageDto>>(recipeMaster.RawMaterials);
+            foreach (var item in recipeMasterDto.RawMaterialUsage)
+            {
+                // Fetch category and subcategory details based on Rmid
+                var rawMaterial = await dbContext.Rmmasters.FindAsync(item.Rmid);
+
+                if (rawMaterial != null)
+                {
+                    item.Rmname = rawMaterial.Rmname;
+                    var category = await dbContext.CategoryMasters.FindAsync(rawMaterial.CategoryId);
+                    item.CategoryName = category?.CategoryName;
+
+                    var subCategory = await dbContext.SubCategoryMasters.FindAsync(rawMaterial.SubCategoryId);
+                    item.SubCategoryName = subCategory?.SubCategoryName;
+                }
+            }
+            
             recipeMasterDto.RecipeCategory = _mapper.Map<List<RecipeCategoryMappingDto>>(recipeMaster.Categories);
 
             return new ApiResponse<RecipeMasterDto>(recipeMasterDto);

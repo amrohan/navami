@@ -6,11 +6,11 @@ using navami.Models;
 namespace navami
 {
 
-    public class CategoryMasterServie
+    public class CategoryMasterService
     {
         private readonly NavamiContext dbContext;
         private readonly IMapper _mapper;
-        public CategoryMasterServie(NavamiContext context, IMapper mapper)
+        public CategoryMasterService(NavamiContext context, IMapper mapper)
         {
             dbContext = context;
             _mapper = mapper;

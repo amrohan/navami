@@ -32,36 +32,7 @@ namespace navami
             }
         }
 
-        // //GetRawMaterialById 
-        // public ApiResponse<RmmasterDto> GetRawMaterialById(int id)
-        // {
-        //     try
-        //     {
-        //         var rawMaterial = dbContext.Rmmasters
-        //             .Where(u => u.Rmid == id && u.IsActive != true)
-        //             .Include(u => u.Category)
-        //             .Include(u => u.SubCategory)
-        //             .FirstOrDefault();
-        //         if (rawMaterial == null)
-        //         {
-        //             return new ApiResponse<RmmasterDto>("RawMaterial not found");
-        //         }
-        //         var rawMaterialDto = _mapper.Map<RmmasterDto>(rawMaterial);
-        //         rawMaterialDto.CategoryName = rawMaterial.Category?.CategoryName;
-        //         rawMaterialDto.SubCategoryName = rawMaterial.SubCategory?.SubCategoryName;
-        //         var price = dbContext.RmpriceMasters.Where(u => u.Rmid == rawMaterial.Rmid).OrderByDescending(u => u.CreatedAt).FirstOrDefault();
-        //         if (price != null)
-        //         {
-        //             rawMaterialDto.Price = price.Price;
-        //             rawMaterialDto.PriceDate = price.CreatedAt;
-        //         }
-        //         return new ApiResponse<RmmasterDto>(rawMaterialDto);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return new ApiResponse<RmmasterDto>(ex.Message);
-        //     }
-        // }
+
         public async Task<ApiResponse<RmmasterDto>> GetRawMaterialByIdAsync(int id)
         {
             try
@@ -210,7 +181,7 @@ namespace navami
                             Rmid = rawMaterial.Rmid,
                             VendorId = rawMaterial.VendorId.Value,
                             SupplierName = rawMaterial.Party ?? "Unknown",
-                            Price = rawMaterialDto.Price.Value,
+                            Price = rawMaterialDto.Price,
                             CreatedAt = rawMaterial.PriceDate ?? DateTime.Now,
                             CreatedBy = rawMaterial.AddedBy
                         };
@@ -251,6 +222,22 @@ namespace navami
             }
         }
 
+
+        // GetRawMaterialBySubCategory
+        public ApiResponse<List<RmmasterDto>> GetRawMaterialBySubCategory(int subCategoryId)
+        {
+            try
+            {
+                var rawMaterial = dbContext.Rmmasters
+                    .Where(u => u.SubCategoryId == subCategoryId && !u.IsActive)
+                    .ToList();
+                return new ApiResponse<List<RmmasterDto>>(_mapper.Map<List<RmmasterDto>>(rawMaterial));
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<RmmasterDto>>(ex.Message);
+            }
+        }
 
 
     }

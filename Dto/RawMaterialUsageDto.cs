@@ -10,6 +10,10 @@ namespace navami.Dto
 
         public string Rmname { get; set; } = null!;
 
+        public string CategoryName { get; set; }
+
+        public string SubCategoryName { get; set; }
+
         public int Rmid { get; set; }
 
         public decimal Quantity { get; set; }

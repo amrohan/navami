@@ -34,7 +34,7 @@ namespace navami.Dto
         public string? Party { get; set; }
         public Guid? VendorId { get; set; }
 
-        public decimal? Price { get; set; }
+        public decimal Price { get; set; }
 
         public DateTime? PriceDate { get; set; }
 
