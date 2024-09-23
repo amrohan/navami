@@ -8,9 +8,9 @@ namespace navami
     public class RecipeCategoryMappingService
     {
 
-        private readonly NavamiContext dbContext;
+        private readonly NavamiDevContext dbContext;
         private readonly IMapper _mapper;
-        public RecipeCategoryMappingService(NavamiContext context, IMapper mapper)
+        public RecipeCategoryMappingService(NavamiDevContext context, IMapper mapper)
         {
             dbContext = context;
             _mapper = mapper;
@@ -30,7 +30,7 @@ namespace navami
         }
 
         //GetRecipeCategoryMappingById
-        public ApiResponse<RecipeCategoryMappingDto> GetRecipeCategoryMappingById(int id)
+        public ApiResponse<RecipeCategoryMappingDto> GetRecipeCategoryMappingById(Guid id)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace navami
         }
 
         // getRecipeCategoryMappingByRecipeId
-        public ApiResponse<List<RecipeCategoryMappingDto>> GetRecipeCategoryMappingByRecipeId(int recipeId)
+        public ApiResponse<List<RecipeCategoryMappingDto>> GetRecipeCategoryMappingByRecipeId(Guid recipeId)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace navami
         }
 
         //deleteRecipeCategoryMapping
-        public ApiResponse<RecipeCategoryMappingDto> DeleteRecipeCategoryMapping(int id)
+        public ApiResponse<RecipeCategoryMappingDto> DeleteRecipeCategoryMapping(Guid id)
         {
             try
             {

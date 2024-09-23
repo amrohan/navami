@@ -1,5 +1,5 @@
 @page "/rawmaterial/add"
-@page "/rawmaterial/edit/{RmId:int}"
+@page "/rawmaterial/edit/{RmId:Guid}"
 
 @attribute [Authorize]
 
@@ -18,17 +18,17 @@
 <FluentCard Width="100%" Height="300px" AreaRestricted="false" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(rawMaterial.Rmid != 0 ? "Update RM" : "Add RM")</h3>
+        <h3 class="fs-5">@(rawMaterial.RawMaterialId != Guid.Empty ? "Update RM" : "Add RM")</h3>
     </div>
 
     <div class="container text-start">
         <div class="row row-cols-4 align-content-center">
             <div class="col">
-                <FluentTextField @bind-Value=rawMaterial.Rmcode Label="Code" Placeholder="Enter raw material code"
+                <FluentTextField @bind-Value=rawMaterial.RawMaterialCode Label="Code" Placeholder="Enter raw material code"
                     Class="w-100" />
             </div>
             <div class="col">
-                <FluentTextField @bind-Value=rawMaterial.Rmname Label="Raw Material" Placeholder="Enter raw material"
+                <FluentTextField @bind-Value=rawMaterial.RawMaterialName Label="Raw Material" Placeholder="Enter raw material"
                     Class="w-100" />`
             </div>
             <div class="col">
@@ -51,21 +51,21 @@
                     Placeholder="Enter specification no..." Class="w-100" />
             </div>
             <div class="col">
-                <FluentSelect Height="300px" TOption="CategoryMasterDto" Items="@categoryList"
+                <FluentSelect Height="300px" TOption="CategoryDto" Items="@categoryList"
                     @bind-Value="rawMaterial.CategoryName" Label="Category" Placeholder="Select Category"
                     OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
                     @onchange="OnCategoryChange" />
             </div>
 
             <div class="col">
-                <FluentSelect Height="300px" TOption="SubCategoryMasterDto" Items="@subCategoryList"
+                <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
                     @bind-Value="rawMaterial.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
                     OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100" />
             </div>
 
             <div class="co d-flex align-content-center align-items-end mt-4">
                 <div class="col d-flex justify-content-start align-items-end">
-                    <FluentSwitch @bind-Value=rawMaterial.IsNewRm Label="New Rm" Class="mb-1" />
+                    <FluentSwitch @bind-Value=rawMaterial.IsNew Label="New Rm" Class="mb-1" />
                 </div>
                 <div class="col d-flex justify-content-start align-items-end">
                     <FluentSwitch @bind-Value=rawMaterial.IsDiscontinued Label="Discontinued" Class="mb-1" />
@@ -75,7 +75,7 @@
         <div class="col d-flex justify-content-between align-items-start w-100 mt-2">
             <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
             <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial">
-                @(rawMaterial.Rmid == 0 ? "Add" : "Update")
+                @(rawMaterial.RawMaterialId == Guid.Empty ? "Add" : "Update")
             </FluentButton>
         </div>
     </div>
@@ -87,11 +87,11 @@
     [CascadingParameter]
     public HttpContext? httpContext { get; set; } = default!;
     [Parameter]
-    public int RmId { get; set; }
+    public Guid RmId { get; set; }
 
-    private RmmasterDto rawMaterial = new RmmasterDto();
-    private List<CategoryMasterDto> categoryList = new List<CategoryMasterDto>();
-    private List<SubCategoryMasterDto> subCategoryList = new List<SubCategoryMasterDto>();
+    private RawMaterialsDto rawMaterial = new RawMaterialsDto();
+    private List<CategoryDto> categoryList = new List<CategoryDto>();
+    private List<SubCategoryDto> subCategoryList = new List<SubCategoryDto>();
     private List<VendorMasterDto> vendorList = new List<VendorMasterDto>();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
@@ -103,7 +103,7 @@
         await LoadVendorDataAsync();
         await LoadSubCategoryDataAsync();
 
-        if (RmId != 0)
+        if (RmId != Guid.Empty)
         {
             await LoadRawMaterialDataAsync(RmId);
         }
@@ -154,8 +154,8 @@
             }
             rawMaterial.VendorId = vendor.VendorId;
 
-            ApiResponse<RmmasterDto> response;
-            if (rawMaterial.Rmid == 0)
+            ApiResponse<RawMaterialsDto> response;
+            if (rawMaterial.RawMaterialId == Guid.Empty)
             {
                 response = rawMaterialService.AddRawMaterial(rawMaterial);
             }
@@ -203,7 +203,7 @@
                 return;
             }
 
-            var categoryId = int.Parse(categoryItem.CategoryId.ToString());
+            var categoryId = categoryItem.CategoryId;
             var response = subCategoryService.GetSubCategoryMasterByCategory(categoryId);
 
             if (response.Success)
@@ -251,7 +251,7 @@
         }
     }
 
-    private async Task LoadRawMaterialDataAsync(int rmId)
+    private async Task LoadRawMaterialDataAsync(Guid rmId)
     {
         isLoading = true;
         var responseRawMaterial = await rawMaterialService.GetRawMaterialByIdAsync(rmId);

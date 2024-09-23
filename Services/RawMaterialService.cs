@@ -11,92 +11,92 @@ namespace navami
     public class RawMaterialService
     {
 
-        private readonly NavamiContext dbContext;
+        private readonly NavamiDevContext dbContext;
         private readonly IMapper _mapper;
-        public RawMaterialService(NavamiContext context, IMapper mapper)
+        public RawMaterialService(NavamiDevContext context, IMapper mapper)
         {
             dbContext = context;
             _mapper = mapper;
         }
 
-        public ApiResponse<List<RmmasterDto>> GetRawMaterial()
+        public ApiResponse<List<RawMaterialsDto>> GetRawMaterial()
         {
             try
             {
-                var rawMaterial = dbContext.Rmmasters.Where(u => u.IsActive != true).ToList();
-                return new ApiResponse<List<RmmasterDto>>(_mapper.Map<List<RmmasterDto>>(rawMaterial));
+                var rawMaterial = dbContext.RawMaterials.Where(u => u.IsActive != true).ToList();
+                return new ApiResponse<List<RawMaterialsDto>>(_mapper.Map<List<RawMaterialsDto>>(rawMaterial));
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<RmmasterDto>>(ex.Message);
+                return new ApiResponse<List<RawMaterialsDto>>(ex.Message);
             }
         }
 
 
-        public async Task<ApiResponse<RmmasterDto>> GetRawMaterialByIdAsync(int id)
+        public async Task<ApiResponse<RawMaterialsDto>> GetRawMaterialByIdAsync(Guid id)
         {
             try
             {
-                var rawMaterial = await dbContext.Rmmasters
-                    .Where(u => u.Rmid == id && !u.IsActive) // Use !u.IsActive for clarity
+                var rawMaterial = await dbContext.RawMaterials
+                    .Where(u => u.RawMaterialId == id && !u.IsActive) // Use !u.IsActive for clarity
                     .Include(u => u.Category)
                     .Include(u => u.SubCategory)
                     .Select(rm => new
                     {
                         Rm = rm,
-                        PriceInfo = dbContext.RmpriceMasters
-                            .Where(pm => pm.Rmid == rm.Rmid)
-                            .OrderByDescending(pm => pm.CreatedAt)
+                        PriceInfo = dbContext.RawMaterials
+                            .Where(pm => pm.RawMaterialId == rm.RawMaterialId)
+                            .OrderByDescending(pm => pm.AddedOn)
                             .FirstOrDefault()
                     })
                     .FirstOrDefaultAsync(); // Use FirstOrDefaultAsync for asynchronous execution
 
                 if (rawMaterial == null)
                 {
-                    return new ApiResponse<RmmasterDto>("RawMaterial not found");
+                    return new ApiResponse<RawMaterialsDto>("RawMaterial not found");
                 }
 
-                var rawMaterialDto = _mapper.Map<RmmasterDto>(rawMaterial.Rm);
+                var rawMaterialDto = _mapper.Map<RawMaterialsDto>(rawMaterial.Rm);
                 rawMaterialDto.CategoryName = rawMaterial.Rm.Category?.CategoryName;
                 rawMaterialDto.SubCategoryName = rawMaterial.Rm.SubCategory?.SubCategoryName;
 
                 if (rawMaterial.PriceInfo != null)
                 {
-                    rawMaterialDto.Price = rawMaterial.PriceInfo.Price;
-                    rawMaterialDto.PriceDate = rawMaterial.PriceInfo.CreatedAt;
+                    rawMaterialDto.Price = rawMaterial.PriceInfo.Price ?? 0m;
+                    rawMaterialDto.PriceDate = rawMaterial.PriceInfo.AddedOn;
                 }
 
-                return new ApiResponse<RmmasterDto>(rawMaterialDto);
+                return new ApiResponse<RawMaterialsDto>(rawMaterialDto);
             }
             catch (Exception ex)
             {
                 // Log the exception (consider using a logging framework)
                 Console.WriteLine(ex); // Replace with proper logging
-                return new ApiResponse<RmmasterDto>(ex.Message);
+                return new ApiResponse<RawMaterialsDto>(ex.Message);
             }
         }
-        public async Task<ApiResponse<List<RmmasterDto>>> GetAllRawMaterials()
+        public async Task<ApiResponse<List<RawMaterialsDto>>> GetAllRawMaterials()
         {
             try
             {
-                var rawMaterials = await dbContext.Rmmasters
+                var rawMaterials = await dbContext.RawMaterials
                     .Where(rm => !rm.IsActive)
                     .Include(rm => rm.Category)
                     .Include(rm => rm.SubCategory)
                     .Select(rm => new
                     {
                         Rm = rm,
-                        PriceInfo = dbContext.RmpriceMasters
-                            .Where(pm => pm.Rmid == rm.Rmid)
+                        PriceInfo = dbContext.RawMaterialPrices
+                            .Where(pm => pm.RawMaterialId == rm.RawMaterialId)
                             .OrderByDescending(pm => pm.CreatedAt)
                             .FirstOrDefault()
                     })
-                    .Select(result => new RmmasterDto
+                    .Select(result => new RawMaterialsDto
                     {
-                        Rmid = result.Rm.Rmid,
-                        Rmcode = result.Rm.Rmcode,
-                        Rmname = result.Rm.Rmname,
-                        IsNewRm = result.Rm.IsNewRm,
+                        RawMaterialId = result.Rm.RawMaterialId,
+                        RawMaterialCode = result.Rm.RawMaterialCode,
+                        RawMaterialName = result.Rm.RawMaterialName,
+                        IsNew = result.Rm.IsNew,
                         CategoryId = result.Rm.CategoryId,
                         CategoryName = result.Rm.Category.CategoryName,
                         SubCategoryId = result.Rm.SubCategoryId,
@@ -116,28 +116,28 @@ namespace navami
                     })
                     .ToListAsync();
 
-                return new ApiResponse<List<RmmasterDto>>(rawMaterials);
+                return new ApiResponse<List<RawMaterialsDto>>(rawMaterials);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                return new ApiResponse<List<RmmasterDto>>(ex.Message);
+                return new ApiResponse<List<RawMaterialsDto>>(ex.Message);
             }
         }
 
-        public ApiResponse<RmmasterDto> AddRawMaterial(RmmasterDto rawMaterialDto)
+        public ApiResponse<RawMaterialsDto> AddRawMaterial(RawMaterialsDto rawMaterialDto)
         {
             try
             {
-                var rawMaterial = _mapper.Map<Rmmaster>(rawMaterialDto);
-                dbContext.Rmmasters.Add(rawMaterial);
+                var rawMaterial = _mapper.Map<RawMaterial>(rawMaterialDto);
+                dbContext.RawMaterials.Add(rawMaterial);
                 dbContext.SaveChanges();
 
                 if (rawMaterial.VendorId.HasValue && rawMaterial.Price.HasValue)
                 {
-                    var price = new RmpriceMaster
+                    var price = new RawMaterialPrice
                     {
-                        Rmid = rawMaterial.Rmid,
+                        RawMaterialId = rawMaterial.RawMaterialId,
                         VendorId = rawMaterial.VendorId.Value,
                         SupplierName = rawMaterial.Party ?? "Unknown",
                         Price = rawMaterial.Price.Value,
@@ -145,40 +145,40 @@ namespace navami
                         CreatedBy = rawMaterial.AddedBy
                     };
 
-                    dbContext.RmpriceMasters.Add(price);
+                    dbContext.RawMaterialPrices.Add(price);
 
                     dbContext.SaveChanges();
                 }
 
                 // Map back to DTO for the response
-                var resultDto = _mapper.Map<RmmasterDto>(rawMaterial);
-                return new ApiResponse<RmmasterDto>(resultDto);
+                var resultDto = _mapper.Map<RawMaterialsDto>(rawMaterial);
+                return new ApiResponse<RawMaterialsDto>(resultDto);
             }
             catch (Exception ex)
             {
                 // Log the inner exception details for better debugging
                 var innerException = ex.InnerException?.Message ?? "No additional details";
-                return new ApiResponse<RmmasterDto>($"Error: {ex.Message}. Inner Exception: {innerException}");
+                return new ApiResponse<RawMaterialsDto>($"Error: {ex.Message}. Inner Exception: {innerException}");
             }
         }
 
         //UpdateRawMaterial
-        public ApiResponse<RmmasterDto> UpdateRawMaterial(RmmasterDto rawMaterialDto)
+        public ApiResponse<RawMaterialsDto> UpdateRawMaterial(RawMaterialsDto rawMaterialDto)
         {
             try
             {
-                var rawMaterial = dbContext.Rmmasters.FirstOrDefault(u => u.Rmid == rawMaterialDto.Rmid);
+                var rawMaterial = dbContext.RawMaterials.FirstOrDefault(u => u.RawMaterialId == rawMaterialDto.RawMaterialId);
                 if (rawMaterial == null)
                 {
-                    return new ApiResponse<RmmasterDto>("RawMaterial not found");
+                    return new ApiResponse<RawMaterialsDto>("RawMaterial not found");
                 }
                 if (rawMaterial.Price != rawMaterialDto.Price)
                 {
                     if (rawMaterial.VendorId.HasValue && rawMaterial.Price.HasValue)
                     {
-                        var price = new RmpriceMaster
+                        var price = new RawMaterialPrice
                         {
-                            Rmid = rawMaterial.Rmid,
+                            RawMaterialId = rawMaterial.RawMaterialId,
                             VendorId = rawMaterial.VendorId.Value,
                             SupplierName = rawMaterial.Party ?? "Unknown",
                             Price = rawMaterialDto.Price,
@@ -186,7 +186,7 @@ namespace navami
                             CreatedBy = rawMaterial.AddedBy
                         };
 
-                        dbContext.RmpriceMasters.Add(price);
+                        dbContext.RawMaterialPrices.Add(price);
 
                         dbContext.SaveChanges();
                     }
@@ -194,48 +194,48 @@ namespace navami
                 _mapper.Map(rawMaterialDto, rawMaterial);
                 dbContext.SaveChanges();
 
-                return new ApiResponse<RmmasterDto>(_mapper.Map<RmmasterDto>(rawMaterial));
+                return new ApiResponse<RawMaterialsDto>(_mapper.Map<RawMaterialsDto>(rawMaterial));
             }
             catch (Exception ex)
             {
-                return new ApiResponse<RmmasterDto>(ex.Message);
+                return new ApiResponse<RawMaterialsDto>(ex.Message);
             }
         }
 
         //DeleteRawMaterial
-        public ApiResponse<RmmasterDto> DeleteRawMaterial(int id)
+        public ApiResponse<RawMaterialsDto> DeleteRawMaterial(Guid id)
         {
             try
             {
-                var rawMaterial = dbContext.Rmmasters.FirstOrDefault(u => u.Rmid == id);
+                var rawMaterial = dbContext.RawMaterials.FirstOrDefault(u => u.RawMaterialId == id);
                 if (rawMaterial == null)
                 {
-                    return new ApiResponse<RmmasterDto>("RawMaterial not found");
+                    return new ApiResponse<RawMaterialsDto>("RawMaterial not found");
                 }
                 rawMaterial.IsActive = true;
                 dbContext.SaveChanges();
-                return new ApiResponse<RmmasterDto>(_mapper.Map<RmmasterDto>(rawMaterial));
+                return new ApiResponse<RawMaterialsDto>(_mapper.Map<RawMaterialsDto>(rawMaterial));
             }
             catch (Exception ex)
             {
-                return new ApiResponse<RmmasterDto>(ex.Message);
+                return new ApiResponse<RawMaterialsDto>(ex.Message);
             }
         }
 
 
         // GetRawMaterialBySubCategory
-        public ApiResponse<List<RmmasterDto>> GetRawMaterialBySubCategory(int subCategoryId)
+        public ApiResponse<List<RawMaterialsDto>> GetRawMaterialBySubCategory(Guid subCategoryId)
         {
             try
             {
-                var rawMaterial = dbContext.Rmmasters
+                var rawMaterial = dbContext.RawMaterials
                     .Where(u => u.SubCategoryId == subCategoryId && !u.IsActive)
                     .ToList();
-                return new ApiResponse<List<RmmasterDto>>(_mapper.Map<List<RmmasterDto>>(rawMaterial));
+                return new ApiResponse<List<RawMaterialsDto>>(_mapper.Map<List<RawMaterialsDto>>(rawMaterial));
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<RmmasterDto>>(ex.Message);
+                return new ApiResponse<List<RawMaterialsDto>>(ex.Message);
             }
         }
 

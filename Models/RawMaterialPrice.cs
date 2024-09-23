@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace navami.Models;
 
-public partial class RmpriceMaster
+public partial class RawMaterialPrice
 {
-    public int RmpriceId { get; set; }
+    public Guid RawMaterialPriceId { get; set; }
 
-    public int Rmid { get; set; }
+    public Guid RawMaterialId { get; set; }
 
     public string SupplierName { get; set; } = null!;
 
@@ -23,5 +23,5 @@ public partial class RmpriceMaster
 
     public Guid? VendorId { get; set; }
 
-    public virtual Rmmaster Rm { get; set; } = null!;
+    public virtual RawMaterial RawMaterial { get; set; } = null!;
 }

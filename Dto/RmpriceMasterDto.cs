@@ -1,10 +1,12 @@
+using navami.Components.Pages.RawMaterial;
+
 namespace navami.Dto
 {
     public class RmpriceMasterDto
     {
-        public int RmpriceId { get; set; }
+        public Guid RawMaterialPriceId { get; set; }
 
-        public int Rmid { get; set; }
+        public Guid RawMaterialId { get; set; }
 
         public string SupplierName { get; set; } = null!;
 
@@ -19,6 +21,9 @@ namespace navami.Dto
         public Guid? UpdatedBy { get; set; }
 
         public Guid? VendorId { get; set; }
+
+        public virtual RawMaterial RawMaterial { get; set; } = null!;
+
 
 
     }

@@ -83,7 +83,7 @@
 
     private async Task DeleteRecipe(RecipeMasterDto context)
     {
-        var response = await recipeMasterService.DeleteRecipeMaster(context.RecipeId ?? 0);
+        var response = await recipeMasterService.DeleteRecipeMaster(context.RecipeId);
         if (response.Success)
         {
             ToastService.ShowSuccess("Recipe deleted successfully");

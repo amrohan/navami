@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace navami.Models;
 
-public partial class RecipeMaster
+public partial class Recipe
 {
-    public int RecipeId { get; set; }
+    public Guid RecipeId { get; set; }
 
     public string RecipeName { get; set; } = null!;
 
@@ -22,8 +22,6 @@ public partial class RecipeMaster
     public Guid CreatedBy { get; set; }
 
     public DateTime CreatedAt { get; set; }
-
-    public Guid? UpdatedBy { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
 

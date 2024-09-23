@@ -34,8 +34,8 @@
         <div style="height: 450px; overflow:auto;" class="border rounded">
             <FluentDataGrid Items="@rawMaterialList" GenerateHeader="GenerateHeaderOption.Sticky" Virtualize="true"
                 ItemSize="43">
-                <PropertyColumn Property="@(c=>c.Rmcode)" Sortable="true" title="Code" />
-                <PropertyColumn Property="@(c=>c.Rmname)" Sortable="true" title="Raw Material" />
+                <PropertyColumn Property="@(c=>c.RawMaterialCode)" Sortable="true" title="Code" />
+                <PropertyColumn Property="@(c=>c.RawMaterialName)" Sortable="true" title="Raw Material" />
                 <PropertyColumn Property="@(c=>c.Price)" Sortable="true" title="Price" />
                 <PropertyColumn Property="@(c=>c.Party)" Sortable="true" title="Vendor" />
                 <PropertyColumn Property="@(c=>c.Description)" Sortable="true" title="Description" />
@@ -60,8 +60,8 @@
 
 
 @code {
-    private IQueryable<RmmasterDto> rawMaterialList;
-    private IQueryable<RmmasterDto> originalRawMaterialList;
+    private IQueryable<RawMaterialsDto> rawMaterialList;
+    private IQueryable<RawMaterialsDto> originalRawMaterialList;
 
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
@@ -78,9 +78,9 @@
         navigationManager.NavigateTo("/rawmaterial/add");
     }
 
-    private void EditRawMaterial(RmmasterDto rawMaterial)
+    private void EditRawMaterial(RawMaterialsDto rawMaterial)
     {
-        navigationManager.NavigateTo($"/rawmaterial/edit/{rawMaterial.Rmid}");
+        navigationManager.NavigateTo($"/rawmaterial/edit/{rawMaterial.RawMaterialId}");
     }
 
     private void SearchRawMaterial()
@@ -91,17 +91,17 @@
         }
         else
         {
-            rawMaterialList = originalRawMaterialList.Where(c => c.Rmname.Contains(searchTerm));
+            rawMaterialList = originalRawMaterialList.Where(c => c.RawMaterialName.Contains(searchTerm));
         }
     }
 
-    private void DeleteRecipeCategory(RmmasterDto rawMaterial)
+    private void DeleteRecipeCategory(RawMaterialsDto rawMaterial)
     {
-        var response = rawMaterialService.DeleteRawMaterial(rawMaterial.Rmid);
+        var response = rawMaterialService.DeleteRawMaterial(rawMaterial.RawMaterialId);
         if (response.Success)
         {
             ToastService.ShowSuccess("Raw Material deleted successfully");
-            rawMaterialList = rawMaterialList.Where(c => c.Rmid != rawMaterial.Rmid);
+            rawMaterialList = rawMaterialList.Where(c => c.RawMaterialId != rawMaterial.RawMaterialId);
         }
         else
         {

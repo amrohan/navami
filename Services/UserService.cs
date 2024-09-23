@@ -8,45 +8,45 @@ namespace navami.Services
 {
     public class UserService
     {
-        private readonly NavamiContext dbContext;
+        private readonly NavamiDevContext dbContext;
         private readonly IMapper _mapper;
 
-        public UserService(NavamiContext context, IMapper mapper)
+        public UserService(NavamiDevContext context, IMapper mapper)
         {
             dbContext = context;
             _mapper = mapper;
         }
 
-        public ApiResponse<User> RegisterUser(User model)
+        public ApiResponse<UserMaster> RegisterUser(UserMaster model)
         {
             try
             {
                 // Check if the username already exists
-                var existingUser = dbContext.Users.FirstOrDefault(u => u.Username == model.Username);
+                var existingUser = dbContext.UserMasters.FirstOrDefault(u => u.Username == model.Username);
                 if (existingUser != null)
                 {
-                    return new ApiResponse<User>("Username already exists.");
+                    return new ApiResponse<UserMaster>("Username already exists.");
                 }
 
                 // Check if the email already exists
-                existingUser = dbContext.Users.FirstOrDefault(u => u.Email == model.Email);
+                existingUser = dbContext.UserMasters.FirstOrDefault(u => u.Email == model.Email);
                 if (existingUser != null)
                 {
-                    return new ApiResponse<User>("Email already exists.");
+                    return new ApiResponse<UserMaster>("Email already exists.");
                 }
 
                 // Hash the password using BCrypt
                 model.Password = BC.HashPassword(model.Password);
 
                 // Add the user to the database
-                dbContext.Users.Add(model);
+                dbContext.UserMasters.Add(model);
                 dbContext.SaveChanges();
 
-                return new ApiResponse<User>(model); // Return the registered user
+                return new ApiResponse<UserMaster>(model); // Return the registered user
             }
             catch (Exception ex)
             {
-                return new ApiResponse<User>(ex.Message); // Return any exception message
+                return new ApiResponse<UserMaster>(ex.Message); // Return any exception message
             }
         }
 
@@ -75,30 +75,30 @@ namespace navami.Services
                     }
                 }
         */
-        public async Task<ApiResponse<User>> LoginUserAsync(LoginModel model)
+        public async Task<ApiResponse<UserMaster>> LoginUserAsync(LoginModel model)
         {
             try
             {
                 // Find the user by username asynchronously
-                var user = await dbContext.Users
+                var user = await dbContext.UserMasters
                     .FirstOrDefaultAsync(u => u.Username == model.Username);
 
                 if (user == null)
                 {
-                    return new ApiResponse<User>("Invalid username or password.");
+                    return new ApiResponse<UserMaster>("Invalid username or password.");
                 }
 
                 // Verify the password
                 if (!BC.Verify(model.Password, user.Password))
                 {
-                    return new ApiResponse<User>("Invalid username or password.");
+                    return new ApiResponse<UserMaster>("Invalid username or password.");
                 }
 
-                return new ApiResponse<User>(user);
+                return new ApiResponse<UserMaster>(user);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<User>(ex.Message); // Return any exception message
+                return new ApiResponse<UserMaster>(ex.Message); // Return any exception message
             }
         }
         public async Task<ApiResponse<List<Role>>> GetAllUserRolesAsync()
@@ -131,7 +131,7 @@ namespace navami.Services
             try
             {
                 // Fetch the list of users asynchronously
-                var users = await dbContext.Users.ToListAsync();
+                var users = await dbContext.UserMasters.ToListAsync();
 
                 // Check if users are found
                 if (users == null || users.Count == 0)
@@ -150,15 +150,15 @@ namespace navami.Services
         }
 
         //  update user
-        public async Task<ApiResponse<User>> UpdateUserAsync(User model)
+        public async Task<ApiResponse<UserMaster>> UpdateUserAsync(UserMaster model)
         {
             try
             {
                 // Find the user by ID
-                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == model.UserId);
+                var user = await dbContext.UserMasters.FirstOrDefaultAsync(u => u.UserId == model.UserId);
                 if (user == null)
                 {
-                    return new ApiResponse<User>("User not found.");
+                    return new ApiResponse<UserMaster>("User not found.");
                 }
                 // check if password is hash or not
                 if (!model.Password.StartsWith("$2a$"))
@@ -168,15 +168,15 @@ namespace navami.Services
                 }
 
                 // validate username and email 
-                var existingUser = dbContext.Users.FirstOrDefault(u => u.Username == model.Username);
+                var existingUser = dbContext.UserMasters.FirstOrDefault(u => u.Username == model.Username);
                 if (existingUser != null && existingUser.UserId != model.UserId)
                 {
-                    return new ApiResponse<User>("Username already exists.");
+                    return new ApiResponse<UserMaster>("Username already exists.");
                 }
-                existingUser = dbContext.Users.FirstOrDefault(u => u.Email == model.Email);
+                existingUser = dbContext.UserMasters.FirstOrDefault(u => u.Email == model.Email);
                 if (existingUser != null && existingUser.UserId != model.UserId)
                 {
-                    return new ApiResponse<User>("Email already exists.");
+                    return new ApiResponse<UserMaster>("Email already exists.");
                 }
                 user.Username = model.Username;
                 user.Password = model.Password;
@@ -188,30 +188,30 @@ namespace navami.Services
                 // Save the changes
                 await dbContext.SaveChangesAsync();
 
-                return new ApiResponse<User>(user);
+                return new ApiResponse<UserMaster>(user);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<User>($"An error occurred while updating the user: {ex.Message}");
+                return new ApiResponse<UserMaster>($"An error occurred while updating the user: {ex.Message}");
             }
         }
-        public async Task<ApiResponse<User>> GetUserByIdAsync(Guid userId)
+        public async Task<ApiResponse<UserMaster>> GetUserByIdAsync(Guid userId)
         {
             try
             {
                 // Find the user by ID
-                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+                var user = await dbContext.UserMasters.FirstOrDefaultAsync(u => u.UserId == userId);
                 if (user == null)
                 {
-                    return new ApiResponse<User>("User not found.");
+                    return new ApiResponse<UserMaster>("User not found.");
                 }
 
-                return new ApiResponse<User>(user);
+                return new ApiResponse<UserMaster>(user);
             }
             catch (Exception ex)
             {
                 // Log the exception here (if you have a logging mechanism)
-                return new ApiResponse<User>($"An error occurred while fetching the user: {ex.Message}");
+                return new ApiResponse<UserMaster>($"An error occurred while fetching the user: {ex.Message}");
             }
         }
 
@@ -221,14 +221,14 @@ namespace navami.Services
             try
             {
                 // Find the user by ID
-                var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+                var user = await dbContext.UserMasters.FirstOrDefaultAsync(u => u.UserId == userId);
                 if (user == null)
                 {
                     return new ApiResponse<UserDto>("User not found.");
                 }
 
                 // Remove the user
-                dbContext.Users.Remove(user);
+                dbContext.UserMasters.Remove(user);
                 await dbContext.SaveChangesAsync();
                 var userDto = _mapper.Map<UserDto>(user);
                 return new ApiResponse<UserDto>(userDto);

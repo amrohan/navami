@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace navami.Models;
 
-public partial class VendorMaster
+public partial class Vendor
 {
     public Guid VendorId { get; set; }
 

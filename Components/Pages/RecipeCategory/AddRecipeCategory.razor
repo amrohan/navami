@@ -1,5 +1,5 @@
 @page "/recipe-category/add"
-@page "/recipe-category/edit/{RecipeCategoryId:int}"
+@page "/recipe-category/edit/{RecipeCategoryId:Guid}"
 
 @attribute [Authorize]
 
@@ -15,7 +15,7 @@
 <FluentCard Width="100%" Height="200px" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(recipeCategory.RecipeCategoryId != 0 ? "Update Recipe Category" : "Add Recipe Category")</h3>
+        <h3 class="fs-5">@(recipeCategory.RecipeCategoryId != Guid.Empty ? "Update Recipe Category" : "Add Recipe Category")</h3>
     </div>
 
     <div class="container mt-2">
@@ -29,7 +29,7 @@
             <div class="d-flex justify-content-start align-items-center ml-4">
 
                 <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddRecipe">
-                    @(recipeCategory.RecipeCategoryId != 0 ? "Update" : "Add")
+                    @(recipeCategory.RecipeCategoryId != Guid.Empty ? "Update" : "Add")
                 </FluentButton>
             </div>
         </div>
@@ -44,14 +44,14 @@
     public HttpContext? httpContext { get; set; } = default!;
 
     [Parameter]
-    public int RecipeCategoryId { get; set; }
+    public Guid RecipeCategoryId { get; set; }
     private RecipeCategoryDto recipeCategory = new RecipeCategoryDto();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
     protected override void OnInitialized()
     {
-        if (RecipeCategoryId != 0)
+        if (RecipeCategoryId != Guid.Empty)
         {
             var response = recipeCategoryService.GetRecipeCategoryById(RecipeCategoryId);
             if (response.Success)
@@ -79,12 +79,11 @@
             isLoading = false;
             return;
         }
-        recipeCategory.CreatedBy = userId;
-        recipeCategory.UpdatedBy = userId;
+        recipeCategory.CreatedBy = Guid.Parse(userId);
 
-        if (recipeCategory.RecipeCategoryId != 0)
+        if (recipeCategory.RecipeCategoryId != Guid.Empty)
         {
-            recipeCategory.UpdatedAt = DateTime.UtcNow.ToString();
+            recipeCategory.UpdatedAt = DateTime.UtcNow;
             response = recipeCategoryService.UpdateRecipeCategory(recipeCategory);
 
             if (response.Success)

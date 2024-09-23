@@ -1,5 +1,5 @@
 @page "/subcategory/add"
-@page "/subcategory/edit/{SubCategoryId:int}"
+@page "/subcategory/edit/{SubCategoryId:Guid}"
 
 @attribute [Authorize]
 
@@ -16,7 +16,7 @@
 <FluentCard Width="100%" Height="200px" AreaRestricted="false" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(subCategory.CategoryId != 0 ? "Update Sub Category" : "Add Sub Category")</h3>
+        <h3 class="fs-5">@(subCategory.CategoryId != Guid.Empty ? "Update Sub Category" : "Add Sub Category")</h3>
     </div>
 
     <div class="container mt-2">
@@ -27,7 +27,7 @@
                 </FluentTextField>
             </div>
             <div class="w-50">
-                <FluentSelect Height="300px" TOption="CategoryMasterDto" Items="@category"
+                <FluentSelect Height="300px" TOption="CategoryDto" Items="@category"
                     @bind-Value="subCategory.CategoryName" Label="Category" Placeholder="Select Category"
                     Options="@category" OptionText="@(c=>c.CategoryName)" OptionValue="@(c=>c.CategoryName)"
                     Class="w-100">
@@ -35,7 +35,7 @@
             </div>
             <div class="d-flex justify-content-start align-items-center ml-4">
                 <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddSubCategoryMaster">
-                    @(subCategory.SubCategoryId != 0 ? "Update" : "Add")
+                    @(subCategory.SubCategoryId != Guid.Empty ? "Update" : "Add")
                 </FluentButton>
             </div>
         </div>
@@ -50,17 +50,17 @@
     [CascadingParameter]
     public HttpContext? httpContext { get; set; } = default!;
     [Parameter]
-    public int SubCategoryId { get; set; }
+    public Guid SubCategoryId { get; set; }
 
-    private SubCategoryMasterDto subCategory = new SubCategoryMasterDto();
-    private List<CategoryMasterDto> category = new List<CategoryMasterDto>();
+    private SubCategoryDto subCategory = new SubCategoryDto();
+    private List<CategoryDto> category = new List<CategoryDto>();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
     private string selectedCategoryName = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        if (SubCategoryId != 0)
+        if (SubCategoryId != Guid.Empty)
         {
             var response = subCategoryMasterService.GetSubCategoryMasterById(SubCategoryId);
             if (response.Success)
@@ -88,7 +88,7 @@
         isLoading = true;
         var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
         var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-        ApiResponse<SubCategoryMasterDto> response;
+        ApiResponse<SubCategoryDto> response;
         if (userId == null)
         {
             errorMessage = "User not found";
@@ -96,11 +96,10 @@
             isLoading = false;
             return;
         }
-        subCategory.CreatedBy = userId;
-        subCategory.UpdatedBy = userId;
+        subCategory.CreatedBy = Guid.Parse(userId);
         subCategory.CategoryId = category.FirstOrDefault(c => c.CategoryName == subCategory.CategoryName).CategoryId;
 
-        if (subCategory.SubCategoryId != 0)
+        if (subCategory.SubCategoryId != Guid.Empty)
         {
             subCategory.CategoryName = category.FirstOrDefault(c => c.CategoryId == subCategory.CategoryId).CategoryName;
             response = subCategoryMasterService.UpdateSubCategoryMaster(subCategory);

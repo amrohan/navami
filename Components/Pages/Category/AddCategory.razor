@@ -1,5 +1,5 @@
 @page "/category/add"
-@page "/category/edit/{CategoryId:int}"
+@page "/category/edit/{CategoryId:Guid}"
 
 @attribute [Authorize]
 
@@ -16,7 +16,7 @@
 <FluentCard Width="100%" Height="200px" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(category.CategoryId != 0 ? "Update Category" : "Add Category")</h3>
+        <h3 class="fs-5">@(category.CategoryId != Guid.Empty ? "Update Category" : "Add Category")</h3>
     </div>
 
     <div class="container mt-2">
@@ -30,7 +30,7 @@
             <div class="d-flex justify-content-start align-items-center ml-4">
 
                 <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddCategoryMaster">
-                    @(category.CategoryId != 0 ? "Update" : "Add")
+                    @(category.CategoryId != Guid.Empty ? "Update" : "Add")
                 </FluentButton>
             </div>
         </div>
@@ -42,14 +42,14 @@
     [CascadingParameter]
     public HttpContext? httpContext { get; set; } = default!;
     [Parameter]
-    public int CategoryId { get; set; }
-    private CategoryMasterDto category = new CategoryMasterDto();
+    public Guid CategoryId { get; set; }
+    private CategoryDto category = new CategoryDto();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
     protected override void OnInitialized()
     {
-        if (CategoryId != 0)
+        if (CategoryId != Guid.Empty)
         {
             var response = categoryMasterService.GetCategoryMasterById(CategoryId);
             if (response.Success)
@@ -68,7 +68,7 @@
         isLoading = true;
         var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
         var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-        ApiResponse<CategoryMasterDto> response;
+        ApiResponse<CategoryDto> response;
         if (userId == null)
         {
             errorMessage = "User not found";
@@ -76,12 +76,11 @@
             isLoading = false;
             return;
         }
-        category.CreatedBy = userId;
-        category.UpdatedBy = userId;
+        category.CreatedBy = Guid.Parse(userId);
 
-        if (category.CategoryId != 0)
+        if (category.CategoryId != Guid.Empty)
         {
-            category.UpdatedDate = DateTime.UtcNow.ToString();
+            category.UpdatedAt = DateTime.Now;
             response = categoryMasterService.UpdateCategoryMaster(category);
 
             if (response.Success)

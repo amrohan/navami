@@ -9,9 +9,9 @@ namespace navami
     public class RawMaterialUsageService
     {
 
-        private readonly NavamiContext dbContext;
+        private readonly NavamiDevContext dbContext;
         private readonly IMapper _mapper;
-        public RawMaterialUsageService(NavamiContext context, IMapper mapper)
+        public RawMaterialUsageService(NavamiDevContext context, IMapper mapper)
         {
             dbContext = context;
             _mapper = mapper;
@@ -33,11 +33,11 @@ namespace navami
         }
 
         // GetRawMaterialUsageById
-        public ApiResponse<RawMaterialUsageDto> GetRawMaterialUsageById(int id)
+        public ApiResponse<RawMaterialUsageDto> GetRawMaterialUsageById(Guid id)
         {
             try
             {
-                var rawMaterialUsage = dbContext.RawMaterialUsages.FirstOrDefault(u => u.RmusageId == id);
+                var rawMaterialUsage = dbContext.RawMaterialUsages.FirstOrDefault(u => u.RawMaterialUsageId == id);
                 if (rawMaterialUsage == null)
                 {
                     return new ApiResponse<RawMaterialUsageDto>("RawMaterialUsage not found");
@@ -73,7 +73,7 @@ namespace navami
         {
             try
             {
-                var rawMaterialUsage = dbContext.RawMaterialUsages.FirstOrDefault(u => u.RmusageId == model.RmusageId);
+                var rawMaterialUsage = dbContext.RawMaterialUsages.FirstOrDefault(u => u.RawMaterialUsageId == model.RawMaterialUsageId);
                 if (rawMaterialUsage == null)
                 {
                     return new ApiResponse<RawMaterialUsageDto>("RawMaterialUsage not found");
@@ -90,11 +90,11 @@ namespace navami
         }
 
         // DeleteRawMaterialUsage
-        public async Task<ApiResponse<RawMaterialUsageDto>> DeleteRawMaterialUsage(int id)
+        public async Task<ApiResponse<RawMaterialUsageDto>> DeleteRawMaterialUsage(Guid id)
         {
             try
             {
-                var rawMaterialUsage = dbContext.RawMaterialUsages.FirstOrDefault(u => u.RmusageId == id);
+                var rawMaterialUsage = dbContext.RawMaterialUsages.FirstOrDefault(u => u.RawMaterialUsageId == id);
                 if (rawMaterialUsage == null)
                 {
                     return new ApiResponse<RawMaterialUsageDto>("RawMaterialUsage not found");
@@ -116,7 +116,7 @@ namespace navami
 
         // Sp
 
-        public async Task UpdateRecipeCostAsync(int recipeId)
+        public async Task UpdateRecipeCostAsync(Guid recipeId)
         {
             await dbContext.Database.ExecuteSqlRawAsync("EXEC UpdateRecipeCost @RecipeID", new SqlParameter("@RecipeID", recipeId));
         }

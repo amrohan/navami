@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace navami.Models;
 
-public partial class User
+public partial class UserMaster
 {
     public Guid UserId { get; set; }
 
@@ -18,8 +18,4 @@ public partial class User
     public string? Password { get; set; }
 
     public bool? IsDeactivated { get; set; }
-
-    public virtual ICollection<RecipeCategory> RecipeCategoryCreatedByNavigations { get; set; } = new List<RecipeCategory>();
-
-    public virtual ICollection<RecipeCategory> RecipeCategoryUpdatedByNavigations { get; set; } = new List<RecipeCategory>();
 }

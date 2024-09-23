@@ -1,20 +1,29 @@
 
 
+using navami.Components.Pages.RawMaterial;
+using navami.Components.Pages.SubCategory;
 using System.ComponentModel.DataAnnotations;
 
 namespace navami.Dto
 {
 
-    public class CategoryMasterDto
+    public class CategoryDto
     {
-        public int CategoryId { get; set; }
-        [Required(AllowEmptyStrings = false, ErrorMessage = "Category Name is required")]
-        public string? CategoryName { get; set; }
-        public string? CreatedBy { get; set; }
-        public string? UpdatedBy { get; set; }
-        public string? CreatedDate { get; set; }
-        public string? UpdatedDate { get; set; }
+        public Guid CategoryId { get; set; }
+
+        public string CategoryName { get; set; } = null!;
+
+        public Guid CreatedBy { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
+
         public bool IsActive { get; set; }
+
+        public virtual ICollection<RawMaterial> RawMaterials { get; set; } = new List<RawMaterial>();
+
+        public virtual ICollection<SubCategory> SubCategories { get; set; } = new List<SubCategory>();
 
     }
 }

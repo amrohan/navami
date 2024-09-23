@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using navami.Dto;
 using navami.Models;
 
-namespace navami
+namespace navami.Services
 {
     public class VendorMasterService
     {
-        private readonly NavamiContext dbContext;
+        private readonly NavamiDevContext dbContext;
         private readonly IMapper _mapper;
-        public VendorMasterService(NavamiContext context, IMapper mapper)
+        public VendorMasterService(NavamiDevContext context, IMapper mapper)
         {
             dbContext = context;
             _mapper = mapper;
@@ -20,7 +20,7 @@ namespace navami
         {
             try
             {
-                var vendorMasters = await dbContext.VendorMasters
+                var vendorMasters = await dbContext.Vendors
                     .Where(u => !u.IsActive)
                     .ToListAsync();
 
@@ -39,7 +39,7 @@ namespace navami
         {
             try
             {
-                var vendorMaster = dbContext.VendorMasters.Where(u => u.VendorId == id).FirstOrDefault();
+                var vendorMaster = dbContext.Vendors.Where(u => u.VendorId == id).FirstOrDefault();
                 return new ApiResponse<VendorMasterDto>(_mapper.Map<VendorMasterDto>(vendorMaster));
             }
             catch (Exception ex)
@@ -52,10 +52,10 @@ namespace navami
         {
             try
             {
-                var vendorMaster = _mapper.Map<VendorMaster>(vendorMasterDto);
+                var vendorMaster = _mapper.Map<Vendor>(vendorMasterDto);
                 vendorMaster.VendorId = Guid.NewGuid();
                 vendorMaster.CreatedAt = DateTime.Now;
-                dbContext.VendorMasters.Add(vendorMaster);
+                dbContext.Vendors.Add(vendorMaster);
                 dbContext.SaveChanges();
                 return new ApiResponse<VendorMasterDto>(_mapper.Map<VendorMasterDto>(vendorMaster));
             }
@@ -69,7 +69,7 @@ namespace navami
         {
             try
             {
-                var vendorMaster = dbContext.VendorMasters.Where(u => u.VendorId == vendorMasterDto.VendorId).FirstOrDefault();
+                var vendorMaster = dbContext.Vendors.Where(u => u.VendorId == vendorMasterDto.VendorId).FirstOrDefault();
                 if (vendorMaster == null)
                 {
                     return new ApiResponse<VendorMasterDto>("Vendor not found");
@@ -92,7 +92,7 @@ namespace navami
         {
             try
             {
-                var vendorMaster = dbContext.VendorMasters.Where(u => u.VendorId == id).FirstOrDefault();
+                var vendorMaster = dbContext.Vendors.Where(u => u.VendorId == id).FirstOrDefault();
                 if (vendorMaster == null)
                 {
                     return new ApiResponse<VendorMasterDto>("Vendor not found");

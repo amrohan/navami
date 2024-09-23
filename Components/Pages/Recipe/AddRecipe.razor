@@ -1,5 +1,5 @@
 @page "/recipe/add"
-@page "/recipe/edit/{RecipeId:int}"
+@page "/recipe/edit/{RecipeId:Guid}"
 
 @attribute [Authorize]
 
@@ -30,7 +30,7 @@
 <FluentCard Width="100%" Height="900px" AreaRestricted="false">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(RecipeId != 0 ? "Update Recipe" : "New Recipe ")</h3>
+        <h3 class="fs-5">@(RecipeId != Guid.Empty ? "Update Recipe" : "New Recipe ")</h3>
     </div>
 
     <div class="container text-start">
@@ -58,22 +58,22 @@
         </div>
         <div class="row row-cols-4 align-content-center mt-4">
             <div class="col">
-                <FluentSelect Height="300px" TOption="CategoryMasterDto" Items="@categoryList"
+                <FluentSelect Height="300px" TOption="CategoryDto" Items="@categoryList"
                               @bind-Value="rawMaterialUsageDto.CategoryName" Label="Category" Placeholder="Select Category"
                               OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
                               @onchange="OnCategoryChange" />
             </div>
 
             <div class="col">
-                <FluentSelect Height="300px" TOption="SubCategoryMasterDto" Items="@subCategoryList"
+                <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
                               @bind-Value="rawMaterialUsageDto.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
                               OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
                               @onchange="OnSubCategoryChange" />
             </div>
             <div class="col">
-                <FluentSelect Height="300px" TOption="RmmasterDto" Items="@rawMaterialList"
-                              @bind-Value="rawMaterialUsageDto.Rmname" Label="Raw Material" Placeholder="Select Raw Material"
-                              OptionText="@(c => c.Rmname)" OptionValue="@(c =>c.Rmname)" Class="w-100"
+                <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
+                              @bind-Value="rawMaterialUsageDto.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
+                              OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
                               @onchange="OnRawMaterialChange" />
 
             </div>
@@ -145,7 +145,7 @@
             </div>
             <div class="align-content-start border rounded mt-4" style="height: 450px; overflow:auto;">
                 <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()" GenerateHeader="GenerateHeaderOption.Sticky">
-                    <PropertyColumn Property="@(u => u.Rmname)" Sortable="true" Title="Raw material" />
+                    <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
                     <PropertyColumn Property="@(u => u.CategoryName)" Sortable="true" Title="Category" />
                     <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
 
@@ -201,7 +201,7 @@
 @code {
 
     [Parameter]
-    public int RecipeId { get; set; }
+    public Guid RecipeId { get; set; }
     // list to store RecipeMasterDto item
     private RecipeMasterDto recipeMasterDto = new RecipeMasterDto();
 
@@ -209,8 +209,8 @@
     private List<RawMaterialUsageDto> rawMaterialUsageList = new List<RawMaterialUsageDto>();
     // list Raw Material
     private RawMaterialUsageDto rawMaterialUsageDto = new RawMaterialUsageDto();
-    private List<RmmasterDto> rawMaterialList = new List<RmmasterDto>();
-    private RmmasterDto rawMaterialDto = new RmmasterDto();
+    private List<RawMaterialsDto> rawMaterialList = new List<RawMaterialsDto>();
+    private RawMaterialsDto rawMaterialDto = new RawMaterialsDto();
 
     // list Recipe Category
     private List<RecipeCategoryDto> recipeCategoryList;
@@ -218,8 +218,8 @@
     private List<RecipeCategoryDto> previousSelectedRecipeCategory = new List<RecipeCategoryDto>();
     private IEnumerable<RecipeCategoryDto> selectedRecipeCategory = Array.Empty<RecipeCategoryDto>();
 
-    private List<CategoryMasterDto> categoryList = new List<CategoryMasterDto>();
-    private List<SubCategoryMasterDto> subCategoryList = new List<SubCategoryMasterDto>();
+    private List<CategoryDto> categoryList = new List<CategoryDto>();
+    private List<SubCategoryDto> subCategoryList = new List<SubCategoryDto>();
 
     private bool isEditing = false;
     private bool canEditRecipe = false;
@@ -249,20 +249,20 @@
         {
             recipeCategoryList = recipeCategoryListRes.Data;
         }
-        if (RecipeId != 0)
+        if (RecipeId != Guid.Empty)
         {
             var response = await recipeMasterService.GetRecipeMasterById(RecipeId);
             if (response.Success)
             {
                 recipeMasterDto = response.Data;
-                rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
-                previousSelectedRecipeCategory = recipeMasterDto.RecipeCategory.Select(c => new RecipeCategoryDto
+                rawMaterialUsageList = recipeMasterDto.RawMaterialUsages;
+                previousSelectedRecipeCategory = recipeMasterDto.RecipeCategoryMappings.Select(c => new RecipeCategoryDto
                     {
                         RecipeCategoryId = c.RecipeCategoryId,
                         RecipeCategoryName = recipeCategoryList.FirstOrDefault(r => r.RecipeCategoryId ==
                         c.RecipeCategoryId)?.RecipeCategoryName
                     }).ToList();
-                var ids = recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategoryId).ToList();
+                var ids = recipeMasterDto.RecipeCategoryMappings.Select(c => c.RecipeCategoryId).ToList();
                 selectedRecipeCategory = recipeCategoryList.Where(c => ids.Contains(c.RecipeCategoryId));
 
                 if (recipeMasterDto.CreatedAt != null)
@@ -281,7 +281,7 @@
                         canEditRecipe = true; // Allow editing
                     }
                 }
-                
+
             }
             else
             {
@@ -292,8 +292,8 @@
     }
     public void OnAddRawMaterial()
     {
-        rawMaterialUsageDto.Rmid = rawMaterialDto.Rmid;
-        rawMaterialUsageDto.Rmname = rawMaterialDto.Rmname;
+        rawMaterialUsageDto.RawMaterialId = rawMaterialDto.RawMaterialId;
+        rawMaterialUsageDto.RawMaterialName= rawMaterialDto.RawMaterialName;
         rawMaterialUsageDto.Cost = Math.Round(rawMaterialDto.Price * rawMaterialUsageDto.Quantity, 4);
         rawMaterialUsageList.Add(rawMaterialUsageDto);
         ClearForm();
@@ -301,7 +301,7 @@
 
     private void ClearForm()
     {
-        rawMaterialDto = new RmmasterDto();
+        rawMaterialDto = new RawMaterialsDto();
         rawMaterialUsageDto = new RawMaterialUsageDto();
     }
 
@@ -329,9 +329,9 @@
 
     public async Task OnDeleteRawMaterial(RawMaterialUsageDto rawMaterialUsageDto)
     {
-        if (rawMaterialUsageDto.RmusageId != 0)
+        if (rawMaterialUsageDto.RawMaterialUsageId != Guid.Empty)
         {
-            var response = await rawMaterialUsageService.DeleteRawMaterialUsage(rawMaterialUsageDto.RmusageId);
+            var response = await rawMaterialUsageService.DeleteRawMaterialUsage(rawMaterialUsageDto.RawMaterialId);
             if (response.Success)
             {
                 ToastService.ShowSuccess("Raw Material deleted successfully");
@@ -349,7 +349,7 @@
     public void OnRawMaterialChange(ChangeEventArgs e)
     {
         var rawMaterialName = e.Value.ToString();
-        rawMaterialDto = rawMaterialList.FirstOrDefault(r => r.Rmname == rawMaterialName);
+        rawMaterialDto = rawMaterialList.FirstOrDefault(r => r.RawMaterialName == rawMaterialName);
     }
 
     public async void OnSaveRecipe()
@@ -368,19 +368,20 @@
         }
 
         // Store the current user info
-        recipeMasterDto.UpdatedBy = Guid.Parse(userId);
+        recipeMasterDto.UpdatedAt = DateTime.Now;
+        recipeCategoryDto.CreatedBy = Guid.Parse(userId);
         recipeMasterDto.Username = username ?? string.Empty;
 
         // Check if we are updating an existing recipe
         if (recipeMasterDto.RecipeId != null)
         {
             recipeMasterDto.UpdatedAt = DateTime.UtcNow;
-            recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
+            recipeMasterDto.RawMaterialUsages = rawMaterialUsageList;
 
             // Create new RecipeCategoryMappingDtos for the current selection
             var recipeCategoryMappingDtos = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
                 {
-                    RecipeId = recipeMasterDto.RecipeId ?? 0,
+                    RecipeId = recipeMasterDto.RecipeId ,
                     RecipeCategoryId = c.RecipeCategoryId,
                 }).ToList();
 
@@ -391,11 +392,11 @@
 
             foreach (var removedCategory in removedRecipeCategories)
             {
-                await recipeMasterService.DeleteRecipeCategoryMapping(recipeMasterDto.RecipeId.Value, removedCategory.RecipeCategoryId);
+                await recipeMasterService.DeleteRecipeCategoryMapping(recipeMasterDto.RecipeId, removedCategory.RecipeCategoryId);
             }
 
             // Update the recipe with new categories
-            recipeMasterDto.RecipeCategory = recipeCategoryMappingDtos;
+            recipeMasterDto.RecipeCategoryMappings = recipeCategoryMappingDtos;
 
             // Call update service
             var response = await recipeMasterService.UpdateRecipeMaster(recipeMasterDto);
@@ -425,16 +426,16 @@
         // Prepare to add a new recipe
         recipeMasterDto.CreatedBy = Guid.Parse(userId);
         recipeMasterDto.CreatedAt = DateTime.UtcNow;
-        recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
+        recipeMasterDto.RawMaterialUsages = rawMaterialUsageList;
 
         // Create mapping for new categories
         var newRecipeCategoryMappings = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
             {
-                RecipeId = 0,
+                RecipeId = Guid.NewGuid(),
                 RecipeCategoryId = c.RecipeCategoryId,
             }).ToList();
 
-        recipeMasterDto.RecipeCategory = newRecipeCategoryMappings;
+        recipeMasterDto.RecipeCategoryMappings = newRecipeCategoryMappings;
 
         // Call add service
         var addResponse = await recipeMasterService.AddRecipeMaster(recipeMasterDto);
@@ -487,7 +488,7 @@
                 return;
             }
 
-            var categoryId = int.Parse(categoryItem.CategoryId.ToString());
+            var categoryId = categoryItem.CategoryId;
             var response = subCategoryService.GetSubCategoryMasterByCategory(categoryId);
 
             if (response.Success)
@@ -525,7 +526,7 @@
                 return;
             }
 
-            var subCategoryId = int.Parse(subCategoryItem.SubCategoryId.ToString());
+            var subCategoryId = subCategoryItem.SubCategoryId;
             var response = rawMaterialService.GetRawMaterialBySubCategory(subCategoryId);
 
             if (response.Success)
@@ -561,12 +562,12 @@
     {
         if (string.IsNullOrEmpty(searchTerm))
         {
-            rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
+            rawMaterialUsageList = recipeMasterDto.RawMaterialUsages;
         }
         else
         {
-            rawMaterialUsageList = recipeMasterDto.RawMaterialUsage.Where(c =>
-            c.Rmname.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+            rawMaterialUsageList = recipeMasterDto.RawMaterialUsages.Where(c =>
+            c.RawMaterialName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
             c.CategoryName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
             c.SubCategoryName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
         }

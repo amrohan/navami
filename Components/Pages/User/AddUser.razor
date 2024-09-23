@@ -72,7 +72,7 @@
     [Parameter]
     public Guid? UserId { get; set; }
 
-    public User user = new User();
+    public UserMaster user = new UserMaster();
     bool deactive;
     bool isLoading = false;
     string errorMessage = string.Empty;
@@ -129,7 +129,7 @@
         if (isValid)
         {
             user.IsDeactivated = deactive;
-            ApiResponse<User> response;
+            ApiResponse<UserMaster> response;
 
             if (user.UserId == Guid.Empty)
             {

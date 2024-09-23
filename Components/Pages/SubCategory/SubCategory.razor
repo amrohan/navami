@@ -56,8 +56,8 @@
 
 @code {
     // categoryList
-    private IQueryable<SubCategoryMasterDto> categoryList;
-    private IQueryable<SubCategoryMasterDto> originalCategoryList;
+    private IQueryable<SubCategoryDto> categoryList;
+    private IQueryable<SubCategoryDto> originalCategoryList;
 
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
@@ -71,12 +71,12 @@
         navigationManager.NavigateTo("/subcategory/add");
     }
 
-    private void EditSubCategory(SubCategoryMasterDto context)
+    private void EditSubCategory(SubCategoryDto context)
     {
         navigationManager.NavigateTo($"/subcategory/edit/{context.SubCategoryId}");
     }
 
-    private void DeleteSubCategory(SubCategoryMasterDto context)
+    private void DeleteSubCategory(SubCategoryDto context)
     {
         var response = subCategoryMasterService.DeleteSubCategoryMaster(context.SubCategoryId);
         if (response.Success)
