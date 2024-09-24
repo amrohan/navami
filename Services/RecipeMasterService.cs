@@ -139,7 +139,7 @@ namespace navami
             }
 
             // Save related recipe categories
-            foreach (var recipeCategory in recipeMasterDto.RecipeCategories)
+            foreach (var recipeCategory in recipeMasterDto.RecipeCategoryMappings)
             {
                 var recipeCategoryMapping = _mapper.Map<RecipeCategoryMapping>(recipeCategory);
                 recipeCategoryMapping.RecipeId = recipeMaster.RecipeId;
@@ -156,7 +156,7 @@ namespace navami
 
         public async Task UpdateRecipeCostAsync(Guid recipeId)
         {
-            await dbContext.Database.ExecuteSqlRawAsync("EXEC UpdateRecipeCost @RecipeID", new SqlParameter("@RecipeID", recipeId));
+            await dbContext.Database.ExecuteSqlRawAsync("EXEC UpdateRecipeCost @RecipeId", new SqlParameter("@RecipeId", recipeId));
         }
 
         public async Task<ApiResponse<RecipeMasterDto>> UpdateRecipeMaster(RecipeMasterDto recipeMasterDto)

@@ -100,7 +100,7 @@ namespace navami
                     return new ApiResponse<RawMaterialUsageDto>("RawMaterialUsage not found");
                 }
                 dbContext.RawMaterialUsages.Remove(rawMaterialUsage);
-                // rawMaterialUsage.IsActive = true;
+                 //rawMaterialUsage.isActive = true;
                 dbContext.SaveChanges();
                 await UpdateRecipeCostAsync(rawMaterialUsage.RecipeId);
 
@@ -118,7 +118,7 @@ namespace navami
 
         public async Task UpdateRecipeCostAsync(Guid recipeId)
         {
-            await dbContext.Database.ExecuteSqlRawAsync("EXEC UpdateRecipeCost @RecipeID", new SqlParameter("@RecipeID", recipeId));
+            await dbContext.Database.ExecuteSqlRawAsync("EXEC UpdateRecipeCost @RecipeId", new SqlParameter("@RecipeId", recipeId));
         }
 
     }

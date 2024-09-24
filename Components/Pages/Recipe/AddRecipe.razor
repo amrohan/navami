@@ -1,5 +1,5 @@
 @page "/recipe/add"
-@page "/recipe/edit/{RecipeId:Guid}"
+@page "/recipe/edit/{RecipeId:guid}"
 
 @attribute [Authorize]
 
@@ -331,7 +331,7 @@
     {
         if (rawMaterialUsageDto.RawMaterialUsageId != Guid.Empty)
         {
-            var response = await rawMaterialUsageService.DeleteRawMaterialUsage(rawMaterialUsageDto.RawMaterialId);
+            var response = await rawMaterialUsageService.DeleteRawMaterialUsage(rawMaterialUsageDto.RawMaterialUsageId);
             if (response.Success)
             {
                 ToastService.ShowSuccess("Raw Material deleted successfully");
@@ -373,7 +373,7 @@
         recipeMasterDto.Username = username ?? string.Empty;
 
         // Check if we are updating an existing recipe
-        if (recipeMasterDto.RecipeId != null)
+        if (recipeMasterDto.RecipeId != Guid.Empty )
         {
             recipeMasterDto.UpdatedAt = DateTime.UtcNow;
             recipeMasterDto.RawMaterialUsages = rawMaterialUsageList;
