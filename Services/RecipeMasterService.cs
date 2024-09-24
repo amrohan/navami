@@ -63,7 +63,7 @@ namespace navami
             foreach (var recipeMasterDto in recipeMasterDtos)
             {
                 // Map raw materials
-                recipeMasterDto.RawMaterialUsages = _mapper.Map<List<RawMaterialUsageDto>>(
+                recipeMasterDto.RawMaterialUsage = _mapper.Map<List<RawMaterialUsageDto>>(
                     recipeMasters.FirstOrDefault(rm => rm.RecipeId == recipeMasterDto.RecipeId)?.RawMaterialUsages);
 
                 // Get category names from the mapped RecipeCategoryMappings
@@ -100,8 +100,8 @@ namespace navami
 
             // Map the recipe master entity to DTO
             var recipeMasterDto = _mapper.Map<RecipeMasterDto>(recipeMaster.Recipe);
-            recipeMasterDto.RawMaterialUsages = _mapper.Map<List<RawMaterialUsageDto>>(recipeMaster.RawMaterials);
-            foreach (var item in recipeMasterDto.RawMaterialUsages)
+            recipeMasterDto.RawMaterialUsage = _mapper.Map<List<RawMaterialUsageDto>>(recipeMaster.RawMaterials);
+            foreach (var item in recipeMasterDto.RawMaterialUsage)
             {
                 // Fetch category and subcategory details based on Rmid
                 var rawMaterial = await dbContext.RawMaterials.FindAsync(item.RawMaterialId);
@@ -117,7 +117,7 @@ namespace navami
                 }
             }
             
-            recipeMasterDto.RecipeCategoryMappings = _mapper.Map<List<RecipeCategoryMappingDto>>(recipeMaster.Categories);
+            recipeMasterDto.RecipeCategory = _mapper.Map<List<RecipeCategoryMappingDto>>(recipeMaster.Categories);
 
             return new ApiResponse<RecipeMasterDto>(recipeMasterDto);
         }
@@ -131,7 +131,7 @@ namespace navami
             dbContext.Recipes.Add(recipeMaster);
 
             // Save related raw materials
-            foreach (var rawMaterial in recipeMasterDto.RawMaterialUsages)
+            foreach (var rawMaterial in recipeMasterDto.RawMaterialUsage)
             {
                 var rawMaterialUsage = _mapper.Map<RawMaterialUsage>(rawMaterial);
                 rawMaterialUsage.RecipeId = recipeMaster.RecipeId;
@@ -139,7 +139,7 @@ namespace navami
             }
 
             // Save related recipe categories
-            foreach (var recipeCategory in recipeMasterDto.RecipeCategoryMappings)
+            foreach (var recipeCategory in recipeMasterDto.RecipeCategory)
             {
                 var recipeCategoryMapping = _mapper.Map<RecipeCategoryMapping>(recipeCategory);
                 recipeCategoryMapping.RecipeId = recipeMaster.RecipeId;
@@ -177,7 +177,7 @@ namespace navami
                 _mapper.Map(recipeMasterDto, recipeMaster);
 
                 // Update related raw materials
-                foreach (var rawMaterial in recipeMasterDto.RawMaterialUsages)
+                foreach (var rawMaterial in recipeMasterDto.RawMaterialUsage)
                 {
                     var rawMaterialUsage = recipeMaster.RawMaterialUsages
                         .FirstOrDefault(u => u.RawMaterialUsageId == rawMaterial.RawMaterialUsageId);
@@ -196,7 +196,7 @@ namespace navami
                 }
 
                 // Update related recipe categories
-                foreach (var recipeCategory in recipeMasterDto.RecipeCategoryMappings)
+                foreach (var recipeCategory in recipeMasterDto.RecipeCategory)
                 {
                     var recipeCategoryMapping = recipeMaster.RecipeCategoryMappings
                         .FirstOrDefault(u => u.RecipeCategoryId == recipeCategory.RecipeCategoryId);

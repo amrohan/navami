@@ -117,6 +117,7 @@ public partial class NavamiDevContext : DbContext
 
             entity.Property(e => e.RawMaterialUsageId).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Cost).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.Quantity).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.RawMaterial).WithMany(p => p.RawMaterialUsages)

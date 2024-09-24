@@ -18,7 +18,7 @@ namespace navami.Dto
 
         public bool IsActive { get; set; }
 
-        public virtual ICollection<RecipeCategoryMapping> RecipeCategoryMappings { get; set; } = new List<RecipeCategoryMapping>();
+        public List<RecipeCategoryMapping> RecipeCategoryMappings { get; set; } = new List<RecipeCategoryMapping>();
 
         //public int RecipeCategoryId { get; set; }
         //[Required(ErrorMessage = "Recipe Category Name is required")]

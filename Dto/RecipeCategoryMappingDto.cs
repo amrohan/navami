@@ -19,9 +19,9 @@ namespace navami.Dto
 
         public bool IsActive { get; set; }
 
-        public virtual Recipe Recipe { get; set; } = null!;
+        public Recipe Recipe { get; set; } = null!;
 
-        public virtual RecipeCategory RecipeCategory { get; set; } = null!;
+        public RecipeCategory RecipeCategory { get; set; } = null!;
     }
     //public int RecipeCategoryMappingId { get; set; }
 

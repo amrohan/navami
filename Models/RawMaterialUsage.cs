@@ -15,6 +15,8 @@ public partial class RawMaterialUsage
 
     public decimal Cost { get; set; }
 
+    public bool IsActive { get; set; }
+
     public virtual RawMaterial RawMaterial { get; set; } = null!;
 
     public virtual Recipe Recipe { get; set; } = null!;

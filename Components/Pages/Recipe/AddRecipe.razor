@@ -255,14 +255,14 @@
             if (response.Success)
             {
                 recipeMasterDto = response.Data;
-                rawMaterialUsageList = recipeMasterDto.RawMaterialUsages;
-                previousSelectedRecipeCategory = recipeMasterDto.RecipeCategoryMappings.Select(c => new RecipeCategoryDto
+                rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
+                previousSelectedRecipeCategory = recipeMasterDto.RecipeCategory.Select(c => new RecipeCategoryDto
                     {
                         RecipeCategoryId = c.RecipeCategoryId,
                         RecipeCategoryName = recipeCategoryList.FirstOrDefault(r => r.RecipeCategoryId ==
                         c.RecipeCategoryId)?.RecipeCategoryName
                     }).ToList();
-                var ids = recipeMasterDto.RecipeCategoryMappings.Select(c => c.RecipeCategoryId).ToList();
+                var ids = recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategoryId).ToList();
                 selectedRecipeCategory = recipeCategoryList.Where(c => ids.Contains(c.RecipeCategoryId));
 
                 if (recipeMasterDto.CreatedAt != null)
@@ -376,7 +376,7 @@
         if (recipeMasterDto.RecipeId != Guid.Empty )
         {
             recipeMasterDto.UpdatedAt = DateTime.UtcNow;
-            recipeMasterDto.RawMaterialUsages = rawMaterialUsageList;
+            recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
 
             // Create new RecipeCategoryMappingDtos for the current selection
             var recipeCategoryMappingDtos = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
@@ -396,7 +396,7 @@
             }
 
             // Update the recipe with new categories
-            recipeMasterDto.RecipeCategoryMappings = recipeCategoryMappingDtos;
+            recipeMasterDto.RecipeCategory = recipeCategoryMappingDtos;
 
             // Call update service
             var response = await recipeMasterService.UpdateRecipeMaster(recipeMasterDto);
@@ -426,7 +426,7 @@
         // Prepare to add a new recipe
         recipeMasterDto.CreatedBy = Guid.Parse(userId);
         recipeMasterDto.CreatedAt = DateTime.UtcNow;
-        recipeMasterDto.RawMaterialUsages = rawMaterialUsageList;
+        recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
 
         // Create mapping for new categories
         var newRecipeCategoryMappings = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
@@ -435,7 +435,7 @@
                 RecipeCategoryId = c.RecipeCategoryId,
             }).ToList();
 
-        recipeMasterDto.RecipeCategoryMappings = newRecipeCategoryMappings;
+        recipeMasterDto.RecipeCategory = newRecipeCategoryMappings;
 
         // Call add service
         var addResponse = await recipeMasterService.AddRecipeMaster(recipeMasterDto);
@@ -562,11 +562,11 @@
     {
         if (string.IsNullOrEmpty(searchTerm))
         {
-            rawMaterialUsageList = recipeMasterDto.RawMaterialUsages;
+            rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
         }
         else
         {
-            rawMaterialUsageList = recipeMasterDto.RawMaterialUsages.Where(c =>
+            rawMaterialUsageList = recipeMasterDto.RawMaterialUsage.Where(c =>
             c.RawMaterialName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
             c.CategoryName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
             c.SubCategoryName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();

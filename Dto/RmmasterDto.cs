@@ -43,14 +43,15 @@ namespace navami.Dto
 
         public virtual Category Category { get; set; } = null!;
 
-        public virtual ICollection<RawMaterialPrice> RawMaterialPrices { get; set; } = new List<RawMaterialPrice>();
+        //public virtual ICollection<RawMaterialPrice> RawMaterialPrices { get; set; } = new List<RawMaterialPrice>();
 
-        public virtual ICollection<RawMaterialUsage> RawMaterialUsages { get; set; } = new List<RawMaterialUsage>();
+        //public virtual ICollection<RawMaterialUsage> RawMaterialUsages { get; set; } = new List<RawMaterialUsage>();
 
         public virtual SubCategory SubCategory { get; set; } = null!;
 
         public string CategoryName { get; set; } = null!;
         public string SubCategoryName { get; set; } = null!;
+        public string VendorNmae { get; set; } = null;
 
         //public int Rmid { get; set; }
 

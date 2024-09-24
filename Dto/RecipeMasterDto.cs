@@ -25,12 +25,11 @@ namespace navami.Dto
 
         public DateTime? UpdatedAt { get; set; }
 
-        public virtual List<RawMaterialUsageDto> RawMaterialUsages { get; set; } = new List<RawMaterialUsageDto>();
-
-        public virtual List<RecipeCategoryMappingDto> RecipeCategoryMappings { get; set; } = new List<RecipeCategoryMappingDto>();
 
         //etc 
         public string? RecipeCategories { get; set; }
+        public List<RawMaterialUsageDto> RawMaterialUsage { get; set; } = new List<RawMaterialUsageDto>();
+        public List<RecipeCategoryMappingDto> RecipeCategory { get; set; } = new List<RecipeCategoryMappingDto>();
 
         //public int? RecipeId { get; set; }
         //public string? RecipeCode { get; set; }
@@ -53,8 +52,7 @@ namespace navami.Dto
         //public DateTime? UpdatedAt { get; set; }
 
         //// custom properties
-        //public List<RawMaterialUsageDto> RawMaterialUsage { get; set; } = new List<RawMaterialUsageDto>();
-        //public List<RecipeCategoryMappingDto> RecipeCategory { get; set; } = new List<RecipeCategoryMappingDto>();
+
 
     }
 
