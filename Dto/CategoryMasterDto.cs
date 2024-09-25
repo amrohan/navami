@@ -21,9 +21,9 @@ namespace navami.Dto
 
         public bool IsActive { get; set; }
 
-        public virtual ICollection<RawMaterial> RawMaterials { get; set; } = new List<RawMaterial>();
+        public virtual List<RawMaterial> RawMaterials { get; set; } = new List<RawMaterial>();
 
-        public virtual ICollection<SubCategory> SubCategories { get; set; } = new List<SubCategory>();
+        public virtual List<SubCategory> SubCategories { get; set; } = new List<SubCategory>();
 
     }
 }

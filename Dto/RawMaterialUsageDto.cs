@@ -21,7 +21,7 @@ namespace navami.Dto
         public  Recipe Recipe { get; set; } = null!;
 
         // etc 
-
+        public Guid CategoryId { get; set; }
         public string CategoryName { get; set; }
         public string RawMaterialName { get; set; } = null!;
         public string SubCategoryName { get; set; }

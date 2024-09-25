@@ -1,6 +1,8 @@
 @page "/vendor"
 
 @attribute [Authorize]
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 @using Microsoft.FluentUI.AspNetCore.Components
 @using navami.Services
@@ -9,8 +11,6 @@
 @inject NavigationManager NavigationManager
 @inject VendorMasterService vendorService
 
-@attribute [StreamRendering(true)]
-@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 
 <FluentCard Width="100%" Height="600px" style="box-shadow: none;">

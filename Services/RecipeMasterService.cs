@@ -17,45 +17,14 @@ namespace navami
             _mapper = mapper;
         }
 
-
-        //public async Task<ApiResponse<List<RecipeMasterDto>>> GetAllRecipeMasters()
-        //{
-        //    // Fetch all recipe masters along with their raw materials and category mappings
-        //    var recipeMasters = await dbContext.Recipes
-        //        .Where(r => r.IsActive != true)
-        //        .Include(rm => rm.RawMaterialUsages)
-        //        .Include(rm => rm.RecipeCategoryMappings)
-        //            .ThenInclude(rcm => rcm.RecipeCategory) // Assuming you have a navigation property for RecipeCategory
-        //        .ToListAsync();
-
-        //    var recipeMasterDtos = _mapper.Map<List<RecipeMasterDto>>(recipeMasters);
-
-        //    foreach (var recipeMasterDto in recipeMasterDtos)
-        //    {
-        //        // Map raw materials
-        //        recipeMasterDto.RawMaterialUsages = _mapper.Map<List<RawMaterialUsageDto>>(recipeMasters(rm => rm.RecepId == recipeMasterDto.RecipeId).RawMaterialUsages);
-
-        //        // Get category names from the mapped RecipeCategoryMappings
-        //        var categoryNames = recipeMasters.Find(rm => rm.RecipeId == recipeMasterDto.RecipeId)
-        //            .RecipeCategoryMappings.Select(rcm =>
-        //                dbContext.RecipeCategories.FirstOrDefault(rc => rc.RecipeCategoryId == rcm.RecipeCategoryId)?.RecipeCategoryName)
-        //            .Where(name => name != null); // Filter out any null names
-
-        //        // Concatenate the category names and assign to RecipeCategories
-        //        recipeMasterDto.RecipeCategories = string.Join(", ", categoryNames);
-        //    }
-
-        //    return new ApiResponse<List<RecipeMasterDto>>(recipeMasterDtos);
-        //}
-
         public async Task<ApiResponse<List<RecipeMasterDto>>> GetAllRecipeMasters()
         {
             // Fetch all recipe masters along with their raw materials and category mappings
             var recipeMasters = await dbContext.Recipes
                 .Where(r => r.IsActive != true)
-                .Include(rm => rm.RawMaterialUsages)
+                .Include(rm => rm.RawMaterialUsages.Where(ru=>ru.IsActive !=true))
                 .Include(rm => rm.RecipeCategoryMappings)
-                    .ThenInclude(rcm => rcm.RecipeCategory) // Assuming you have a navigation property for RecipeCategory
+                    .ThenInclude(rcm => rcm.RecipeCategory) 
                 .ToListAsync();
 
             var recipeMasterDtos = _mapper.Map<List<RecipeMasterDto>>(recipeMasters);
@@ -81,14 +50,14 @@ namespace navami
 
         // GetRecipeMasterById
         public async Task<ApiResponse<RecipeMasterDto>> GetRecipeMasterById(Guid recipeId)
-        {
+         {
             // Fetch the recipe master along with related data using LINQ with Include
             var recipeMaster = await dbContext.Recipes
                 .Where(r => r.RecipeId == recipeId)
                 .Select(r => new
                 {
                     Recipe = r,
-                    RawMaterials = r.RawMaterialUsages,
+                    RawMaterials = r.RawMaterialUsages.Where(u=>u.IsActive !=true),
                     Categories = r.RecipeCategoryMappings
                 })
                 .FirstOrDefaultAsync();
@@ -148,7 +117,6 @@ namespace navami
 
             await dbContext.SaveChangesAsync();
 
-            // Call to update the recipe cost after saving the recipe
             await UpdateRecipeCostAsync(recipeMaster.RecipeId);
 
             return new ApiResponse<RecipeMasterDto>(_mapper.Map<RecipeMasterDto>(recipeMaster));
@@ -210,8 +178,8 @@ namespace navami
                     else
                     {
                         // Update existing recipe category (excluding the key)
-                        // recipeCategoryMapping. = recipeCategory.CreatedAt; 
-                        // recipeCategoryMapping.IsActive = recipeCategory.IsActive;
+                        recipeCategoryMapping.CreatedAt = DateTime.Now;
+                         recipeCategoryMapping.IsActive = recipeCategory.IsActive;
 
                     }
                 }
@@ -228,8 +196,7 @@ namespace navami
                 return new ApiResponse<RecipeMasterDto>(ex.Message);
             }
         }
-
-        // DeleteRecipeCategoryMapping(recipeMasterDto.RecipeId, removedCategory.RecipeCategoryId)
+        
         public async Task<ApiResponse<RecipeMasterDto>> DeleteRecipeCategoryMapping(Guid recipeId, Guid recipeCategoryId)
         {
             try

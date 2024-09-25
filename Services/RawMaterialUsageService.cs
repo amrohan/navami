@@ -100,7 +100,7 @@ namespace navami
                     return new ApiResponse<RawMaterialUsageDto>("RawMaterialUsage not found");
                 }
                 //dbContext.RawMaterialUsages.Remove(rawMaterialUsage);
-                 rawMaterialUsage.IsActive = false;
+                 rawMaterialUsage.IsActive = true;
                 dbContext.SaveChanges();
                 await UpdateRecipeCostAsync(rawMaterialUsage.RecipeId);
 

@@ -5,7 +5,9 @@
 
 @using System.Security.Claims
 
-@rendermode InteractiveServer
+
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 @inject VendorMasterService vendorService
 @inject IToastService ToastService

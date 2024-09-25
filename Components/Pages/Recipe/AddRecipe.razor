@@ -8,7 +8,9 @@
 @using System.Text.Json;
 
 
-@rendermode InteractiveServer
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+
 @inject RecipeMasterService recipeMasterService
 @inject CategoryMasterService categoryService
 @inject SubCategoryMasterService subCategoryService
@@ -57,12 +59,12 @@
             </div>
         </div>
         <div class="row row-cols-4 align-content-center mt-4">
-            <div class="col">
-                <FluentSelect Height="300px" TOption="CategoryDto" Items="@categoryList"
-                              @bind-Value="rawMaterialUsageDto.CategoryName" Label="Category" Placeholder="Select Category"
-                              OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
-                              @onchange="OnCategoryChange" />
-            </div>
+           @*   <div class="col">
+                 <FluentSelect Height="300px" TOption="CategoryDto" Items="@categoryList"
+                               @bind-Value="rawMaterialUsageDto.CategoryName" Label="Category" Placeholder="Select Category"
+                               OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
+                               @onchange="OnCategoryChange" />
+             </div> *@
 
             <div class="col">
                 <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
@@ -74,7 +76,17 @@
                 <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
                               @bind-Value="rawMaterialUsageDto.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
                               OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
-                              @onchange="OnRawMaterialChange" />
+                              @onchange="OnRawMaterialChange">
+                              <OptionTemplate>
+                                  <div class="d-flex justify-content-start align-items-center gap-1">
+                            @context.RawMaterialCode
+                            <FluentDivider Orientation="Orientation.Vertical" Role="DividerRole.Presentation" Style="height: 20px; background-color:black" />
+                            @context.RawMaterialName
+
+                        </div>
+                                 
+                              </OptionTemplate>
+                </FluentSelect>
 
             </div>
             <div class="col">
@@ -112,12 +124,12 @@
                             Rs.@(Math.Round(rawMaterialUsageList.Sum(item => item.Cost), 2))
                         </span>
                     </p>
-                    <p>
-                        Adjusted Cost
-                        <span class="fw-bold">
-                            @(Math.Round(rawMaterialUsageList.Sum(item => item.Cost) * 1.01m, 2))
-                        </span>
-                    </p>
+                   @*   <p>
+                         Adjusted Cost
+                         <span class="fw-bold">
+                             @(Math.Round(rawMaterialUsageList.Sum(item => item.Cost) * 1.01m, 2))
+                         </span>
+                     </p> *@
 
                 </div>
             </div>
@@ -145,44 +157,19 @@
             </div>
             <div class="align-content-start border rounded mt-4" style="height: 450px; overflow:auto;">
                 <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()" GenerateHeader="GenerateHeaderOption.Sticky">
-                    <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
-                    <PropertyColumn Property="@(u => u.CategoryName)" Sortable="true" Title="Category" />
-                    <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
-
-                    <TemplateColumn Title="Quantity" Sortable="true">
-                            @if (isEditing && editingItem == context)
-                            {
-                                <FluentNumberField @bind-Value="@context.Quantity" Placeholder="Enter quantity" />
-                            }
-                            else
-                            {
-                                @context.Quantity
-                            }
-                    </TemplateColumn>
-                    <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
-
-                  @*    <TemplateColumn Title="Cost" Sortable="true">
-                             @if (isEditing && editingItem == context)
-                             {
-                                 <FluentNumberField @bind-Value="@context.Cost" Placeholder="Enter cost" />
-                             }
-                             else
-                             {
-                                 @($"Rs.{@context.Cost}")
-                             }
-                     </TemplateColumn> *@
-
-                    <TemplateColumn Title="Actions" Align="@Align.End">
-                         @* <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-                        OnClick="@(() => OnEditRawMaterialUsage(context))"  Disabled="@(warnMessage != String.Empty)" /> *@
+                    <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
                         <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
                                       OnClick="@(() => OnDeleteRawMaterial(context))" Disabled="@(warnMessage != String.Empty)" />
-                        @if (isEditing && editingItem == context)
-                        {
-                            <FluentButton aria-label="Save changes" IconEnd="@(new Icons.Regular.Size16.Save())"
-                                          OnClick="@(() => OnSaveChanges(context))" Disabled="@(warnMessage != String.Empty)" />
-                        }
+                        <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                      OnClick="@(() => OnEditRawMaterialUsage(context))" Disabled="@(warnMessage != String.Empty)" />
                     </TemplateColumn>
+                    <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
+                     @* <PropertyColumn Property="@(u => u.CategoryName)" Sortable="true" Title="Category" /> *@
+                      <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
+                    <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" Title="Quantity" />
+                    <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
+
+             
                 </FluentDataGrid>
             </div>
 
@@ -196,6 +183,60 @@
     </div>
 
 </FluentCard>
+
+@* pop up *@
+@if(isEditing){
+
+<div class="login-overlay">
+
+<FluentCard Width="600px" Height="280px" AreaRestricted=false>
+    <h2 class="fs-6 fw-bold m-0 p-0">Edit RM Usage</h2>
+    <p class="text-danger fs-6">@errorMessage</p>
+        <div class="row row-cols-2 align-content-center">
+            <div class="col gy-2">
+                <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
+                              @bind-Value="editingItem.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
+                              OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
+                              @onchange="OnSubCategoryChange" />
+            </div>
+            <div class="col gy-2">
+                <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
+                              @bind-Value="editingItem.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
+                              OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
+                              @onchange="OnRawMaterialChange">
+                    <OptionTemplate>
+                        <div class="d-flex justify-content-start align-items-center gap-1">
+                            @context.RawMaterialCode
+                            <FluentDivider Orientation="Orientation.Vertical" Role="DividerRole.Presentation" Style="height: 20px; background-color:black" />
+                            @context.RawMaterialName
+
+                        </div>
+
+                    </OptionTemplate>
+                </FluentSelect>
+
+            </div>
+            <div class="col gy-2">
+                <FluentNumberField Label="Cost" @bind-Value="rawMaterialDto.Price" Placeholder="Enter quantity"
+                                   Class="w-100" ReadOnly="true" />
+            </div>
+            <div class="col gy-2">
+                <FluentNumberField Label="Quantity" @bind-Value="editingItem.Quantity" Placeholder="Enter quantity" Class="w-100" />
+            </div>
+            <div class="col text-end col-6 w-100">
+                <FluentButton Appearance="Appearance.Outline" OnClick="@OnCancelEdit" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
+                    Cancel
+                </FluentButton>
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@OnUpdateRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
+                    Save
+                </FluentButton>
+            </div>
+    </div>
+
+</FluentCard>
+</div>
+}
+
 
 
 @code {
@@ -234,10 +275,10 @@
     protected override async Task OnInitializedAsync()
     {
         var recipeCategoryListRes = await recipeCategoryService.GetRecipeCategoriesAsync();
-        var res = await categoryService.GetCategoryMasterAsync();
+        var res = await subCategoryService.GetSubCategoryMasterAsync();
         if (res.Success)
         {
-            categoryList = res.Data;
+            subCategoryList = res.Data;
         }
         else
         {
@@ -278,7 +319,7 @@
                     }
                     else
                     {
-                        canEditRecipe = true; // Allow editing
+                        canEditRecipe = true; 
                     }
                 }
 
@@ -290,13 +331,36 @@
 
         }
     }
-    public void OnAddRawMaterial()
+
+    public async Task OnAddRawMaterial()
     {
+        if (recipeMasterDto.RecipeId == Guid.Empty)
+        {
+            isLoading = true;
+            rawMaterialUsageDto.RawMaterialId = rawMaterialDto.RawMaterialId;
+            rawMaterialUsageDto.RawMaterialName = rawMaterialDto.RawMaterialName;
+            rawMaterialUsageDto.Cost = Math.Round(rawMaterialDto.Price * rawMaterialUsageDto.Quantity, 4);
+            rawMaterialUsageList.Add(rawMaterialUsageDto);
+
+            var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+            var username = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+            var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            OnSaveRecipe();
+            return;
+        }
+
+
         rawMaterialUsageDto.RawMaterialId = rawMaterialDto.RawMaterialId;
-        rawMaterialUsageDto.RawMaterialName= rawMaterialDto.RawMaterialName;
+        rawMaterialUsageDto.RawMaterialName = rawMaterialDto.RawMaterialName;
         rawMaterialUsageDto.Cost = Math.Round(rawMaterialDto.Price * rawMaterialUsageDto.Quantity, 4);
-        rawMaterialUsageList.Add(rawMaterialUsageDto);
+        rawMaterialUsageDto.RecipeId = recipeMasterDto.RecipeId;
+        var res = rawMaterialUsageService.AddRawMaterialUsage(rawMaterialUsageDto);
+        if(res.Success){
+            rawMaterialUsageDto.RawMaterialUsageId = res.Data.RawMaterialUsageId;
+            rawMaterialUsageList.Add(rawMaterialUsageDto);
         ClearForm();
+
+        }
     }
 
     private void ClearForm()
@@ -306,7 +370,119 @@
     }
 
 
-    // Validate the number of decimal places
+    #region new
+
+    public async void OnSaveRecipe()
+    {
+        isLoading = true;
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        var username = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null)
+        {
+            errorMessage = "User not found";
+            ToastService.ShowError("User not found");
+            isLoading = false;
+            return;
+        }
+
+        // Store the current user info
+        recipeMasterDto.UpdatedAt = DateTime.UtcNow;
+        recipeMasterDto.Username = username ?? string.Empty;
+
+        // Check if we are updating an existing recipe
+        if (recipeMasterDto.RecipeId != Guid.Empty)
+        {
+            // Existing Recipe: Update logic
+            await UpdateExistingRecipe(userId);
+        }
+        else
+        {
+            await CreateNewRecipe(userId);
+        }
+
+        isLoading = false;
+    }
+    private async Task UpdateExistingRecipe(string userId)
+    {
+        recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
+
+        // Create new RecipeCategoryMappingDtos for the current selection
+        var recipeCategoryMappingDtos = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
+            {
+                RecipeId = recipeMasterDto.RecipeId,
+                RecipeCategoryId = c.RecipeCategoryId,
+            }).ToList();
+
+        // Find removed categories and delete them
+        var removedRecipeCategories = previousSelectedRecipeCategory
+            .Where(c => !selectedRecipeCategory.Any(sc => sc.RecipeCategoryId == c.RecipeCategoryId))
+            .ToList();
+
+        foreach (var removedCategory in removedRecipeCategories)
+        {
+            await recipeMasterService.DeleteRecipeCategoryMapping(recipeMasterDto.RecipeId, removedCategory.RecipeCategoryId);
+        }
+
+        // Update the recipe with new categories
+        recipeMasterDto.RecipeCategory = recipeCategoryMappingDtos;
+
+        // Call update service
+        var response = await recipeMasterService.UpdateRecipeMaster(recipeMasterDto);
+
+        if (response.Success)
+        {
+            ToastService.ShowSuccess("Recipe updated successfully");
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+            ToastService.ShowError(response.ErrorMessage);
+        }
+    }
+    private async Task CreateNewRecipe(string userId)
+    {
+        // Check for empty selection when adding a new recipe
+        if (!selectedRecipeCategory.Any())
+        {
+            errorMessage = "Please select a recipe category";
+            return;
+        }
+
+        // Prepare to add a new recipe
+        recipeMasterDto.CreatedBy = Guid.Parse(userId);
+        recipeMasterDto.CreatedAt = DateTime.UtcNow;
+        recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
+
+        // Create mapping for new categories
+        var newRecipeCategoryMappings = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
+            {
+                RecipeId = Guid.NewGuid(), // Temporary ID until saved
+                RecipeCategoryId = c.RecipeCategoryId,
+            }).ToList();
+
+        recipeMasterDto.RecipeCategory = newRecipeCategoryMappings;
+
+        var addResponse = await recipeMasterService.AddRecipeMaster(recipeMasterDto);
+
+        if (addResponse.Success)
+        {
+            ToastService.ShowSuccess("Recipe added successfully");
+            recipeMasterDto.RecipeId = addResponse.Data.RecipeId;
+            navigationManager.NavigateTo($"/recipe/edit/{recipeMasterDto.RecipeId}");
+            return; 
+        }
+
+        errorMessage = addResponse.ErrorMessage;
+        ToastService.ShowError(errorMessage);
+    }
+
+
+    #endregion
+
+    #region methods
+
     private void ValidateDecimalPlaces(ChangeEventArgs e)
     {
         if (decimal.TryParse(e.Value.ToString(), out var value))
@@ -352,111 +528,8 @@
         rawMaterialDto = rawMaterialList.FirstOrDefault(r => r.RawMaterialName == rawMaterialName);
     }
 
-    public async void OnSaveRecipe()
-    {
-        isLoading = true;
-        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
-        var username = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
-        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-        if (userId == null)
-        {
-            errorMessage = "User not found";
-            ToastService.ShowError("User not found");
-            isLoading = false;
-            return;
-        }
-
-        // Store the current user info
-        recipeMasterDto.UpdatedAt = DateTime.Now;
-        recipeCategoryDto.CreatedBy = Guid.Parse(userId);
-        recipeMasterDto.Username = username ?? string.Empty;
-
-        // Check if we are updating an existing recipe
-        if (recipeMasterDto.RecipeId != Guid.Empty )
-        {
-            recipeMasterDto.UpdatedAt = DateTime.UtcNow;
-            recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
-
-            // Create new RecipeCategoryMappingDtos for the current selection
-            var recipeCategoryMappingDtos = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
-                {
-                    RecipeId = recipeMasterDto.RecipeId ,
-                    RecipeCategoryId = c.RecipeCategoryId,
-                }).ToList();
-
-            // Find removed categories and delete them
-            var removedRecipeCategories = previousSelectedRecipeCategory
-            .Where(c => !selectedRecipeCategory.Any(sc => sc.RecipeCategoryId == c.RecipeCategoryId))
-            .ToList();
-
-            foreach (var removedCategory in removedRecipeCategories)
-            {
-                await recipeMasterService.DeleteRecipeCategoryMapping(recipeMasterDto.RecipeId, removedCategory.RecipeCategoryId);
-            }
-
-            // Update the recipe with new categories
-            recipeMasterDto.RecipeCategory = recipeCategoryMappingDtos;
-
-            // Call update service
-            var response = await recipeMasterService.UpdateRecipeMaster(recipeMasterDto);
-
-            if (response.Success)
-            {
-                ToastService.ShowSuccess("Recipe updated successfully");
-            }
-            else
-            {
-                errorMessage = response.ErrorMessage;
-                ToastService.ShowError(response.ErrorMessage);
-            }
-
-            isLoading = false;
-            return;
-        }
-
-        // Check for empty selection when adding a new recipe
-        if (!selectedRecipeCategory.Any())
-        {
-            errorMessage = "Please select a recipe category";
-            isLoading = false;
-            return;
-        }
-
-        // Prepare to add a new recipe
-        recipeMasterDto.CreatedBy = Guid.Parse(userId);
-        recipeMasterDto.CreatedAt = DateTime.UtcNow;
-        recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
-
-        // Create mapping for new categories
-        var newRecipeCategoryMappings = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
-            {
-                RecipeId = Guid.NewGuid(),
-                RecipeCategoryId = c.RecipeCategoryId,
-            }).ToList();
-
-        recipeMasterDto.RecipeCategory = newRecipeCategoryMappings;
-
-        // Call add service
-        var addResponse = await recipeMasterService.AddRecipeMaster(recipeMasterDto);
-
-        if (addResponse.Success)
-        {
-            ToastService.ShowSuccess("Recipe added successfully");
-            // navigationManager.NavigateTo("/recipe");
-        }
-        else
-        {
-            errorMessage = addResponse.ErrorMessage;
-            ToastService.ShowError(errorMessage);
-        }
-
-        isLoading = false;
-    }
-
     public void OnRecipeSearch(OptionsSearchEventArgs<RecipeCategoryDto> e)
     {
-        // Ensure that the search text is not null or empty before filtering
         if (!string.IsNullOrEmpty(e.Text))
         {
             e.Items = recipeCategoryList
@@ -466,48 +539,9 @@
         }
         else
         {
-            // If the search text is empty, return all items or clear the list
             e.Items = recipeCategoryList.ToList();
         }
     }
-
-    private void OnCategoryChange(ChangeEventArgs e)
-    {
-        try
-        {
-            if (e.Value == null)
-            {
-                return;
-            }
-
-            var category = e.Value.ToString();
-            var categoryItem = categoryList.FirstOrDefault(c => c.CategoryName == category);
-
-            if (categoryItem == null)
-            {
-                return;
-            }
-
-            var categoryId = categoryItem.CategoryId;
-            var response = subCategoryService.GetSubCategoryMasterByCategory(categoryId);
-
-            if (response.Success)
-            {
-                subCategoryList = response.Data;
-            }
-            else
-            {
-                errorMessage = response.ErrorMessage;
-                ToastService.ShowError(errorMessage);
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-            ToastService.ShowError(errorMessage);
-        }
-    }
-
 
     private void OnSubCategoryChange(ChangeEventArgs e)
     {
@@ -532,6 +566,8 @@
             if (response.Success)
             {
                 rawMaterialList = response.Data;
+                rawMaterialUsageDto.RawMaterialName = string.Empty;
+                rawMaterialDto.Price = 0;
             }
             else
             {
@@ -546,12 +582,8 @@
         }
     }
 
+    #endregion
 
-    private void OnEditRawMaterialUsage(RawMaterialUsageDto item)
-    {
-        isEditing = true; // Set editing mode
-        editingItem = item;
-    }
 
     private void OnSaveChanges(RawMaterialUsageDto item)
     {     
@@ -572,6 +604,105 @@
             c.SubCategoryName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
+
+
+    #region Edit RM usage pop
+    private void OnEditRawMaterialUsage(RawMaterialUsageDto item)
+    {
+        isEditing = true; 
+        var subCategoryItem = subCategoryList.FirstOrDefault(c => c.SubCategoryName == item.SubCategoryName);
+
+        if (subCategoryItem == null)
+        {
+            return;
+        }
+        var res = rawMaterialService.GetRawMaterialBySubCategory(subCategoryItem.SubCategoryId);
+        if (res.Success)
+        {
+            rawMaterialList = res.Data;
+            rawMaterialDto.Price = rawMaterialList.FirstOrDefault(c => c.RawMaterialName == item.RawMaterialName)?.Price ?? 0m;
+            editingItem = item;
+        }
+
+    }
+
+    private void OnCancelEdit()
+    {
+        isEditing = false;
+        editingItem = null;
+    }
+
+    public void OnUpdateRawMaterial()
+    {
+        // Calculate the cost based on the price and quantity
+        editingItem.Cost = Math.Round(rawMaterialDto.Price * editingItem.Quantity, 4);
+
+        // Check if the editing item exists in the list
+        var existingItemIndex = rawMaterialUsageList.FindIndex(item => item.RawMaterialUsageId == editingItem.RawMaterialUsageId); // Assuming each item has a unique Id
+
+        if (existingItemIndex >= 0)
+        {
+            // Update the existing item
+            rawMaterialUsageList[existingItemIndex] = editingItem; // Update with the modified editingItem
+        }
+        else
+        {
+            // If the item doesn't exist, you may want to add it instead or handle it as needed
+            rawMaterialUsageList.Add(editingItem);
+        }
+
+        ClearForm(); 
+        isEditing = false;
+        editingItem = null;
+
+    }
+
+    // Change events
+    private void OnEditSubCategoryChange(ChangeEventArgs e)
+    {
+        try
+        {
+            if (e.Value == null)
+            {
+                return;
+            }
+
+            var subCategory = e.Value.ToString();
+            var subCategoryItem = subCategoryList.FirstOrDefault(c => c.SubCategoryName == subCategory);
+
+            if (subCategoryItem == null)
+            {
+                return;
+            }
+
+            var subCategoryId = subCategoryItem.SubCategoryId;
+            var response = rawMaterialService.GetRawMaterialBySubCategory(subCategoryId);
+
+            if (response.Success)
+            {
+                rawMaterialList = response.Data;
+                rawMaterialUsageDto.RawMaterialName = string.Empty;
+                rawMaterialDto.Price = 0;
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+                ToastService.ShowError(errorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            ToastService.ShowError(errorMessage);
+        }
+    }
+    public void OnEditRawMaterialChange(ChangeEventArgs e)
+    {
+        var rawMaterialName = e.Value.ToString();
+        rawMaterialDto.Price = rawMaterialList.FirstOrDefault(c => c.RawMaterialName == rawMaterialName)?.Price ?? 0m;
+
+    }
+   #endregion
 
 
 }

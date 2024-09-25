@@ -2,6 +2,9 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+
 @using Microsoft.FluentUI.AspNetCore.Components
 @using System.ComponentModel.DataAnnotations
 @using navami.Services
@@ -9,8 +12,6 @@
 @inject UserService userService
 @inject NavigationManager navigationManager
 
-@attribute [StreamRendering(true)]
-@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 <FluentCard Width="100%" Height="600px" style="box-shadow: none;">
     <div class="d-flex justify-content-between align-items-center mb-2">

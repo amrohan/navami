@@ -1,13 +1,12 @@
 @page "/rawmaterial"
 
-@attribute [Authorize]
-
 @using Microsoft.FluentUI.AspNetCore.Components
 @using navami.Services
 @using navami.Models
 @inject IToastService ToastService
 @inject NavigationManager navigationManager
 @inject RawMaterialService rawMaterialService
+
 @attribute [StreamRendering(true)]
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
 

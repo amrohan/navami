@@ -76,7 +76,7 @@
         if (response.Success)
         {
 
-            recipes = recipes.Where(r => r.RecipeCategoryId != context.RecipeCategoryId).AsQueryable();
+            recipes = recipes.Where(r => r.RecipeCategoryId != context.RecipeCategoryId);
             Console.WriteLine("User deleted successfully");
         }
         else

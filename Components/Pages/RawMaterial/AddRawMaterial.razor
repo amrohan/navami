@@ -2,8 +2,9 @@
 @page "/rawmaterial/edit/{RmId:guid}"
 
 @attribute [Authorize]
+@attribute [StreamRendering]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
-@rendermode InteractiveServer
 
 @using System.Security.Claims
 @inject IToastService ToastService

@@ -49,19 +49,31 @@ namespace navami
         {
             try
             {
-                var subCategoryMasters = await (from subCategory in dbContext.SubCategories
-                                                join category in dbContext.SubCategories on subCategory.CategoryId equals category.CategoryId
-                                                where !subCategory.IsActive
-                                                select new SubCategoryDto
-                                                {
-                                                    SubCategoryId = subCategory.SubCategoryId,
-                                                    SubCategoryName = subCategory.SubCategoryName,
-                                                    IsActive = subCategory.IsActive,
-                                                    CategoryId = subCategory.CategoryId,
-                                                    CategoryName = category.CategoryName,
-                                                    CreatedBy = subCategory.CreatedBy,
-                                                    CreatedAt = subCategory.CreatedAt,
-                                                }).ToListAsync();
+                //var subCategoryMasters = await (from subCategory in dbContext.SubCategories
+                //                                join category in dbContext.SubCategories on subCategory.CategoryId equals category.CategoryId
+                //                                where !subCategory.IsActive
+                //                                select new SubCategoryDto
+                //                                {
+                //                                    SubCategoryId = subCategory.SubCategoryId,
+                //                                    SubCategoryName = subCategory.SubCategoryName,
+                //                                    IsActive = subCategory.IsActive,
+                //                                    CategoryId = subCategory.CategoryId,
+                //                                    CategoryName = category.CategoryName,
+                //                                    CreatedBy = subCategory.CreatedBy,
+                //                                    CreatedAt = subCategory.CreatedAt,
+                //                                }).ToListAsync();
+                var subCategoryMasters = await dbContext.SubCategories
+                    .Where(u => !u.IsActive)
+                    .Select(subCategory => new SubCategoryDto
+                    {
+                        SubCategoryId = subCategory.SubCategoryId,
+                        SubCategoryName = subCategory.SubCategoryName,
+                        IsActive = subCategory.IsActive,
+                        CategoryId = subCategory.CategoryId,
+                        CreatedBy = subCategory.CreatedBy,
+                        CreatedAt = subCategory.CreatedAt,
+                        UpdatedAt = subCategory.UpdatedAt,
+                    }).ToListAsync();
 
                 return new ApiResponse<List<SubCategoryDto>>(subCategoryMasters);
             }

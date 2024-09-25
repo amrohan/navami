@@ -6,7 +6,9 @@
 
 @using System.Security.Claims
 
-@rendermode InteractiveServer
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+
 @inject CategoryMasterService categoryMasterService
 @inject IToastService ToastService
 @inject NavigationManager navigationManager

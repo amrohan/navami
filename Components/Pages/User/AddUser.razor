@@ -3,7 +3,8 @@
 
 @attribute [Authorize(Roles = "Admin")]
 
-@rendermode InteractiveServer
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 @using Microsoft.FluentUI.AspNetCore.Components
 @using System.ComponentModel.DataAnnotations

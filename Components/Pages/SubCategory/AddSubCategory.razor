@@ -2,10 +2,12 @@
 @page "/subcategory/edit/{SubCategoryId:guid}"
 
 @attribute [Authorize]
+@attribute [StreamRendering(true)]
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
+
 
 @using System.Security.Claims
 
-@rendermode InteractiveServer
 @inject SubCategoryMasterService subCategoryMasterService
 @inject CategoryMasterService categoryMasterService
 @inject IToastService ToastService
