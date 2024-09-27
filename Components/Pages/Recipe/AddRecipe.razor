@@ -31,13 +31,22 @@
     </div>
 }
 
-<FluentCard Width="100%" Height="630px" AreaRestricted="false">
+<FluentCard Width="100%" Height="650px" AreaRestricted="false">
     <div class="d-flex justify-content-start align-items-center">
-        <h3 class="fs-5">@(RecipeId != 0 ? "Update Recipe" : "New Recipe ")</h3>
+
+        @if (canEditRecipe)
+        {
+            <h3 class="fs-5">
+                @(RecipeId != 0 ? "Update Recipe" : "New Recipe ")
+            </h3>
+
+        }
+
     </div>
-    <main
-    style="display:flex;justify-content:space-between;align-items:start; width:100%; gap:1rem"
-    >
+    <main style="display:flex;justify-content:space-between;align-items:start; width:100%; gap:1rem">
+        @if (canEditRecipe)
+        {
+
             <div style="width:auto">
                 <div class="container text-start">
                     <div class="row row-cols-2 align-content-lg-start">
@@ -52,7 +61,7 @@
                         <div class="col">
                             <FluentAutocomplete TOption="RecipeCategoryDto" Label="Recipe Category" OnOptionsSearch="OnRecipeSearch"
                                                 Placeholder="Select recipe category" Virtualize="true"
-                                                OptionText="@(item => item.RecipeCategoryName)" MaximumSelectedOptions=20 
+                                                OptionText="@(item => item.RecipeCategoryName)" MaximumSelectedOptions=20
                                                 @bind-SelectedOptions="@selectedRecipeCategory" />
                         </div>
                         <div class="col"></div>
@@ -91,60 +100,98 @@
                             }
                         </div>
                         <div class="col">
-                            <FluentButton Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
+                            <FluentButton Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(!canEditRecipe)">
                                 Add
                             </FluentButton>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div style="width:100%;" >
-                @* Raw Material Usage use FluentDataGrid *@
-                <main>
-              
-
-                    <div class="d-flex justify-content-end align-items-center">
-                        <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
-                                      @bind-Value=searchTerm @bind-Value:after=OnSearchRmUsage Immediate=true />
+        }
+        else
+        {
+            @* ViewMode *@
+            <div style="width:50%">
+                <FluentCard Width="100%" Height="auto" Class="mb-3" AreaRestricted="false">
+                    <div class="d-flex justify-content-between align-items-center p-3" style="border-bottom: 1px solid #dee2e6;">
+                        <h5 class="fs-6 mb-0">Recipe Details</h5>
                     </div>
-                    <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; margin-top:10px">
-                        <p>
-                            Quantity <span class="fw-bold">
-                                @(Math.Round(rawMaterialUsageList.Sum(item => item.Quantity), 2))
-                            </span>
-                        </p>
-                        <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; gap:10px">
-                            <p>
-                                Cost
-                                <span class="fw-bold">
-                                    Rs.@(Math.Round(rawMaterialUsageList.Sum(item => item.Cost), 2))
-                                </span>
-                            </p>
+                    <div class="p-3">
+                        <div class="mb-2">
+                            <label style="font-size:smaller"><strong>Recipe Name</strong></label>
+                            <div class="p-1">
+                                <span>@recipeMasterDto.RecipeName</span>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label style="font-size:smaller"><strong>Profile</strong></label>
+                            <div class="p-1" >
+                                <span>@recipeMasterDto.Profile</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size:smaller"><strong>Category</strong></label>
+                            <div class="p-1">
+                                <span>@string.Join(", ", recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategory.RecipeCategoryName))</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="align-content-start border rounded" style="height: 450px; overflow:auto;">
-                        <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()" GenerateHeader="GenerateHeaderOption.Sticky">
+                </FluentCard>
+            </div>
+
+        }
+
+        <div style="width:100%;">
+            @* Raw Material Usage use FluentDataGrid *@
+            <FluentCard Width="100%" Height="auto" Class="mb-3" AreaRestricted="false">
+            <main>
+
+
+                <div class="d-flex justify-content-end align-items-center">
+                    <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
+                                  @bind-Value=searchTerm @bind-Value:after=OnSearchRmUsage Immediate=true />
+                </div>
+                <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; margin-top:10px">
+                    <p>
+                        Quantity <span class="fw-bold">
+                            @(Math.Round(rawMaterialUsageList.Sum(item => item.Quantity), 2))
+                        </span>
+                    </p>
+                    <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; gap:10px">
+                        <p>
+                            Cost
+                            <span class="fw-bold">
+                                Rs.@(Math.Round(rawMaterialUsageList.Sum(item => item.Cost), 2))
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="align-content-start border rounded" style="height: 450px; overflow:auto;">
+                    <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()" GenerateHeader="GenerateHeaderOption.Sticky">
+                        @if (canEditRecipe)
+                        {
                             <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
                                 <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                                              OnClick="@(() => OnDeleteRawMaterial(context))" Disabled="@(warnMessage != String.Empty)" />
+                                              OnClick="@(() => OnDeleteRawMaterial(context))" Disabled="@(!canEditRecipe)" />
                                 <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-                                              OnClick="@(() => OnEditRawMaterialUsage(context))" Disabled="@(warnMessage != String.Empty)" />
+                                              OnClick="@(() => OnEditRawMaterialUsage(context))" Disabled="@(!canEditRecipe)" />
                             </TemplateColumn>
-                            <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
-                            <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
-                            <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" Title="Quantity" />
-                            <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
-                        </FluentDataGrid>
-                    </div>
-                </main>
-                @* save btn *@
-                <div class="d-flex justify-content-between align-items-start w-100 mt-2">
-                    <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
-                    <FluentButton Appearance="Appearance.Accent" OnClick="@OnSaveRecipe" Disabled="@(warnMessage != String.Empty)">Save Recipe</FluentButton>
+                        }
+                        <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
+                        <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
+                        <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" Title="Quantity" />
+                        <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
+                    </FluentDataGrid>
                 </div>
+            </main>
+            @* save btn *@
+            <div class="d-flex justify-content-between align-items-start w-100 mt-2">
+                <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
+                <FluentButton Appearance="Appearance.Accent" OnClick="@OnSaveRecipe" Disabled="@(!canEditRecipe)">Save Recipe</FluentButton>
             </div>
-        
+            </FluentCard>
+        </div>
+
     </main>
 </FluentCard>
 
@@ -190,10 +237,10 @@
                     <FluentNumberField Label="Quantity" @bind-Value="editingItem.Quantity" Placeholder="Enter quantity" Class="w-100" />
                 </div>
                 <div class="col text-end col-6 w-100">
-                    <FluentButton Appearance="Appearance.Outline" OnClick="@OnCancelEdit" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
+                    <FluentButton Appearance="Appearance.Outline" OnClick="@OnCancelEdit" Class="w-25 mt-4 ml-4" Disabled="@(!canEditRecipe)">
                         Cancel
                     </FluentButton>
-                    <FluentButton Appearance="Appearance.Accent" OnClick="@OnUpdateRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@OnUpdateRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(!canEditRecipe)">
                         Save
                     </FluentButton>
                 </div>
@@ -242,101 +289,139 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var recipeCategoryListRes = await recipeCategoryService.GetRecipeCategoriesAsync();
-        var res = await subCategoryService.GetSubCategoryMasterAsync();
-        if (res.Success)
+        try
         {
-            subCategoryList = res.Data;
+            var recipeCategoryListRes = await recipeCategoryService.GetRecipeCategoriesAsync();
+            var res = await subCategoryService.GetSubCategoryMasterAsync();
+
+            if (res.Success)
+            {
+                subCategoryList = res.Data;
+            }
+            else
+            {
+                errorMessage = res.ErrorMessage;
+                ToastService.ShowError(res.ErrorMessage);
+            }
+
+            if (recipeCategoryListRes.Success)
+            {
+                recipeCategoryList = recipeCategoryListRes.Data;
+            }
+
+            // Check if RecipeId is provided
+            if (RecipeId != 0)
+            {
+                await LoadRecipeById(RecipeId);
+            }
+
+            // Check if CopyId is provided for copying a recipe
+            if (CopyId != 0)
+            {
+                await LoadRecipeForCopy(CopyId);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle unexpected errors
+            errorMessage = "An unexpected error occurred while initializing.";
+            ToastService.ShowError(errorMessage);
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    // Load a recipe by its ID
+    private async Task LoadRecipeById(int recipeId)
+    {
+        var response = await recipeMasterService.GetRecipeMasterById(recipeId);
+        var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
+        var userRole = user?.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
+        var userId = user?.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if (response.Success)
+        {
+            recipeMasterDto = response.Data;
+
+            if (recipeMasterDto.CreatedBy != int.Parse(userId))
+            {
+                if (userRole != "Admin")
+                {
+                    navigationManager.NavigateTo("/accessdenied");
+                };
+            };
+
+            rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
+
+            previousSelectedRecipeCategory = recipeMasterDto.RecipeCategory.Select(c => new RecipeCategoryDto
+                {
+                    RecipeCategoryId = c.RecipeCategoryId,
+                    RecipeCategoryName = recipeCategoryList.FirstOrDefault(r => r.RecipeCategoryId == c.RecipeCategoryId)?.RecipeCategoryName
+                }).ToList();
+
+            var ids = recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategoryId).ToList();
+            selectedRecipeCategory = recipeCategoryList.Where(c => ids.Contains(c.RecipeCategoryId));
+
+            // Check if the recipe can be edited
+            if (recipeMasterDto.CreatedAt != null)
+            {
+                var createdAt = recipeMasterDto.CreatedAt;
+                var canEditTimeLimit = DateTime.UtcNow - createdAt;
+                canEditRecipe = canEditTimeLimit.TotalHours <= 24;
+
+
+                if (userRole != "Admin")
+                {
+                    if (!canEditRecipe)
+                    {
+                        warnMessage = "You cannot edit this recipe as more than 24 hours have passed since its creation.";
+                    }
+                }
+
+            }
         }
         else
         {
-            errorMessage = res.ErrorMessage;
-            ToastService.ShowError(res.ErrorMessage);
-        }
-
-        if (recipeCategoryListRes.Success)
-        {
-            recipeCategoryList = recipeCategoryListRes.Data;
-        }
-        if (RecipeId != 0)
-        {
-            var response = await recipeMasterService.GetRecipeMasterById(RecipeId);
-            if (response.Success)
-            {
-                recipeMasterDto = response.Data;
-                rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
-                previousSelectedRecipeCategory = recipeMasterDto.RecipeCategory.Select(c => new RecipeCategoryDto
-                    {
-                        RecipeCategoryId = c.RecipeCategoryId,
-                        RecipeCategoryName = recipeCategoryList.FirstOrDefault(r => r.RecipeCategoryId ==
-                        c.RecipeCategoryId)?.RecipeCategoryName
-                    }).ToList();
-                var ids = recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategoryId).ToList();
-                selectedRecipeCategory = recipeCategoryList.Where(c => ids.Contains(c.RecipeCategoryId));
-
-                if (recipeMasterDto.CreatedAt != null)
-                {
-                    var createdAt = recipeMasterDto.CreatedAt; // Assuming CreatedAt is of type DateTime
-                    var timeDifference = DateTime.UtcNow - createdAt; // Calculate time difference
-
-                    // Check if more than 24 hours have passed
-                    if (timeDifference.TotalHours > 24)
-                    {
-                        canEditRecipe = false;
-                        warnMessage = "You cannot edit this recipe as more than 24 hours have passed since its creation.";
-                    }
-                    else
-                    {
-                        canEditRecipe = true;
-                    }
-                }
-
-            }
-            else
-            {
-                errorMessage = response.ErrorMessage;
-            }
-
-        }
-
-        if (CopyId != 0)
-        {
-            var response = await recipeMasterService.GetRecipeMasterById(CopyId);
-            if (response.Success)
-            {
-
-                recipeMasterDto = response.Data;
-
-
-                recipeMasterDto.RecipeId = 0; 
-                foreach (var category in recipeMasterDto.RecipeCategory)
-                {
-                    category.RecipeCategoryId = 0; 
-                }
-
-                foreach (var usage in recipeMasterDto.RawMaterialUsage)
-                {
-                    usage.RawMaterialUsageId = 0; 
-                }
-
-                // Assign the modified raw material usage list
-                rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
-
-                previousSelectedRecipeCategory = recipeMasterDto.RecipeCategory.Select(c => new RecipeCategoryDto
-                    {
-                        RecipeCategoryId = c.RecipeCategoryId,
-                        RecipeCategoryName = recipeCategoryList.FirstOrDefault(r => r.RecipeCategoryId == c.RecipeCategoryId)?.RecipeCategoryName
-                    }).ToList();
-
-                var ids = recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategoryId).ToList();
-                selectedRecipeCategory = recipeCategoryList.Where(c => ids.Contains(c.RecipeCategoryId));
-            }
-            else
-            {
-                errorMessage = response.ErrorMessage;
-            }
+            errorMessage = response.ErrorMessage;
         }
     }
+
+    // Load a recipe for copying
+    private async Task LoadRecipeForCopy(int copyId)
+    {
+        var response = await recipeMasterService.GetRecipeMasterById(copyId);
+        if (response.Success)
+        {
+            recipeMasterDto = response.Data;
+
+            // Set RecipeId and other IDs to 0 for new recipe
+            recipeMasterDto.RecipeId = 0;
+            foreach (var category in recipeMasterDto.RecipeCategory)
+            {
+                category.RecipeCategoryId = 0;
+            }
+
+            foreach (var usage in recipeMasterDto.RawMaterialUsage)
+            {
+                usage.RawMaterialUsageId = 0;
+            }
+
+            // Assign modified raw material usage list
+            rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
+
+            previousSelectedRecipeCategory = recipeMasterDto.RecipeCategory.Select(c => new RecipeCategoryDto
+                {
+                    RecipeCategoryId = c.RecipeCategoryId,
+                    RecipeCategoryName = recipeCategoryList.FirstOrDefault(r => r.RecipeCategoryId == c.RecipeCategoryId)?.RecipeCategoryName
+                }).ToList();
+
+            var ids = recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategoryId).ToList();
+            selectedRecipeCategory = recipeCategoryList.Where(c => ids.Contains(c.RecipeCategoryId));
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage;
+        }
+    }
+
 
     public async Task OnAddRawMaterial()
     {
@@ -463,7 +548,7 @@
         // Create mapping for new categories
         var newRecipeCategoryMappings = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
             {
-                RecipeId = 0, // Temporary ID until saved
+                RecipeId = 0,
                 RecipeCategoryId = c.RecipeCategoryId,
             }).ToList();
 
@@ -641,12 +726,12 @@
     {
         editingItem.Cost = Math.Round(rawMaterialDto.Price * editingItem.Quantity, 4);
 
-        var existingItemIndex = rawMaterialUsageList.FindIndex(item => item.RawMaterialUsageId == editingItem.RawMaterialUsageId); 
+        var existingItemIndex = rawMaterialUsageList.FindIndex(item => item.RawMaterialUsageId == editingItem.RawMaterialUsageId);
 
-        if(existingItemIndex == 0)
+        if (existingItemIndex == 0)
         {
             var item = rawMaterialUsageList.FindIndex(item => item == editingItem);
-            if (item >=0)
+            if (item >= 0)
             {
                 rawMaterialUsageList[existingItemIndex] = editingItem;
             }
@@ -655,7 +740,7 @@
 
         if (existingItemIndex >= 0)
         {
-            rawMaterialUsageList[existingItemIndex] = editingItem; 
+            rawMaterialUsageList[existingItemIndex] = editingItem;
         }
         else
         {
