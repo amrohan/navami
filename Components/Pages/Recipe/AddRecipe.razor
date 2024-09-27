@@ -23,218 +23,183 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 
-@if(warnMessage != String.Empty){
+@if (warnMessage != String.Empty)
+{
     <div class="alert alert-warning fst-italic" role="alert">
         <i class="bi bi-exclamation-triangle"></i>  @warnMessage
-</div>
+    </div>
 }
 
-<FluentCard Width="100%" Height="900px" AreaRestricted="false">
-
-    <div class="d-flex justify-content-between align-items-center">
+<FluentCard Width="100%" Height="630px" AreaRestricted="false">
+    <div class="d-flex justify-content-start align-items-center">
         <h3 class="fs-5">@(RecipeId != 0 ? "Update Recipe" : "New Recipe ")</h3>
     </div>
-
-    <div class="container text-start">
-        <div class="row row-cols-3 align-content-center">
-            @* <div class="col">
-            <FluentTextField Label="Recipe Code" @bind-Value="recipeMasterDto.RecipeCode" Placeholder=""
-            Class="w-100" ReadOnly=true />
-            </div> *@
-            <div class="col">
-                <FluentTextField Label="Recipe Name" @bind-Value="recipeMasterDto.RecipeName"
-                                 Placeholder="Enter recipe name" Class="w-100" />
-            </div>
-            <div class="col">
-                <FluentTextField Label="Profile" @bind-Value="recipeMasterDto.Profile" Placeholder="Enter profile"
-                                 Class="w-100" />
-            </div>
-            <div class="col">
-                <FluentAutocomplete TOption="RecipeCategoryDto" Label="Recipe Category" OnOptionsSearch="OnRecipeSearch"
-                                    Placeholder="Select recipe category" Virtualize="true"
-                                    OptionText="@(item => item.RecipeCategoryName)" MaximumSelectedOptions=20 Width="350px"
-                                    @bind-SelectedOptions="@selectedRecipeCategory" />
-
-
-            </div>
-        </div>
-        <div class="row row-cols-4 align-content-center mt-4">
-           @*   <div class="col">
-                 <FluentSelect Height="300px" TOption="CategoryDto" Items="@categoryList"
-                               @bind-Value="rawMaterialUsageDto.CategoryName" Label="Category" Placeholder="Select Category"
-                               OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
-                               @onchange="OnCategoryChange" />
-             </div> *@
-
-            <div class="col">
-                <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
-                              @bind-Value="rawMaterialUsageDto.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
-                              OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
-                              @onchange="OnSubCategoryChange" />
-            </div>
-            <div class="col">
-                <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
-                              @bind-Value="rawMaterialUsageDto.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
-                              OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
-                              @onchange="OnRawMaterialChange">
-                              <OptionTemplate>
-                                  <div class="d-flex justify-content-start align-items-center gap-1">
-                            @context.RawMaterialCode
-                            <FluentDivider Orientation="Orientation.Vertical" Role="DividerRole.Presentation" Style="height: 20px; background-color:black" />
-                            @context.RawMaterialName
-
+    <main
+    style="display:flex;justify-content:space-between;align-items:start; width:100%; gap:1rem"
+    >
+            <div style="width:auto">
+                <div class="container text-start">
+                    <div class="row row-cols-2 align-content-lg-start">
+                        <div class="col">
+                            <FluentTextField Label="Recipe Name" @bind-Value="recipeMasterDto.RecipeName"
+                                             Placeholder="Enter recipe name" Class="w-100" />
                         </div>
-                                 
-                              </OptionTemplate>
-                </FluentSelect>
+                        <div class="col">
+                            <FluentTextField Label="Profile" @bind-Value="recipeMasterDto.Profile" Placeholder="Enter profile"
+                                             Class="w-100" />
+                        </div>
+                        <div class="col">
+                            <FluentAutocomplete TOption="RecipeCategoryDto" Label="Recipe Category" OnOptionsSearch="OnRecipeSearch"
+                                                Placeholder="Select recipe category" Virtualize="true"
+                                                OptionText="@(item => item.RecipeCategoryName)" MaximumSelectedOptions=20 
+                                                @bind-SelectedOptions="@selectedRecipeCategory" />
+                        </div>
+                        <div class="col"></div>
+                    </div>
 
-            </div>
-            <div class="col">
-                <FluentNumberField Label="Cost" @bind-Value="rawMaterialDto.Price" Placeholder="Enter quantity"
-                                   Class="w-100" ReadOnly="true" />
-            </div>
-            <div class="col">
-                <FluentNumberField Label="Quantity" @bind-Value="rawMaterialUsageDto.Quantity" Placeholder="Enter quantity" Class="w-100" @oninput="ValidateDecimalPlaces" />
-                @if (!isValid)
-                {
-                    <div class="text-danger" style="font-size:smaller">Please enter a value with up to four decimal places.</div>
-                }
-            </div>
-            <div class="col">
-                <FluentButton Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
-                    Add
-                </FluentButton>
-            </div>
-
-        </div>
-        @* Raw Material Usage use FluentDataGrid *@
-
-        <main class="mt-4">
-            <div style="display:flex;justify-content: space-between; align-items: end;font-size: small;">
-
-                <p>
-                    Qunatity <span class="fw-bold">
-                        @(Math.Round(rawMaterialUsageList.Sum(item => item.Quantity), 2))
-                    </span>
-                </p>
-                <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; gap:10px">
-                    <p>
-                        Cost
-                        <span class="fw-bold">
-                            Rs.@(Math.Round(rawMaterialUsageList.Sum(item => item.Cost), 2))
-                        </span>
-                    </p>
-                   @*   <p>
-                         Adjusted Cost
-                         <span class="fw-bold">
-                             @(Math.Round(rawMaterialUsageList.Sum(item => item.Cost) * 1.01m, 2))
-                         </span>
-                     </p> *@
-
+                    <div class="row row-cols-2 align-content-center mt-4">
+                        <div class="col">
+                            <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
+                                          @bind-Value="rawMaterialUsageDto.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
+                                          OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
+                                          @onchange="OnSubCategoryChange" />
+                        </div>
+                        <div class="col">
+                            <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
+                                          @bind-Value="rawMaterialUsageDto.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
+                                          OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
+                                          @onchange="OnRawMaterialChange">
+                                <OptionTemplate>
+                                    <div class="d-flex justify-content-start align-items-center gap-1">
+                                        @context.RawMaterialCode
+                                        <FluentDivider Orientation="Orientation.Vertical" Role="DividerRole.Presentation" Style="height: 20px; background-color:black" />
+                                        @context.RawMaterialName
+                                    </div>
+                                </OptionTemplate>
+                            </FluentSelect>
+                        </div>
+                        <div class="col mt-2">
+                            <FluentNumberField Label="Cost" @bind-Value="rawMaterialDto.Price" Placeholder="Enter quantity"
+                                               Class="w-100" ReadOnly="true" />
+                        </div>
+                        <div class="col mt-2">
+                            <FluentNumberField Label="Quantity" @bind-Value="rawMaterialUsageDto.Quantity" Placeholder="Enter quantity" Class="w-100" @oninput="ValidateDecimalPlaces" />
+                            @if (!isValid)
+                            {
+                                <div class="text-danger" style="font-size:smaller">Please enter a value with up to four decimal places.</div>
+                            }
+                        </div>
+                        <div class="col">
+                            <FluentButton Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
+                                Add
+                            </FluentButton>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            @*<div class="align-content-start border rounded" style="height: 450px; overflow:auto;">
-            <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()"
-            GenerateHeader="GenerateHeaderOption.Sticky">
-            <PropertyColumn Property="@(u => u.Rmname)" Sortable="true" Title="Raw material" />
-            <PropertyColumn Property="@(u => u.CategoryName)" Sortable="true" Title="Category" />
-            <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
-            <PropertyColumn Property="@(u => u.Quantity)" Title=@($"Quantity ({(rawMaterialUsageList.Sum(item => item.Quantity))})") Sortable="true" />
-            <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
+            <div style="width:100%;" >
+                @* Raw Material Usage use FluentDataGrid *@
+                <main>
+              
 
-            <TemplateColumn Title="Actions" Align="@Align.End">
-            <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-            OnClick="@(()=>OnEditRawMaterialUsage(context))" />
-            <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-            OnClick="@(() => OnDeleteRawMaterial(context))" />
-            </TemplateColumn>
-            </FluentDataGrid>
-            </div> *@
-            <div class="d-flex justify-content-end align-items-center mb-1">
-                <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
-                              @bind-Value=searchTerm @bind-Value:after=OnSearchRmUsage Immediate=true />
+                    <div class="d-flex justify-content-end align-items-center">
+                        <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
+                                      @bind-Value=searchTerm @bind-Value:after=OnSearchRmUsage Immediate=true />
+                    </div>
+                    <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; margin-top:10px">
+                        <p>
+                            Quantity <span class="fw-bold">
+                                @(Math.Round(rawMaterialUsageList.Sum(item => item.Quantity), 2))
+                            </span>
+                        </p>
+                        <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; gap:10px">
+                            <p>
+                                Cost
+                                <span class="fw-bold">
+                                    Rs.@(Math.Round(rawMaterialUsageList.Sum(item => item.Cost), 2))
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="align-content-start border rounded" style="height: 450px; overflow:auto;">
+                        <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()" GenerateHeader="GenerateHeaderOption.Sticky">
+                            <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
+                                <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                              OnClick="@(() => OnDeleteRawMaterial(context))" Disabled="@(warnMessage != String.Empty)" />
+                                <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                              OnClick="@(() => OnEditRawMaterialUsage(context))" Disabled="@(warnMessage != String.Empty)" />
+                            </TemplateColumn>
+                            <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
+                            <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
+                            <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" Title="Quantity" />
+                            <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
+                        </FluentDataGrid>
+                    </div>
+                </main>
+                @* save btn *@
+                <div class="d-flex justify-content-between align-items-start w-100 mt-2">
+                    <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@OnSaveRecipe" Disabled="@(warnMessage != String.Empty)">Save Recipe</FluentButton>
+                </div>
             </div>
-            <div class="align-content-start border rounded mt-4" style="height: 450px; overflow:auto;">
-                <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()" GenerateHeader="GenerateHeaderOption.Sticky">
-                    <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
-                        <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                                      OnClick="@(() => OnDeleteRawMaterial(context))" Disabled="@(warnMessage != String.Empty)" />
-                        <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-                                      OnClick="@(() => OnEditRawMaterialUsage(context))" Disabled="@(warnMessage != String.Empty)" />
-                    </TemplateColumn>
-                    <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
-                     @* <PropertyColumn Property="@(u => u.CategoryName)" Sortable="true" Title="Category" /> *@
-                      <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
-                    <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" Title="Quantity" />
-                    <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
-
-             
-                </FluentDataGrid>
-            </div>
-
-        </main>
-        @* save btn *@
-        <div class="d-flex justify-content-between align-items-start w-100 mt-2">
-            <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
-            <FluentButton Appearance="Appearance.Accent" OnClick="@OnSaveRecipe" Disabled="@(warnMessage != String.Empty)">Save Recipe</FluentButton>
-        </div>
-
-    </div>
-
+        
+    </main>
 </FluentCard>
+
 
 @* pop up *@
-@if(isEditing){
+@if (isEditing)
+{
 
-<div class="login-overlay">
+    <div class="login-overlay">
 
-<FluentCard Width="600px" Height="280px" AreaRestricted=false>
-    <h2 class="fs-6 fw-bold m-0 p-0">Edit RM Usage</h2>
-    <p class="text-danger fs-6">@errorMessage</p>
-        <div class="row row-cols-2 align-content-center">
-            <div class="col gy-2">
-                <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
-                              @bind-Value="editingItem.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
-                              OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
-                              @onchange="OnSubCategoryChange" />
-            </div>
-            <div class="col gy-2">
-                <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
-                              @bind-Value="editingItem.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
-                              OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
-                              @onchange="OnRawMaterialChange">
-                    <OptionTemplate>
-                        <div class="d-flex justify-content-start align-items-center gap-1">
-                            @context.RawMaterialCode
-                            <FluentDivider Orientation="Orientation.Vertical" Role="DividerRole.Presentation" Style="height: 20px; background-color:black" />
-                            @context.RawMaterialName
+        <FluentCard Width="600px" Height="280px" AreaRestricted=false>
+            <h2 class="fs-6 fw-bold m-0 p-0">Edit RM Usage</h2>
+            <p class="text-danger fs-6">@errorMessage</p>
+            <div class="row row-cols-2 align-content-center">
+                <div class="col gy-2">
+                    <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
+                                  @bind-Value="editingItem.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
+                                  OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
+                                  @onchange="OnSubCategoryChange" />
+                </div>
+                <div class="col gy-2">
+                    <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
+                                  @bind-Value="editingItem.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
+                                  OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
+                                  @onchange="OnRawMaterialChange">
+                        <OptionTemplate>
+                            <div class="d-flex justify-content-start align-items-center gap-1">
+                                @context.RawMaterialCode
+                                <FluentDivider Orientation="Orientation.Vertical" Role="DividerRole.Presentation" Style="height: 20px; background-color:black" />
+                                @context.RawMaterialName
 
-                        </div>
+                            </div>
 
-                    </OptionTemplate>
-                </FluentSelect>
+                        </OptionTemplate>
+                    </FluentSelect>
 
-            </div>
-            <div class="col gy-2">
-                <FluentNumberField Label="Cost" @bind-Value="rawMaterialDto.Price" Placeholder="Enter quantity"
-                                   Class="w-100" ReadOnly="true" />
-            </div>
-            <div class="col gy-2">
-                <FluentNumberField Label="Quantity" @bind-Value="editingItem.Quantity" Placeholder="Enter quantity" Class="w-100" />
-            </div>
-            <div class="col text-end col-6 w-100">
-                <FluentButton Appearance="Appearance.Outline" OnClick="@OnCancelEdit" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
-                    Cancel
-                </FluentButton>
+                </div>
+                <div class="col gy-2">
+                    <FluentNumberField Label="Cost" @bind-Value="rawMaterialDto.Price" Placeholder="Enter quantity"
+                                       Class="w-100" ReadOnly="true" />
+                </div>
+                <div class="col gy-2">
+                    <FluentNumberField Label="Quantity" @bind-Value="editingItem.Quantity" Placeholder="Enter quantity" Class="w-100" />
+                </div>
+                <div class="col text-end col-6 w-100">
+                    <FluentButton Appearance="Appearance.Outline" OnClick="@OnCancelEdit" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
+                        Cancel
+                    </FluentButton>
                     <FluentButton Appearance="Appearance.Accent" OnClick="@OnUpdateRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(warnMessage != String.Empty)">
-                    Save
-                </FluentButton>
+                        Save
+                    </FluentButton>
+                </div>
             </div>
-    </div>
 
-</FluentCard>
-</div>
+        </FluentCard>
+    </div>
 }
 
 
@@ -314,12 +279,12 @@
                     // Check if more than 24 hours have passed
                     if (timeDifference.TotalHours > 24)
                     {
-                        canEditRecipe = false; 
+                        canEditRecipe = false;
                         warnMessage = "You cannot edit this recipe as more than 24 hours have passed since its creation.";
                     }
                     else
                     {
-                        canEditRecipe = true; 
+                        canEditRecipe = true;
                     }
                 }
 
@@ -355,10 +320,11 @@
         rawMaterialUsageDto.Cost = Math.Round(rawMaterialDto.Price * rawMaterialUsageDto.Quantity, 4);
         rawMaterialUsageDto.RecipeId = recipeMasterDto.RecipeId;
         var res = rawMaterialUsageService.AddRawMaterialUsage(rawMaterialUsageDto);
-        if(res.Success){
+        if (res.Success)
+        {
             rawMaterialUsageDto.RawMaterialUsageId = res.Data.RawMaterialUsageId;
             rawMaterialUsageList.Add(rawMaterialUsageDto);
-        ClearForm();
+            ClearForm();
 
         }
     }
@@ -392,7 +358,7 @@
         recipeMasterDto.Username = username ?? string.Empty;
 
         // Check if we are updating an existing recipe
-        if (recipeMasterDto.RecipeId !=0)
+        if (recipeMasterDto.RecipeId != 0)
         {
             // Existing Recipe: Update logic
             await UpdateExistingRecipe(userId);
@@ -471,7 +437,7 @@
             ToastService.ShowSuccess("Recipe added successfully");
             recipeMasterDto.RecipeId = addResponse.Data.RecipeId;
             navigationManager.NavigateTo($"/recipe/edit/{recipeMasterDto.RecipeId}");
-            return; 
+            return;
         }
 
         errorMessage = addResponse.ErrorMessage;
@@ -586,7 +552,7 @@
 
 
     private void OnSaveChanges(RawMaterialUsageDto item)
-    {     
+    {
         isEditing = false;
     }
 
@@ -609,7 +575,7 @@
     #region Edit RM usage pop
     private void OnEditRawMaterialUsage(RawMaterialUsageDto item)
     {
-        isEditing = true; 
+        isEditing = true;
         var subCategoryItem = subCategoryList.FirstOrDefault(c => c.SubCategoryName == item.SubCategoryName);
 
         if (subCategoryItem == null)
@@ -651,7 +617,7 @@
             rawMaterialUsageList.Add(editingItem);
         }
 
-        ClearForm(); 
+        ClearForm();
         isEditing = false;
         editingItem = null;
 
@@ -702,7 +668,7 @@
         rawMaterialDto.Price = rawMaterialList.FirstOrDefault(c => c.RawMaterialName == rawMaterialName)?.Price ?? 0m;
 
     }
-   #endregion
+    #endregion
 
 
 }
