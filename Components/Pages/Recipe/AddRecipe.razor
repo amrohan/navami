@@ -31,7 +31,7 @@
     </div>
 }
 
-<FluentCard Width="100%" Height="650px" AreaRestricted="false">
+<FluentCard Width="100%" Height="680px" AreaRestricted="false">
     <div class="d-flex justify-content-start align-items-center">
 
         @if (canEditRecipe)
@@ -425,6 +425,12 @@
 
     public async Task OnAddRawMaterial()
     {
+        if (selectedRecipeCategory.Count() == 0)
+        {
+            ToastService.ShowError("Please select a recipe category");
+            isLoading = false;
+            return;
+        }
         if (recipeMasterDto.RecipeId == 0)
         {
             rawMaterialUsageDto.RawMaterialId = rawMaterialDto.RawMaterialId;
@@ -465,6 +471,12 @@
     public async void OnSaveRecipe()
     {
         isLoading = true;
+        if (selectedRecipeCategory.Count() ==0)
+        {
+            ToastService.ShowError("Please select a recipe category");
+            isLoading = false;
+            return;
+        }
         var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
         var username = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
         var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;

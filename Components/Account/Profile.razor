@@ -1,0 +1,43 @@
+@rendermode InteractiveServer
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+@inject UserService userService
+
+<FluentProfileMenu Initials="U" Style="--fluent-profile-menu-hover: var(--neutral-stroke-focus); padding: 4px;" OnHeaderButtonClick="SignOut">
+    <ChildContent>
+        <div style="width: 250px; height: 80px">
+            <FluentLabel Typo="@Typography.Header" Style="font-weight: bold;">@usermodel.Username</FluentLabel>
+            <FluentLabel>@usermodel.Email</FluentLabel>
+        </div>
+    </ChildContent>
+</FluentProfileMenu>
+
+@code {
+
+    private UserMaster usermodel = new UserMaster();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
+        var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        if(userId!=null)
+        {    
+            var id = int.Parse(userId);
+            var response = await userService.GetUserByIdAsync(id);
+            if (response.Success)
+            {
+                usermodel = response.Data;
+
+            }
+        }
+
+    }
+    public void SignOut()
+    {
+        NavigationManager.NavigateTo("logout");
+
+    }
+
+}

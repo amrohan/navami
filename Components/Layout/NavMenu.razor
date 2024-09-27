@@ -1,7 +1,7 @@
 ﻿@rendermode InteractiveServer
 
 @code {
-    private bool expanded = true; // Control the expanded state of the menu
+    private bool expanded = true; 
 }
 
 <div class="top-row ps-3 navbar" style="background-color: var(--bg);">
@@ -12,8 +12,7 @@
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<FluentNavMenu @bind-Expanded="@expanded" Width="250" Title="Custom navigation menu"
-               style="background-color: var(--bg);">
+<FluentNavMenu @bind-Expanded="@expanded" Width="250" Title="Custom navigation menu">
     <FluentNavLink Icon="@(new Icons.Regular.Size16.Home())" Href="/" Match="NavLinkMatch.All">
         Dashboard
     </FluentNavLink>
@@ -38,30 +37,20 @@
         <FluentNavLink Icon="@(new Icons.Regular.Size16.Backpack())" Href="/rawmaterial" Match="NavLinkMatch.All">
             Raw Material
         </FluentNavLink>
+        <FluentNavLink Icon="@(new Icons.Regular.Size16.PageFit())" Href="/category" Match="NavLinkMatch.All">
+            Category Master
+        </FluentNavLink>
+        <FluentNavLink Icon="@(new Icons.Regular.Size16.DataUsageSettings())" Href="/subcategory"
+                       Match="NavLinkMatch.All">
+            Sub Category
+        </FluentNavLink>
 
-        <FluentNavGroup Title="Category" Icon="@(new Icons.Regular.Size16.Folder())">
-            <ChildContent>
-                <FluentNavLink Icon="@(new Icons.Regular.Size16.PageFit())" Href="/category" Match="NavLinkMatch.All">
-                    Category Master
-                </FluentNavLink>
-
-                <FluentNavLink Icon="@(new Icons.Regular.Size16.DataUsageSettings())" Href="/subcategory"
-                               Match="NavLinkMatch.All">
-                    Sub Category
-                </FluentNavLink>
-            </ChildContent>
-        </FluentNavGroup>
     </AuthorizeView>
 
 
 </FluentNavMenu>
 
 <style>
-    :root {
-        --bg: #f3f6f9;
-        --active: #d4e3fa;
-        --hover: #e9f0fa;
-        --text: #333;
-    }
+   
 </style>
 
