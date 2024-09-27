@@ -39,6 +39,9 @@
                                   OnClick="@(() => DeleteRecipe(context))" />
                     <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
                                   OnClick="@(() =>EditRecipe(context))" />
+                    <FluentButton aria-label="Copy item" IconEnd="@(new Icons.Regular.Size16.Copy())"
+                                  OnClick="@(() => CopyRecipe(context))" />
+
                 </TemplateColumn>
                 <PropertyColumn Property="@(c => c.RecipeId)" Sortable="true" title="Recipe Code" />
                 <PropertyColumn Property="@(c => c.RecipeName)" Sortable="true" title="Recipe" />
@@ -108,6 +111,12 @@
     private void EditRecipe(RecipeMasterDto context)
     {
         navigationManager.NavigateTo($"/recipe/edit/{context.RecipeId}");
+    }
+
+    private void CopyRecipe(RecipeMasterDto context)
+    {
+       
+        navigationManager.NavigateTo($"/recipe/copy/{context.RecipeId}");
     }
 
     private async Task DeleteRecipe(RecipeMasterDto context)

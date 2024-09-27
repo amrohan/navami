@@ -1,5 +1,6 @@
 @page "/recipe/add"
 @page "/recipe/edit/{RecipeId:int}"
+@page "/recipe/copy/{CopyId:int}"
 
 @attribute [Authorize]
 
@@ -208,6 +209,8 @@
 
     [Parameter]
     public int RecipeId { get; set; }
+    [Parameter]
+    public int CopyId { get; set; }
     // list to store RecipeMasterDto item
     private RecipeMasterDto recipeMasterDto = new RecipeMasterDto();
 
@@ -295,13 +298,50 @@
             }
 
         }
+
+        if (CopyId != 0)
+        {
+            var response = await recipeMasterService.GetRecipeMasterById(CopyId);
+            if (response.Success)
+            {
+
+                recipeMasterDto = response.Data;
+
+
+                recipeMasterDto.RecipeId = 0; 
+                foreach (var category in recipeMasterDto.RecipeCategory)
+                {
+                    category.RecipeCategoryId = 0; 
+                }
+
+                foreach (var usage in recipeMasterDto.RawMaterialUsage)
+                {
+                    usage.RawMaterialUsageId = 0; 
+                }
+
+                // Assign the modified raw material usage list
+                rawMaterialUsageList = recipeMasterDto.RawMaterialUsage;
+
+                previousSelectedRecipeCategory = recipeMasterDto.RecipeCategory.Select(c => new RecipeCategoryDto
+                    {
+                        RecipeCategoryId = c.RecipeCategoryId,
+                        RecipeCategoryName = recipeCategoryList.FirstOrDefault(r => r.RecipeCategoryId == c.RecipeCategoryId)?.RecipeCategoryName
+                    }).ToList();
+
+                var ids = recipeMasterDto.RecipeCategory.Select(c => c.RecipeCategoryId).ToList();
+                selectedRecipeCategory = recipeCategoryList.Where(c => ids.Contains(c.RecipeCategoryId));
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+            }
+        }
     }
 
     public async Task OnAddRawMaterial()
     {
         if (recipeMasterDto.RecipeId == 0)
         {
-            isLoading = true;
             rawMaterialUsageDto.RawMaterialId = rawMaterialDto.RawMaterialId;
             rawMaterialUsageDto.RawMaterialName = rawMaterialDto.RawMaterialName;
             rawMaterialUsageDto.Cost = Math.Round(rawMaterialDto.Price * rawMaterialUsageDto.Quantity, 4);
@@ -313,7 +353,6 @@
             OnSaveRecipe();
             return;
         }
-
 
         rawMaterialUsageDto.RawMaterialId = rawMaterialDto.RawMaterialId;
         rawMaterialUsageDto.RawMaterialName = rawMaterialDto.RawMaterialName;
@@ -600,20 +639,26 @@
 
     public void OnUpdateRawMaterial()
     {
-        // Calculate the cost based on the price and quantity
         editingItem.Cost = Math.Round(rawMaterialDto.Price * editingItem.Quantity, 4);
 
-        // Check if the editing item exists in the list
-        var existingItemIndex = rawMaterialUsageList.FindIndex(item => item.RawMaterialUsageId == editingItem.RawMaterialUsageId); // Assuming each item has a unique Id
+        var existingItemIndex = rawMaterialUsageList.FindIndex(item => item.RawMaterialUsageId == editingItem.RawMaterialUsageId); 
+
+        if(existingItemIndex == 0)
+        {
+            var item = rawMaterialUsageList.FindIndex(item => item == editingItem);
+            if (item >=0)
+            {
+                rawMaterialUsageList[existingItemIndex] = editingItem;
+            }
+
+        }
 
         if (existingItemIndex >= 0)
         {
-            // Update the existing item
-            rawMaterialUsageList[existingItemIndex] = editingItem; // Update with the modified editingItem
+            rawMaterialUsageList[existingItemIndex] = editingItem; 
         }
         else
         {
-            // If the item doesn't exist, you may want to add it instead or handle it as needed
             rawMaterialUsageList.Add(editingItem);
         }
 
