@@ -5,9 +5,9 @@ namespace navami.Models;
 
 public partial class RawMaterialPrice
 {
-    public Guid RawMaterialPriceId { get; set; }
+    public int RawMaterialPriceId { get; set; }
 
-    public Guid RawMaterialId { get; set; }
+    public int RawMaterialId { get; set; }
 
     public string SupplierName { get; set; } = null!;
 
@@ -15,13 +15,13 @@ public partial class RawMaterialPrice
 
     public DateTime CreatedAt { get; set; }
 
-    public Guid CreatedBy { get; set; }
+    public int CreatedBy { get; set; }
 
     public bool IsActive { get; set; }
 
-    public Guid? UpdatedBy { get; set; }
+    public int? UpdatedBy { get; set; }
 
-    public Guid? VendorId { get; set; }
+    public int? VendorId { get; set; }
 
     public virtual RawMaterial RawMaterial { get; set; } = null!;
 }

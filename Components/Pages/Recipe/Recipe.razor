@@ -1,9 +1,12 @@
 @page "/recipe"
 
 @attribute [Authorize]
+
 @inject RecipeMasterService recipeMasterService
 @inject NavigationManager navigationManager
 @inject IToastService ToastService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
 
 @attribute [StreamRendering(true)]
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
@@ -30,22 +33,21 @@
     {
 
         <div class="border rounded" style="height: 450px; overflow:auto;">
-
             <FluentDataGrid Items="@recipeMastList" GenerateHeader="GenerateHeaderOption.Sticky" AutoFit="true">
+                <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
+                    <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                  OnClick="@(() => DeleteRecipe(context))" />
+                    <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                  OnClick="@(() =>EditRecipe(context))" />
+                </TemplateColumn>
                 <PropertyColumn Property="@(c => c.RecipeId)" Sortable="true" title="Recipe Code" />
                 <PropertyColumn Property="@(c => c.RecipeName)" Sortable="true" title="Recipe" />
                 <PropertyColumn Property="@(c => c.Profile)" Sortable="true" title="Profile" />
                 <PropertyColumn Property="@(c => c.RecipeCategories)" Sortable="true" title="Category" />
                 <PropertyColumn Property="@(c => c.TotalCost)" Sortable="true" title="Cost" />
-                <PropertyColumn Property="@(c => c.AdjustedCost)" Sortable="true" title="Adjusted Cost" />
-                <PropertyColumn Property="@(c => $"{c.CreatedAt} by {c.Username}")" Sortable="true" title="Created At" />
+                @* <PropertyColumn Property="@(c => c.AdjustedCost)" Sortable="true" title="Adjusted Cost" /> *@
+                <PropertyColumn Property="@(c => $"{c.CreatedAt.ToShortDateString()} by {c.Username}")" Sortable="true" title="Created At" />
 
-                <TemplateColumn Title="Actions" Align="@Align.End">
-                    <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-                        OnClick="@(() =>EditRecipe(context))" />
-                    <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                        OnClick="@(() => DeleteRecipe(context))" />
-                </TemplateColumn>
             </FluentDataGrid>
         </div>
 
@@ -60,17 +62,44 @@
     string searchTerm = string.Empty;
     protected override async Task OnInitializedAsync()
     {
-        var response = await recipeMasterService.GetAllRecipeMasters();
-        if (response.Success)
+        try
         {
-            recipeMastList = response.Data.AsQueryable();
-            originalRecipeMastList = recipeMastList;
+            var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+            var userId = user?.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var userRole = user?.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
+
+            ApiResponse<List<RecipeMasterDto>> response;
+
+            // Check user role and decide whether to pass the user ID or not
+            if (userRole != "Admin" )
+            {
+                var id = Convert.ToInt32(userId);
+                response = await recipeMasterService.GetAllRecipeMasters(id);
+            }
+            else
+            {
+                response = await recipeMasterService.GetAllRecipeMasters();
+            }
+
+            // Handle the API response
+            if (response.Success)
+            {
+                recipeMastList = response.Data.AsQueryable();
+                originalRecipeMastList = recipeMastList;
+            }
+            else
+            {
+                errorMessage = response.ErrorMessage;
+            }
         }
-        else
+        catch (Exception ex)
         {
-            errorMessage = response.ErrorMessage;
+            // Handle potential errors
+            errorMessage = "An error occurred while initializing the data.";
+            Console.WriteLine(ex.Message);
         }
     }
+
 
     private void OnAddRecipe()
     {

@@ -5,7 +5,7 @@ namespace navami.Dto
 {
     public class RawMaterialsDto
     {
-        public Guid RawMaterialId { get; set; }
+        public int RawMaterialId { get; set; }
 
         public string RawMaterialCode { get; set; } = null!;
 
@@ -13,9 +13,9 @@ namespace navami.Dto
 
         public bool IsNew { get; set; }
 
-        public Guid CategoryId { get; set; }
+        public int CategoryId { get; set; }
 
-        public Guid SubCategoryId { get; set; }
+        public int SubCategoryId { get; set; }
 
         public string? SpecificationNo { get; set; }
 
@@ -25,13 +25,13 @@ namespace navami.Dto
 
         public DateTime AddedOn { get; set; }
 
-        public Guid AddedBy { get; set; }
+        public int AddedBy { get; set; }
 
         public DateTime? LastModifiedOn { get; set; }
 
-        public Guid? LastModifiedBy { get; set; }
+        public int? LastModifiedBy { get; set; }
 
-        public string? Party { get; set; }
+        //public string? Party { get; set; }
 
         public decimal Price { get; set; }
 
@@ -39,7 +39,7 @@ namespace navami.Dto
 
         public bool IsActive { get; set; }
 
-        public Guid? VendorId { get; set; }
+        //public int? VendorId { get; set; }
 
         public virtual Category Category { get; set; } = null!;
 

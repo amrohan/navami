@@ -33,7 +33,7 @@ namespace navami
         }
 
         // GetRawMaterialUsageById
-        public ApiResponse<RawMaterialUsageDto> GetRawMaterialUsageById(Guid id)
+        public ApiResponse<RawMaterialUsageDto> GetRawMaterialUsageById(int id)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace navami
         }
 
         // DeleteRawMaterialUsage
-        public async Task<ApiResponse<RawMaterialUsageDto>> DeleteRawMaterialUsage(Guid id)
+        public async Task<ApiResponse<RawMaterialUsageDto>> DeleteRawMaterialUsage(int id)
         {
             try
             {
@@ -116,7 +116,7 @@ namespace navami
 
         // Sp
 
-        public async Task UpdateRecipeCostAsync(Guid recipeId)
+        public async Task UpdateRecipeCostAsync(int recipeId)
         {
             await dbContext.Database.ExecuteSqlRawAsync("EXEC UpdateRecipeCost @RecipeId", new SqlParameter("@RecipeId", recipeId));
         }

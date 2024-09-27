@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using navami.Components.Pages.User;
 using navami.Dto;
 using navami.Models;
 
@@ -17,15 +18,28 @@ namespace navami
             _mapper = mapper;
         }
 
-        public async Task<ApiResponse<List<RecipeMasterDto>>> GetAllRecipeMasters()
+        public async Task<ApiResponse<List<RecipeMasterDto>>> GetAllRecipeMasters(int? userId = 0)
         {
             // Fetch all recipe masters along with their raw materials and category mappings
-            var recipeMasters = await dbContext.Recipes
-                .Where(r => r.IsActive != true)
-                .Include(rm => rm.RawMaterialUsages.Where(ru=>ru.IsActive !=true))
-                .Include(rm => rm.RecipeCategoryMappings)
-                    .ThenInclude(rcm => rcm.RecipeCategory) 
-                .ToListAsync();
+            var recipeMasters = new List<Recipe>();
+            if (userId != 0)
+            {
+                recipeMasters = await dbContext.Recipes
+                    .Where(r => r.IsActive != true && r.CreatedBy == userId)
+                    .Include(rm => rm.RawMaterialUsages.Where(ru => ru.IsActive != true))
+                    .Include(rm => rm.RecipeCategoryMappings)
+                        .ThenInclude(rcm => rcm.RecipeCategory)
+                        .ToListAsync();
+            }
+            else
+            {
+                recipeMasters = await dbContext.Recipes
+               .Where(r => r.IsActive != true)
+               .Include(rm => rm.RawMaterialUsages.Where(ru => ru.IsActive != true))
+               .Include(rm => rm.RecipeCategoryMappings)
+                   .ThenInclude(rcm => rcm.RecipeCategory)
+               .ToListAsync();
+            }
 
             var recipeMasterDtos = _mapper.Map<List<RecipeMasterDto>>(recipeMasters);
 
@@ -49,7 +63,7 @@ namespace navami
         }
 
         // GetRecipeMasterById
-        public async Task<ApiResponse<RecipeMasterDto>> GetRecipeMasterById(Guid recipeId)
+        public async Task<ApiResponse<RecipeMasterDto>> GetRecipeMasterById(int recipeId)
          {
             // Fetch the recipe master along with related data using LINQ with Include
             var recipeMaster = await dbContext.Recipes
@@ -122,7 +136,7 @@ namespace navami
             return new ApiResponse<RecipeMasterDto>(_mapper.Map<RecipeMasterDto>(recipeMaster));
         }
 
-        public async Task UpdateRecipeCostAsync(Guid recipeId)
+        public async Task UpdateRecipeCostAsync(int recipeId)
         {
             await dbContext.Database.ExecuteSqlRawAsync("EXEC UpdateRecipeCost @RecipeId", new SqlParameter("@RecipeId", recipeId));
         }
@@ -197,7 +211,7 @@ namespace navami
             }
         }
         
-        public async Task<ApiResponse<RecipeMasterDto>> DeleteRecipeCategoryMapping(Guid recipeId, Guid recipeCategoryId)
+        public async Task<ApiResponse<RecipeMasterDto>> DeleteRecipeCategoryMapping(int recipeId, int recipeCategoryId)
         {
             try
             {
@@ -220,7 +234,7 @@ namespace navami
         }
 
         // deletereipe
-        public async Task<ApiResponse<RecipeMasterDto>> DeleteRecipeMaster(Guid recipeId)
+        public async Task<ApiResponse<RecipeMasterDto>> DeleteRecipeMaster(int recipeId)
         {
             try
             {

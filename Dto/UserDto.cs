@@ -5,7 +5,7 @@ namespace navami.Dto
 
     public class UserDto
     {
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
         [Required(ErrorMessage = "Username is required")]
         public string? Username { get; set; }
 

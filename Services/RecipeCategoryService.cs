@@ -42,7 +42,7 @@ namespace navami
 
 
         // get by id
-        public ApiResponse<RecipeCategoryDto> GetRecipeCategoryById(Guid id)
+        public ApiResponse<RecipeCategoryDto> GetRecipeCategoryById(int id)
         {
             try
             {
@@ -73,6 +73,7 @@ namespace navami
 
                 // Add the RecipeCategory to the database
                 var recipeCategory = _mapper.Map<RecipeCategory>(model);
+                
                 dbContext.RecipeCategories.Add(recipeCategory);
                 dbContext.SaveChanges();
 
@@ -144,7 +145,7 @@ namespace navami
         }
 
         // delete
-        public ApiResponse<RecipeCategory> DeleteRecipeCategory(Guid id)
+        public ApiResponse<RecipeCategory> DeleteRecipeCategory(int id)
         {
             try
             {

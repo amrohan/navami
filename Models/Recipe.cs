@@ -5,7 +5,7 @@ namespace navami.Models;
 
 public partial class Recipe
 {
-    public Guid RecipeId { get; set; }
+    public int RecipeId { get; set; }
 
     public string RecipeName { get; set; } = null!;
 
@@ -19,7 +19,7 @@ public partial class Recipe
 
     public bool IsActive { get; set; }
 
-    public Guid CreatedBy { get; set; }
+    public int CreatedBy { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace navami.Models;
 
 public partial class RecipeCategory
 {
-    public Guid RecipeCategoryId { get; set; }
+    public int RecipeCategoryId { get; set; }
 
     public string RecipeCategoryName { get; set; } = null!;
 
-    public Guid CreatedBy { get; set; }
+    public int CreatedBy { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

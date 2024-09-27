@@ -1,11 +1,13 @@
 ﻿@page "/recipe-category"
 
-@attribute [Authorize]
+
+@attribute [Authorize(Roles = "Admin")]
 
 @using Microsoft.FluentUI.AspNetCore.Components
 @using navami.Services
 @using navami.Models
 @inject NavigationManager navigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject RecipeCategoryService recipeCategoryService
 
@@ -33,13 +35,13 @@
     {
         <div style="height: 450px; overflow:auto;" class="border rounded">
             <FluentDataGrid Items="@recipes" GenerateHeader="GenerateHeaderOption.Sticky">
-                <PropertyColumn Property="@(u => u.RecipeCategoryName)" Sortable="true" title="Recipe Category" />
-                <TemplateColumn Title="Actions" Align="@Align.End">
-                    <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-                        OnClick="@(()=>EditRecipeCategory(context))" />
+                <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
                     <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                        OnClick="@(() => DeleteRecipeCategory(context))" />
+                                  OnClick="@(() => DeleteRecipeCategory(context))" />
+                    <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                  OnClick="@(()=>EditRecipeCategory(context))" />
                 </TemplateColumn>
+                <PropertyColumn Property="@(u => u.RecipeCategoryName)" Sortable="true" title="Recipe Category" />
             </FluentDataGrid>
         </div>
     }

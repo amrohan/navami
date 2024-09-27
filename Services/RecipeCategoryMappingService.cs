@@ -30,7 +30,7 @@ namespace navami
         }
 
         //GetRecipeCategoryMappingById
-        public ApiResponse<RecipeCategoryMappingDto> GetRecipeCategoryMappingById(Guid id)
+        public ApiResponse<RecipeCategoryMappingDto> GetRecipeCategoryMappingById(int id)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace navami
         }
 
         // getRecipeCategoryMappingByRecipeId
-        public ApiResponse<List<RecipeCategoryMappingDto>> GetRecipeCategoryMappingByRecipeId(Guid recipeId)
+        public ApiResponse<List<RecipeCategoryMappingDto>> GetRecipeCategoryMappingByRecipeId(int recipeId)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace navami
         }
 
         //deleteRecipeCategoryMapping
-        public ApiResponse<RecipeCategoryMappingDto> DeleteRecipeCategoryMapping(Guid id)
+        public ApiResponse<RecipeCategoryMappingDto> DeleteRecipeCategoryMapping(int id)
         {
             try
             {

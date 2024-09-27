@@ -1,7 +1,8 @@
 @page "/subcategory/add"
-@page "/subcategory/edit/{SubCategoryId:guid}"
+@page "/subcategory/edit/{SubCategoryId:int}"
 
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
+
 @attribute [StreamRendering(true)]
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
 
@@ -18,7 +19,7 @@
 <FluentCard Width="100%" Height="200px" AreaRestricted="false" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(subCategory.CategoryId != Guid.Empty ? "Update Sub Category" : "Add Sub Category")</h3>
+        <h3 class="fs-5">@(subCategory.CategoryId != 0 ? "Update Sub Category" : "Add Sub Category")</h3>
     </div>
 
     <div class="container mt-2">
@@ -37,7 +38,7 @@
             </div>
             <div class="d-flex justify-content-start align-items-center ml-4">
                 <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddSubCategoryMaster">
-                    @(subCategory.SubCategoryId != Guid.Empty ? "Update" : "Add")
+                    @(subCategory.SubCategoryId != 0 ? "Update" : "Add")
                 </FluentButton>
             </div>
         </div>
@@ -52,7 +53,7 @@
     [CascadingParameter]
     public HttpContext? httpContext { get; set; } = default!;
     [Parameter]
-    public Guid SubCategoryId { get; set; }
+    public int SubCategoryId { get; set; }
 
     private SubCategoryDto subCategory = new SubCategoryDto();
     private List<CategoryDto> category = new List<CategoryDto>();
@@ -62,7 +63,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (SubCategoryId != Guid.Empty)
+        if (SubCategoryId != 0)
         {
             var response = subCategoryMasterService.GetSubCategoryMasterById(SubCategoryId);
             if (response.Success)
@@ -98,10 +99,10 @@
             isLoading = false;
             return;
         }
-        subCategory.CreatedBy = Guid.Parse(userId);
+        subCategory.CreatedBy = int.Parse(userId);
         subCategory.CategoryId = category.FirstOrDefault(c => c.CategoryName == subCategory.CategoryName).CategoryId;
 
-        if (subCategory.SubCategoryId != Guid.Empty)
+        if (subCategory.SubCategoryId != 0)
         {
             subCategory.CategoryName = category.FirstOrDefault(c => c.CategoryId == subCategory.CategoryId).CategoryName;
             response = subCategoryMasterService.UpdateSubCategoryMaster(subCategory);

@@ -5,11 +5,11 @@ namespace navami.Models;
 
 public partial class RawMaterialUsage
 {
-    public Guid RawMaterialUsageId { get; set; }
+    public int RawMaterialUsageId { get; set; }
 
-    public Guid RecipeId { get; set; }
+    public int RecipeId { get; set; }
 
-    public Guid RawMaterialId { get; set; }
+    public int RawMaterialId { get; set; }
 
     public decimal Quantity { get; set; }
 

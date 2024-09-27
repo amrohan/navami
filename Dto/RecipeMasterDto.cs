@@ -5,7 +5,7 @@ namespace navami.Dto
 {
     public class RecipeMasterDto
     {
-        public Guid RecipeId { get; set; }
+        public int RecipeId { get; set; }
 
         public string RecipeName { get; set; } = null!;
 
@@ -19,7 +19,7 @@ namespace navami.Dto
 
         public bool IsActive { get; set; }
 
-        public Guid CreatedBy { get; set; }
+        public int CreatedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

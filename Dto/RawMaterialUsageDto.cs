@@ -4,11 +4,11 @@ namespace navami.Dto
 {
     public partial class RawMaterialUsageDto
     {
-        public Guid RawMaterialUsageId { get; set; }
+        public int RawMaterialUsageId { get; set; }
 
-        public Guid RecipeId { get; set; }
+        public int RecipeId { get; set; }
 
-        public Guid RawMaterialId { get; set; }
+        public int RawMaterialId { get; set; }
 
         public decimal Quantity { get; set; }
 
@@ -21,7 +21,7 @@ namespace navami.Dto
         public  Recipe Recipe { get; set; } = null!;
 
         // etc 
-        public Guid CategoryId { get; set; }
+        public int CategoryId { get; set; }
         public string CategoryName { get; set; }
         public string RawMaterialName { get; set; } = null!;
         public string SubCategoryName { get; set; }

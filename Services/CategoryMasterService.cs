@@ -54,7 +54,7 @@ namespace navami
         }
 
         // get by id
-        public ApiResponse<CategoryDto> GetCategoryMasterById(Guid id)
+        public ApiResponse<CategoryDto> GetCategoryMasterById(int id)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace navami
         }
 
         // delete
-        public ApiResponse<CategoryDto> DeleteCategoryMaster(Guid id)
+        public ApiResponse<CategoryDto> DeleteCategoryMaster(int id)
         {
             try
             {

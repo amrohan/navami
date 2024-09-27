@@ -1,5 +1,5 @@
 ﻿@page "/user/add"
-@page "/user/edit/{UserId:guid}"
+@page "/user/edit/{UserId:int}"
 
 @attribute [Authorize(Roles = "Admin")]
 
@@ -16,7 +16,7 @@
 
 <FluentCard Width="100%" Height="230px" style="box-shadow: none;">
 
-    <h3 class="fs-5">@(user.UserId == Guid.Empty ? "Add User" : "Edit User")</h3>
+    <h3 class="fs-5">@(user.UserId == 0 ? "Add User" : "Edit User")</h3>
 
     <EditForm Model="@user" OnValidSubmit="@RegisterUser">
         <DataAnnotationsValidator />
@@ -63,7 +63,7 @@
         <div class="col d-flex justify-content-between align-items-center w-100">
             <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
             <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@RegisterUser">
-                @(user.UserId == Guid.Empty ? "Register" : "Update")
+                @(user.UserId == 0 ? "Register" : "Update")
             </FluentButton>
         </div>
     </EditForm>
@@ -71,7 +71,7 @@
 
 @code {
     [Parameter]
-    public Guid? UserId { get; set; }
+    public int UserId { get; set; }
 
     public UserMaster user = new UserMaster();
     bool deactive;
@@ -102,9 +102,9 @@
             Console.WriteLine(response.ErrorMessage);
         }
 
-        if (UserId.HasValue && UserId.Value != Guid.Empty)
+        if ( UserId != 0)
         {
-            var userResponse = await userService.GetUserByIdAsync(UserId.Value);
+            var userResponse = await userService.GetUserByIdAsync(UserId);
             if (userResponse.Success)
             {
                 user = userResponse.Data;
@@ -132,7 +132,7 @@
             user.IsDeactivated = deactive;
             ApiResponse<UserMaster> response;
 
-            if (user.UserId == Guid.Empty)
+            if (user.UserId == 0)
             {
                 // Add new user
                 response = userService.RegisterUser(user);

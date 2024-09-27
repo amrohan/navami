@@ -33,7 +33,7 @@ namespace navami
         }
 
 
-        public async Task<ApiResponse<RawMaterialsDto>> GetRawMaterialByIdAsync(Guid id)
+        public async Task<ApiResponse<RawMaterialsDto>> GetRawMaterialByIdAsync(int id)
         {
             try
             {
@@ -75,6 +75,54 @@ namespace navami
                 return new ApiResponse<RawMaterialsDto>(ex.Message);
             }
         }
+        //public async Task<ApiResponse<List<RawMaterialsDto>>> GetAllRawMaterials()
+        //{
+        //    try
+        //    {
+        //        var rawMaterials = await dbContext.RawMaterials
+        //            .Where(rm => !rm.IsActive)
+        //            .Include(rm => rm.Category)
+        //            .Include(rm => rm.SubCategory)
+        //            .Select(rm => new
+        //            {
+        //                Rm = rm,
+        //                PriceInfo = dbContext.RawMaterialPrices
+        //                    .Where(pm => pm.RawMaterialId == rm.RawMaterialId)
+        //                    .OrderByDescending(pm => pm.CreatedAt)
+        //                    .FirstOrDefault()
+        //            })
+        //            .Select(result => new RawMaterialsDto
+        //            {
+        //                RawMaterialId = result.Rm.RawMaterialId,
+        //                RawMaterialCode = result.Rm.RawMaterialCode,
+        //                RawMaterialName = result.Rm.RawMaterialName,
+        //                IsNew = result.Rm.IsNew,
+        //                CategoryId = result.Rm.CategoryId,
+        //                CategoryName = result.Rm.Category.CategoryName,
+        //                SubCategoryId = result.Rm.SubCategoryId,
+        //                SubCategoryName = result.Rm.SubCategory.SubCategoryName,
+        //                SpecificationNo = result.Rm.SpecificationNo,
+        //                Description = result.Rm.Description,
+        //                IsDiscontinued = result.Rm.IsDiscontinued,
+        //                AddedOn = result.Rm.AddedOn,
+        //                AddedBy = result.Rm.AddedBy,
+        //                LastModifiedOn = result.Rm.LastModifiedOn,
+        //                LastModifiedBy = result.Rm.LastModifiedBy,
+        //                Price = result.PriceInfo.Price,
+        //                PriceDate = result.PriceInfo.CreatedAt,
+        //                IsActive = result.Rm.IsActive
+        //            })
+        //            .ToListAsync();
+
+        //        return new ApiResponse<List<RawMaterialsDto>>(rawMaterials);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex);
+        //        return new ApiResponse<List<RawMaterialsDto>>(ex.Message);
+        //    }
+        //}
+
         public async Task<ApiResponse<List<RawMaterialsDto>>> GetAllRawMaterials()
         {
             try
@@ -108,8 +156,6 @@ namespace navami
                         AddedBy = result.Rm.AddedBy,
                         LastModifiedOn = result.Rm.LastModifiedOn,
                         LastModifiedBy = result.Rm.LastModifiedBy,
-                        Party = result.Rm.Party,
-                        VendorId = result.Rm.VendorId,
                         Price = result.PriceInfo.Price,
                         PriceDate = result.PriceInfo.CreatedAt,
                         IsActive = result.Rm.IsActive
@@ -133,12 +179,12 @@ namespace navami
                 dbContext.RawMaterials.Add(rawMaterial);
                 dbContext.SaveChanges();
 
-                if (rawMaterial.VendorId.HasValue && rawMaterial.Price.HasValue)
+                if ( rawMaterial.Price.HasValue)
                 {
                     var price = new RawMaterialPrice
                     {
                         RawMaterialId = rawMaterial.RawMaterialId,
-                        VendorId = rawMaterial.VendorId.Value,
+                        VendorId = 0,
                         SupplierName = rawMaterial.Party ?? "Unknown",
                         Price = rawMaterial.Price.Value,
                         CreatedAt = rawMaterial.PriceDate ?? DateTime.Now,
@@ -203,7 +249,7 @@ namespace navami
         }
 
         //DeleteRawMaterial
-        public ApiResponse<RawMaterialsDto> DeleteRawMaterial(Guid id)
+        public ApiResponse<RawMaterialsDto> DeleteRawMaterial(int id)
         {
             try
             {
@@ -224,7 +270,7 @@ namespace navami
 
 
         // GetRawMaterialBySubCategory
-        public ApiResponse<List<RawMaterialsDto>> GetRawMaterialBySubCategory(Guid subCategoryId)
+        public ApiResponse<List<RawMaterialsDto>> GetRawMaterialBySubCategory(int subCategoryId)
         {
             try
             {

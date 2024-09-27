@@ -1,5 +1,5 @@
 @page "/recipe/add"
-@page "/recipe/edit/{RecipeId:guid}"
+@page "/recipe/edit/{RecipeId:int}"
 
 @attribute [Authorize]
 
@@ -32,7 +32,7 @@
 <FluentCard Width="100%" Height="900px" AreaRestricted="false">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(RecipeId != Guid.Empty ? "Update Recipe" : "New Recipe ")</h3>
+        <h3 class="fs-5">@(RecipeId != 0 ? "Update Recipe" : "New Recipe ")</h3>
     </div>
 
     <div class="container text-start">
@@ -242,7 +242,7 @@
 @code {
 
     [Parameter]
-    public Guid RecipeId { get; set; }
+    public int RecipeId { get; set; }
     // list to store RecipeMasterDto item
     private RecipeMasterDto recipeMasterDto = new RecipeMasterDto();
 
@@ -290,7 +290,7 @@
         {
             recipeCategoryList = recipeCategoryListRes.Data;
         }
-        if (RecipeId != Guid.Empty)
+        if (RecipeId != 0)
         {
             var response = await recipeMasterService.GetRecipeMasterById(RecipeId);
             if (response.Success)
@@ -334,7 +334,7 @@
 
     public async Task OnAddRawMaterial()
     {
-        if (recipeMasterDto.RecipeId == Guid.Empty)
+        if (recipeMasterDto.RecipeId == 0)
         {
             isLoading = true;
             rawMaterialUsageDto.RawMaterialId = rawMaterialDto.RawMaterialId;
@@ -392,7 +392,7 @@
         recipeMasterDto.Username = username ?? string.Empty;
 
         // Check if we are updating an existing recipe
-        if (recipeMasterDto.RecipeId != Guid.Empty)
+        if (recipeMasterDto.RecipeId !=0)
         {
             // Existing Recipe: Update logic
             await UpdateExistingRecipe(userId);
@@ -451,14 +451,14 @@
         }
 
         // Prepare to add a new recipe
-        recipeMasterDto.CreatedBy = Guid.Parse(userId);
+        recipeMasterDto.CreatedBy = int.Parse(userId);
         recipeMasterDto.CreatedAt = DateTime.UtcNow;
         recipeMasterDto.RawMaterialUsage = rawMaterialUsageList;
 
         // Create mapping for new categories
         var newRecipeCategoryMappings = selectedRecipeCategory.Select(c => new RecipeCategoryMappingDto
             {
-                RecipeId = Guid.NewGuid(), // Temporary ID until saved
+                RecipeId = 0, // Temporary ID until saved
                 RecipeCategoryId = c.RecipeCategoryId,
             }).ToList();
 
@@ -505,7 +505,7 @@
 
     public async Task OnDeleteRawMaterial(RawMaterialUsageDto rawMaterialUsageDto)
     {
-        if (rawMaterialUsageDto.RawMaterialUsageId != Guid.Empty)
+        if (rawMaterialUsageDto.RawMaterialUsageId != 0)
         {
             var response = await rawMaterialUsageService.DeleteRawMaterialUsage(rawMaterialUsageDto.RawMaterialUsageId);
             if (response.Success)

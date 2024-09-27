@@ -42,11 +42,11 @@ namespace navami.Services
                 dbContext.UserMasters.Add(model);
                 dbContext.SaveChanges();
 
-                return new ApiResponse<UserMaster>(model); // Return the registered user
+                return new ApiResponse<UserMaster>(model);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<UserMaster>(ex.Message); // Return any exception message
+                return new ApiResponse<UserMaster>(ex.Message);
             }
         }
 
@@ -195,7 +195,7 @@ namespace navami.Services
                 return new ApiResponse<UserMaster>($"An error occurred while updating the user: {ex.Message}");
             }
         }
-        public async Task<ApiResponse<UserMaster>> GetUserByIdAsync(Guid userId)
+        public async Task<ApiResponse<UserMaster>> GetUserByIdAsync(int userId)
         {
             try
             {
@@ -216,7 +216,7 @@ namespace navami.Services
         }
 
         // delete user 
-        public async Task<ApiResponse<UserDto>> DeleteUserAsync(Guid userId)
+        public async Task<ApiResponse<UserDto>> DeleteUserAsync(int userId)
         {
             try
             {

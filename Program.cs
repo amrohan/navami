@@ -40,7 +40,11 @@ builder.Services.AddScoped<RecipeCategoryMappingService>();
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddDbContext<NavamiDevContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<NavamiDevContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+}
+);
 
 builder.Services.AddAutoMapper(typeof(NavamiProfile));
 

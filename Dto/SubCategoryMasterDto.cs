@@ -5,15 +5,15 @@ namespace navami.Dto
 {
     public class SubCategoryDto
     {
-        public Guid SubCategoryId { get; set; }
+        public int SubCategoryId { get; set; }
 
         public string SubCategoryName { get; set; } = null!;
 
-        public Guid CategoryId { get; set; }
+        public int CategoryId { get; set; }
 
         public string? CategoryName { get; set; }
 
-        public Guid CreatedBy { get; set; }
+        public int CreatedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

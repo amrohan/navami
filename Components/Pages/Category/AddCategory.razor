@@ -1,7 +1,8 @@
 @page "/category/add"
-@page "/category/edit/{CategoryId:guid}"
+@page "/category/edit/{CategoryId:int}"
 
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
+
 
 
 @using System.Security.Claims
@@ -18,7 +19,7 @@
 <FluentCard Width="100%" Height="200px" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(category.CategoryId != Guid.Empty ? "Update Category" : "Add Category")</h3>
+        <h3 class="fs-5">@(category.CategoryId != 0 ? "Update Category" : "Add Category")</h3>
     </div>
 
     <div class="container mt-2">
@@ -32,7 +33,7 @@
             <div class="d-flex justify-content-start align-items-center ml-4">
 
                 <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddCategoryMaster">
-                    @(category.CategoryId != Guid.Empty ? "Update" : "Add")
+                    @(category.CategoryId !=0 ? "Update" : "Add")
                 </FluentButton>
             </div>
         </div>
@@ -44,14 +45,14 @@
     [CascadingParameter]
     public HttpContext? httpContext { get; set; } = default!;
     [Parameter]
-    public Guid CategoryId { get; set; }
+    public int CategoryId { get; set; }
     private CategoryDto category = new CategoryDto();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
     protected override void OnInitialized()
     {
-        if (CategoryId != Guid.Empty)
+        if (CategoryId != 0)
         {
             var response = categoryMasterService.GetCategoryMasterById(CategoryId);
             if (response.Success)
@@ -78,9 +79,9 @@
             isLoading = false;
             return;
         }
-        category.CreatedBy = Guid.Parse(userId);
+        category.CreatedBy = int.Parse(userId);
 
-        if (category.CategoryId != Guid.Empty)
+        if (category.CategoryId != 0)
         {
             category.UpdatedAt = DateTime.Now;
             response = categoryMasterService.UpdateCategoryMaster(category);

@@ -9,11 +9,11 @@ namespace navami.Dto
 
     public class CategoryDto
     {
-        public Guid CategoryId { get; set; }
+        public int CategoryId { get; set; }
 
         public string CategoryName { get; set; } = null!;
 
-        public Guid CreatedBy { get; set; }
+        public int CreatedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

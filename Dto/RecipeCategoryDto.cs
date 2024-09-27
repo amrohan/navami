@@ -1,24 +1,24 @@
 
 using navami.Models;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace navami.Dto
 {
     public class RecipeCategoryDto
     {
-        public Guid RecipeCategoryId { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int RecipeCategoryId { get; set; }
 
         public string RecipeCategoryName { get; set; } = null!;
 
-        public Guid CreatedBy { get; set; }
+        public int CreatedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
 
         public bool IsActive { get; set; }
-
-        public List<RecipeCategoryMapping> RecipeCategoryMappings { get; set; } = new List<RecipeCategoryMapping>();
 
         //public int RecipeCategoryId { get; set; }
         //[Required(ErrorMessage = "Recipe Category Name is required")]

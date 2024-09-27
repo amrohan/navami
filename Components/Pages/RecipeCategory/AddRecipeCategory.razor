@@ -1,7 +1,7 @@
 @page "/recipe-category/add"
-@page "/recipe-category/edit/{RecipeCategoryId:guid}"
+@page "/recipe-category/edit/{RecipeCategoryId:int}"
 
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
 
 @using System.Security.Claims
 
@@ -17,7 +17,7 @@
 <FluentCard Width="100%" Height="200px" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(recipeCategory.RecipeCategoryId != Guid.Empty ? "Update Recipe Category" : "Add Recipe Category")</h3>
+        <h3 class="fs-5">@(recipeCategory.RecipeCategoryId != 0 ? "Update Recipe Category" : "Add Recipe Category")</h3>
     </div>
 
     <div class="container mt-2">
@@ -31,7 +31,7 @@
             <div class="d-flex justify-content-start align-items-center ml-4">
 
                 <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@AddRecipe">
-                    @(recipeCategory.RecipeCategoryId != Guid.Empty ? "Update" : "Add")
+                    @(recipeCategory.RecipeCategoryId != 0 ? "Update" : "Add")
                 </FluentButton>
             </div>
         </div>
@@ -46,14 +46,14 @@
     public HttpContext? httpContext { get; set; } = default!;
 
     [Parameter]
-    public Guid RecipeCategoryId { get; set; }
+    public int RecipeCategoryId { get; set; }
     private RecipeCategoryDto recipeCategory = new RecipeCategoryDto();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
     protected override void OnInitialized()
     {
-        if (RecipeCategoryId != Guid.Empty)
+        if (RecipeCategoryId != 0)
         {
             var response = recipeCategoryService.GetRecipeCategoryById(RecipeCategoryId);
             if (response.Success)
@@ -81,9 +81,9 @@
             isLoading = false;
             return;
         }
-        recipeCategory.CreatedBy = Guid.Parse(userId);
+        recipeCategory.CreatedBy = int.Parse(userId);
 
-        if (recipeCategory.RecipeCategoryId != Guid.Empty)
+        if (recipeCategory.RecipeCategoryId != 0)
         {
             recipeCategory.UpdatedAt = DateTime.UtcNow;
             response = recipeCategoryService.UpdateRecipeCategory(recipeCategory);
@@ -104,6 +104,7 @@
         response = recipeCategoryService.AddRecipeCategory(recipeCategory);
         if (response.Success)
         {
+            recipeCategory = new RecipeCategoryDto();
             ToastService.ShowSuccess("Recipe Category added successfully");
         }
         else

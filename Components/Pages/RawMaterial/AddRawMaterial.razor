@@ -1,7 +1,8 @@
 @page "/rawmaterial/add"
-@page "/rawmaterial/edit/{RmId:guid}"
+@page "/rawmaterial/edit/{RmId:int}"
 
-@attribute [Authorize]
+@attribute [Authorize(Roles = "Admin")]
+
 @attribute [StreamRendering]
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
 
@@ -15,80 +16,72 @@
 @inject SubCategoryMasterService subCategoryService
 @inject VendorMasterService vendorMasterService
 
-
-<FluentCard Width="100%" Height="300px" AreaRestricted="false" style="box-shadow: none;">
+<FluentCard Width="100%" Height="400px" AreaRestricted="false" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(rawMaterial.RawMaterialId != Guid.Empty ? "Update RM" : "Add RM")</h3>
+        <h3 class="fs-5">@(rawMaterial.RawMaterialId != 0 ? "Update RM" : "Add RM")</h3>
     </div>
 
     <div class="container text-start">
-        <div class="row row-cols-4 align-content-center">
+        <div class="row row-cols-3 align-content-center">
             <div class="col">
                 <FluentTextField @bind-Value=rawMaterial.RawMaterialCode Label="Code" Placeholder="Enter raw material code"
-                    Class="w-100" />
+                                 Class="w-100" />
             </div>
             <div class="col">
                 <FluentTextField @bind-Value=rawMaterial.RawMaterialName Label="Raw Material" Placeholder="Enter raw material"
-                    Class="w-100" />`
+                                 Class="w-100" />`
             </div>
             <div class="col">
                 <FluentNumberField @bind-Value=rawMaterial.Price Label="Price" Placeholder="Enter raw material price"
-                    Class="w-100" @oninput="@(e => rawMaterial.Price = Convert.ToDecimal(e.Value))" />
-            </div>
-            @* vendor *@
-            <div class="col">
-                <FluentSelect Height="300px" TOption="VendorMasterDto" Items="@vendorList"
-                    @bind-Value="rawMaterial.Party" Label="Vendor" Placeholder="Select Vendor"
-                    OptionText="@(c => c.VendorName)" OptionValue="@(c =>c.VendorName)" Class="w-100" />
-            </div>
-
-            <div class="col">
-                <FluentTextField @bind-Value=rawMaterial.Description Label="Description" Placeholder="Enter description"
-                    Class="w-100" />
-            </div>
-            <div class="col">
-                <FluentTextField @bind-Value=rawMaterial.SpecificationNo Label="Specificiation"
-                    Placeholder="Enter specification no..." Class="w-100" />
+                                   Class="w-100" @oninput="@(e => rawMaterial.Price = Convert.ToDecimal(e.Value))" />
             </div>
             <div class="col">
                 <FluentSelect Height="300px" TOption="CategoryDto" Items="@categoryList"
-                    @bind-Value="rawMaterial.CategoryName" Label="Category" Placeholder="Select Category"
-                    OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
-                    @onchange="OnCategoryChange" />
+                              @bind-Value="rawMaterial.CategoryName" Label="Category" Placeholder="Select Category"
+                              OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
+                              @onchange="OnCategoryChange" />
             </div>
 
             <div class="col">
                 <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
-                    @bind-Value="rawMaterial.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
-                    OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100" />
+                              @bind-Value="rawMaterial.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
+                              OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100" />
             </div>
+            <div class="col">
+                <FluentTextField @bind-Value=rawMaterial.SpecificationNo Label="Specificiation"
+                                 Placeholder="Enter specification no..." Class="w-100" />
+            </div>
+            <div class="col-sm-10 mt-2">
+                <FluentTextArea @bind-Value=rawMaterial.Description Label="Description" Placeholder="Enter description"
+                                Class="w-100" />
+            </div>
+
 
             <div class="co d-flex align-content-center align-items-end mt-4">
                 <div class="col d-flex justify-content-start align-items-end">
-                    <FluentSwitch @bind-Value=rawMaterial.IsNew Label="New Rm" Class="mb-1" />
+                    <FluentSwitch @bind-Value=rawMaterial.IsNew Label="New Rm" Class="mb-1" Disabled=!canAccess />
                 </div>
                 <div class="col d-flex justify-content-start align-items-end">
-                    <FluentSwitch @bind-Value=rawMaterial.IsDiscontinued Label="Discontinued" Class="mb-1" />
+                    <FluentSwitch @bind-Value=rawMaterial.IsDiscontinued Label="Discontinued" Class="mb-1" Disabled=!canAccess />
                 </div>
             </div>
         </div>
         <div class="col d-flex justify-content-between align-items-start w-100 mt-2">
             <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
             <FluentButton Loading="@isLoading" Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial">
-                @(rawMaterial.RawMaterialId == Guid.Empty ? "Add" : "Update")
+                @(rawMaterial.RawMaterialId == 0 ? "Add" : "Update")
             </FluentButton>
         </div>
     </div>
 
 </FluentCard>
 
-
 @code {
     [CascadingParameter]
     public HttpContext? httpContext { get; set; } = default!;
     [Parameter]
-    public Guid RmId { get; set; }
+    public int RmId { get; set; }
 
     private RawMaterialsDto rawMaterial = new RawMaterialsDto();
     private List<CategoryDto> categoryList = new List<CategoryDto>();
@@ -97,14 +90,29 @@
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
+    private bool canAccess = false;
+
     protected override async Task OnInitializedAsync()
 
     {
+        var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
+        var userRole = user?.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
+        if (userRole == "Admin")
+        {
+            canAccess = true;
+        }
+        else
+        {
+            canAccess = false;
+            rawMaterial.IsNew = true;
+        }
+
+
         await LoadCategoryDataAsync();
         await LoadVendorDataAsync();
         await LoadSubCategoryDataAsync();
 
-        if (RmId != Guid.Empty)
+        if (RmId != 0)
         {
             await LoadRawMaterialDataAsync(RmId);
         }
@@ -125,7 +133,7 @@
                 return;
             }
 
-            rawMaterial.AddedBy = Guid.Parse(userId);
+            rawMaterial.AddedBy = int.Parse(userId);
             rawMaterial.AddedOn = DateTime.Now;
 
             var category = categoryList.FirstOrDefault(c => c.CategoryName == rawMaterial.CategoryName);
@@ -146,17 +154,9 @@
             }
             rawMaterial.SubCategoryId = subCategory.SubCategoryId;
 
-            var vendor = vendorList.FirstOrDefault(c => c.VendorName == rawMaterial.Party);
-            if (vendor == null)
-            {
-                errorMessage = "Vendor not found";
-                isLoading = false;
-                return;
-            }
-            rawMaterial.VendorId = vendor.VendorId;
 
             ApiResponse<RawMaterialsDto> response;
-            if (rawMaterial.RawMaterialId == Guid.Empty)
+            if (rawMaterial.RawMaterialId == 0)
             {
                 response = rawMaterialService.AddRawMaterial(rawMaterial);
             }
@@ -252,7 +252,7 @@
         }
     }
 
-    private async Task LoadRawMaterialDataAsync(Guid rmId)
+    private async Task LoadRawMaterialDataAsync(int rmId)
     {
         isLoading = true;
         var responseRawMaterial = await rawMaterialService.GetRawMaterialByIdAsync(rmId);

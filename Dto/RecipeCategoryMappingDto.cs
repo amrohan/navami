@@ -5,13 +5,13 @@ namespace navami.Dto
 {
     public class RecipeCategoryMappingDto
     {
-        public Guid RecipeCategoryMappingId { get; set; }
+        public int RecipeCategoryMappingId { get; set; }
 
-        public Guid RecipeId { get; set; }
+        public int RecipeId { get; set; }
 
-        public Guid RecipeCategoryId { get; set; }
+        public int RecipeCategoryId { get; set; }
 
-        public Guid CreatedBy { get; set; }
+        public int CreatedBy { get; set; }
 
         public DateTime CreatedAt { get; set; }
 

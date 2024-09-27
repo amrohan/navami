@@ -35,7 +35,7 @@ namespace navami.Services
             }
         }
         // get by id
-        public ApiResponse<VendorMasterDto> GetVendorMasterById(Guid id)
+        public ApiResponse<VendorMasterDto> GetVendorMasterById(int id)
         {
             try
             {
@@ -53,7 +53,6 @@ namespace navami.Services
             try
             {
                 var vendorMaster = _mapper.Map<Vendor>(vendorMasterDto);
-                vendorMaster.VendorId = Guid.NewGuid();
                 vendorMaster.CreatedAt = DateTime.Now;
                 dbContext.Vendors.Add(vendorMaster);
                 dbContext.SaveChanges();
@@ -88,7 +87,7 @@ namespace navami.Services
         }
 
         // delete
-        public ApiResponse<VendorMasterDto> DeleteVendorMaster(Guid id)
+        public ApiResponse<VendorMasterDto> DeleteVendorMaster(int id)
         {
             try
             {
