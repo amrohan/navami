@@ -258,6 +258,8 @@
     public int RecipeId { get; set; }
     [Parameter]
     public int CopyId { get; set; }
+
+    string userRole;
     // list to store RecipeMasterDto item
     private RecipeMasterDto recipeMasterDto = new RecipeMasterDto();
 
@@ -335,7 +337,7 @@
     {
         var response = await recipeMasterService.GetRecipeMasterById(recipeId);
         var user = AuthenticationStateProvider.GetAuthenticationStateAsync().Result.User;
-        var userRole = user?.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
+        userRole = user?.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
         var userId = user?.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
         if (response.Success)
         {
@@ -375,6 +377,10 @@
                         warnMessage = "You cannot edit this recipe as more than 24 hours have passed since its creation.";
                     }
                 }
+                else
+                {
+                    canEditRecipe = true;
+                }
 
             }
         }
@@ -390,15 +396,11 @@
         var response = await recipeMasterService.GetRecipeMasterById(copyId);
         if (response.Success)
         {
+            canEditRecipe = true;
             recipeMasterDto = response.Data;
 
             // Set RecipeId and other IDs to 0 for new recipe
             recipeMasterDto.RecipeId = 0;
-            foreach (var category in recipeMasterDto.RecipeCategory)
-            {
-                category.RecipeCategoryId = 0;
-            }
-
             foreach (var usage in recipeMasterDto.RawMaterialUsage)
             {
                 usage.RawMaterialUsageId = 0;

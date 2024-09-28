@@ -49,7 +49,14 @@
                 <PropertyColumn Property="@(c => c.RecipeCategories)" Sortable="true" title="Category" />
                 <PropertyColumn Property="@(c => c.TotalCost)" Sortable="true" title="Cost" />
                 @* <PropertyColumn Property="@(c => c.AdjustedCost)" Sortable="true" title="Adjusted Cost" /> *@
-                <PropertyColumn Property="@(c => $"{c.CreatedAt.ToShortDateString()} by {c.Username}")" Sortable="true" title="Created At" />
+                @if(userRole == "Admin")
+                {
+                    <PropertyColumn Property="@(c => $"{c.CreatedAt.ToShortDateString()} by {c.Username}")" Sortable="true" title="Created At" />
+                }
+                else
+                {
+                    <PropertyColumn Property="@(c => c.CreatedAt.ToShortDateString())" Sortable="true" title="Created At" />
+                }
 
             </FluentDataGrid>
         </div>
@@ -63,13 +70,14 @@
     private IQueryable<RecipeMasterDto> originalRecipeMastList;
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
+    string userRole;
     protected override async Task OnInitializedAsync()
     {
         try
         {
             var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
             var userId = user?.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            var userRole = user?.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
+            userRole = user?.FindFirst(c => c.Type == ClaimTypes.Role)?.Value;
 
             ApiResponse<List<RecipeMasterDto>> response;
 

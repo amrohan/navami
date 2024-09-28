@@ -93,6 +93,10 @@ namespace navami.Services
                 {
                     return new ApiResponse<UserMaster>("Invalid username or password.");
                 }
+                if(user.IsDeactivated != false)
+                {
+                    return new ApiResponse<UserMaster>("Your account is deactivated contact to Admin.");
+                }
 
                 return new ApiResponse<UserMaster>(user);
             }
@@ -154,6 +158,10 @@ namespace navami.Services
         {
             try
             {
+                if (model.Role == "Admin")
+                {
+                    return new ApiResponse<UserMaster>("Can not deactivate Admin");
+                }
                 // Find the user by ID
                 var user = await dbContext.UserMasters.FirstOrDefaultAsync(u => u.UserId == model.UserId);
                 if (user == null)

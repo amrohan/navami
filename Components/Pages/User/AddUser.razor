@@ -56,7 +56,7 @@
                 </div>
 
                 <div class="col d-flex justify-content-start align-items-end">
-                    <FluentSwitch @bind-Value=deactive Label="Deactivate" Class="mb-1" />
+                    <FluentSwitch @bind-Value=deactive Disabled=@(user.Role == "Admin") Label="Deactivate" Class="mb-1" />
                 </div>
             </div>
         </div>
@@ -75,6 +75,7 @@
 
     public UserMaster user = new UserMaster();
     bool deactive;
+    bool CanDeactivate;
     bool isLoading = false;
     string errorMessage = string.Empty;
     private List<Role>? userRoles;
@@ -85,21 +86,18 @@
         {
             isLoading = true;
             errorMessage = string.Empty;
-
-            // Perform registration or update logic here
-
             isLoading = false;
         }
         var response = await userService.GetAllUserRolesAsync();
 
         if (response.Success)
         {
-            userRoles = response.Data; // Extract roles from the ApiResponse
+            userRoles = response.Data;
         }
         else
         {
-            // Handle the error, e.g., show a message or log the error
             Console.WriteLine(response.ErrorMessage);
+            ToastService.ShowError(response.ErrorMessage);
         }
 
         if ( UserId != 0)
@@ -112,8 +110,9 @@
             }
             else
             {
-                // Handle the error, e.g., show a message or log the error
                 Console.WriteLine(userResponse.ErrorMessage);
+                ToastService.ShowError(response.ErrorMessage);
+
             }
         }
     }
