@@ -27,12 +27,12 @@ namespace navami.Models
         public virtual DbSet<UserMaster> UserMasters { get; set; }
         public virtual DbSet<Vendor> Vendors { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            // Move connection string to configuration for better security.
-#warning Connection string should be moved out of source code.
-            optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=navami_dev;Trusted_Connection=True;TrustServerCertificate=True;");
-        }
+//        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//        {
+//            // Move connection string to configuration for better security.
+//#warning Connection string should be moved out of source code.
+//            optionsBuilder.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=navami_dev;Trusted_Connection=True;TrustServerCertificate=True;");
+//        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
