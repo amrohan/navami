@@ -16,49 +16,50 @@
 @inject SubCategoryMasterService subCategoryService
 @inject VendorMasterService vendorMasterService
 
-<FluentCard Width="100%" Height="400px" AreaRestricted="false" style="box-shadow: none;">
+<FluentCard Width="100%" Height="410px" AreaRestricted="false" style="box-shadow: none;">
 
     <div class="d-flex justify-content-between align-items-center">
-        <h3 class="fs-5">@(rawMaterial.RawMaterialId != 0 ? "Update RM" : "Add RM")</h3>
+        <h3 class="fs-5">@(rawMaterial.RawMaterialId != 0 ? "Update " : "Add ") Raw Material</h3>
     </div>
 
     <div class="container text-start">
-        <div class="row row-cols-3 align-content-center">
-            <div class="col">
+        <div class="row row-cols-3 align-content-center my-2">
+            <div class="col mt-2">
                 <FluentTextField @bind-Value=rawMaterial.RawMaterialCode Label="Code" Placeholder="Enter raw material code"
                                  Class="w-100" />
             </div>
-            <div class="col">
+            <div class="col mt-2">
                 <FluentTextField @bind-Value=rawMaterial.RawMaterialName Label="Raw Material" Placeholder="Enter raw material"
-                                 Class="w-100" />`
+                                 Class="w-100" />
             </div>
-            <div class="col">
+            <div class="col mt-2">
                 <FluentNumberField @bind-Value=rawMaterial.Price Label="Price" Placeholder="Enter raw material price"
-                                   Class="w-100" @oninput="@(e => rawMaterial.Price = Convert.ToDecimal(e.Value))" />
+                                   Class="w-100" @oninput="@(e => HandlePriceInput(e))" />
             </div>
-            <div class="col">
+            <div class="col mt-2">
+                <FluentTextField @bind-Value=rawMaterial.VendorNmae Label="Venodr name" Placeholder="Enter vendor name"
+                                 Class="w-100" />
+            </div>
+            <div class="col mt-2">
                 <FluentSelect Height="300px" TOption="CategoryDto" Items="@categoryList"
                               @bind-Value="rawMaterial.CategoryName" Label="Category" Placeholder="Select Category"
                               OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
                               @onchange="OnCategoryChange" />
             </div>
-
-            <div class="col">
+            <div class="col mt-2">
                 <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
                               @bind-Value="rawMaterial.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
                               OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100" />
             </div>
-            <div class="col">
-                <FluentTextField @bind-Value=rawMaterial.SpecificationNo Label="Specificiation"
-                                 Placeholder="Enter specification no..." Class="w-100" />
-            </div>
-            <div class="col-sm-10 mt-2">
+            <div class="col-sm-8 mt-2">
                 <FluentTextArea @bind-Value=rawMaterial.Description Label="Description" Placeholder="Enter description"
                                 Class="w-100" />
             </div>
-
-
-            <div class="co d-flex align-content-center align-items-end mt-4">
+            <div class="col mt-2">
+                <FluentTextArea @bind-Value=rawMaterial.SpecificationNo Label="Specificiation"
+                                Placeholder="Enter specification no..." Class="w-100" />
+            </div>
+            <div class="col d-flex align-content-center align-items-end mt-4">
                 <div class="col d-flex justify-content-start align-items-end">
                     <FluentSwitch @bind-Value=rawMaterial.IsNew Label="New Rm" Class="mb-1" Disabled=!canAccess />
                 </div>
@@ -167,7 +168,12 @@
 
             if (response.Success)
             {
-                ToastService.ShowSuccess("Raw Material added successfully");
+                ToastService.ShowSuccess(rawMaterial.RawMaterialId == 0
+                ? "Raw Material added successfully"
+                : "Raw Material updated successfully");
+
+                navigationManager.NavigateTo("/rawmaterial");
+
             }
             else
             {
@@ -263,6 +269,15 @@
         }
 
         isLoading = false;
+    }
+
+    private void HandlePriceInput(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value.ToString(), out decimal price))
+        {
+            rawMaterial.Price = price;
+        }
+     
     }
 
 }

@@ -91,6 +91,7 @@
             if (response.Success)
             {
                 ToastService.ShowSuccess("Recipe Category updated successfully");
+                navigationManager.NavigateTo("/recipe-category");
             }
             else
             {
@@ -106,6 +107,7 @@
         {
             recipeCategory = new RecipeCategoryDto();
             ToastService.ShowSuccess("Recipe Category added successfully");
+            navigationManager.NavigateTo("/recipe-category");
         }
         else
         {

@@ -12,6 +12,7 @@
 @using navami.Models
 @inject UserService userService
 @inject IToastService ToastService
+@inject NavigationManager navigationManager
 
 
 <FluentCard Width="100%" Height="230px" style="box-shadow: none;">
@@ -146,6 +147,12 @@
             {
                 // Show a success message
                 isLoading = false;
+
+                ToastService.ShowSuccess(user.UserId == 0
+                ? "User added successfully"
+                : "User updated successfully");
+
+                navigationManager.NavigateTo("/user");
                 ToastService.ShowSuccess("User created successfully");
 
             }

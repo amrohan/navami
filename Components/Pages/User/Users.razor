@@ -35,7 +35,7 @@
             <FluentDataGrid Items="@users" GenerateHeader="GenerateHeaderOption.Sticky">
                 <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
                     <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                                  OnClick="@(() => DeleteUser(context))" />
+                                  OnClick="@(() => HandleDelete(context))" />
                     <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
                                   OnClick="@(()=>EditUser(context))" />
                 </TemplateColumn>
@@ -51,12 +51,17 @@
     }
 </FluentCard>
 
+<ConfirmDialog ConfirmationChanged="@HandleConfirmation" ShowDialog="@showDialog" />
+
 
 @code {
     private IQueryable<UserDto> users;
     private IQueryable<UserDto> originalUsers;
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
+    UserDto ctx = new UserDto();
+    bool showDialog = false;
+
     protected override async Task OnInitializedAsync()
     {
         var response = await userService.GetAllUsersAsync();
@@ -122,4 +127,21 @@
         }
     }
 
+    private void HandleDelete(UserDto userDto)
+    {
+        ctx = userDto;
+        showDialog = true;
+    }
+    private async Task HandleConfirmation(bool confirmed)
+    {
+        if (confirmed)
+        {
+            await DeleteUser(ctx);
+            showDialog = false;
+        }
+        else
+        {
+            showDialog = false;
+        }
+    }
 }

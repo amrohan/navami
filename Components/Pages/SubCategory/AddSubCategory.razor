@@ -114,7 +114,12 @@
 
         if (response.Success)
         {
-            ToastService.ShowSuccess("Sub Category added successfully");
+
+            ToastService.ShowSuccess(subCategory.SubCategoryId == 0
+            ? "Sub category added successfully"
+            : "Sub category updated successfully");
+
+            navigationManager.NavigateTo("/subcategory");
         }
         else
         {

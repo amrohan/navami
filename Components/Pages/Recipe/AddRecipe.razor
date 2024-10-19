@@ -23,6 +23,7 @@
 @inject NavigationManager navigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
+<PageTitle>Recipe</PageTitle>
 
 @if (warnMessage != String.Empty)
 {
@@ -37,7 +38,10 @@
         @if (canEditRecipe)
         {
             <h3 class="fs-5">
-                @(RecipeId != 0 ? "Update " : "New ") Recipe Master
+                @(RecipeId == 0 && CopyId == 0 ? "Add Recipe" :
+                    RecipeId != 0 ? $"Update Recipe" :
+                    CopyId != 0 ? $"Copy Recipe" :
+                    "New Recipe")
             </h3>
 
         }
@@ -49,16 +53,16 @@
 
             <div style="width:auto">
                 <div class="container text-start">
-                    <div class="row row-cols-2 align-content-lg-start">
-                        <div class="col">
+                    <div class="row row-cols-2 align-content-lg-start my-2">
+                        <div class="col mt-2">
                             <FluentTextField Label="Recipe Name" @bind-Value="recipeMasterDto.RecipeName"
                                              Placeholder="Enter recipe name" Class="w-100" />
                         </div>
-                        <div class="col">
+                        <div class="col mt-2">
                             <FluentTextField Label="Profile" @bind-Value="recipeMasterDto.Profile" Placeholder="Enter profile"
                                              Class="w-100" />
                         </div>
-                        <div class="col">
+                        <div class="col mt-2">
                             <FluentAutocomplete TOption="RecipeCategoryDto" Label="Recipe Category" OnOptionsSearch="OnRecipeSearch"
                                                 Placeholder="Select recipe category" Virtualize="true"
                                                 OptionText="@(item => item.RecipeCategoryName)" MaximumSelectedOptions=20
@@ -125,7 +129,7 @@
                         </div>
                         <div class="mb-2">
                             <label style="font-size:smaller"><strong>Profile</strong></label>
-                            <div class="p-1" >
+                            <div class="p-1">
                                 <span>@recipeMasterDto.Profile</span>
                             </div>
                         </div>
@@ -144,51 +148,51 @@
         <div style="width:100%;">
             @* Raw Material Usage use FluentDataGrid *@
             <FluentCard Width="100%" Height="auto" Class="mb-3" AreaRestricted="false">
-            <main>
+                <main>
 
 
-                <div class="d-flex justify-content-end align-items-center">
-                    <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
-                                  @bind-Value=searchTerm @bind-Value:after=OnSearchRmUsage Immediate=true />
-                </div>
-                <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; margin-top:10px">
-                    <p>
-                        Quantity <span class="fw-bold">
-                            @(Math.Round(rawMaterialUsageList.Sum(item => item.Quantity), 2))
-                        </span>
-                    </p>
-                    <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; gap:10px">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <FluentSearch Placeholder="Search sub category..." Icon="Search" IconPosition="IconPosition.Start"
+                                      @bind-Value=searchTerm @bind-Value:after=OnSearchRmUsage Immediate=true />
+                    </div>
+                    <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; margin-top:10px">
                         <p>
-                            Cost
-                            <span class="fw-bold">
-                                Rs.@(Math.Round(rawMaterialUsageList.Sum(item => item.Cost), 2))
+                            Quantity <span class="fw-bold">
+                                @(Math.Round(rawMaterialUsageList.Sum(item => item.Quantity), 2))
                             </span>
                         </p>
+                        <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; gap:10px">
+                            <p>
+                                Cost
+                                <span class="fw-bold">
+                                    Rs.@(Math.Round(rawMaterialUsageList.Sum(item => item.Cost), 2))
+                                </span>
+                            </p>
+                        </div>
                     </div>
+                    <div class="align-content-start border rounded" style="height: 450px; overflow:auto;">
+                        <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()" GenerateHeader="GenerateHeaderOption.Sticky">
+                            @if (canEditRecipe)
+                            {
+                                <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
+                                    <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
+                                                  OnClick="@(() => OnDeleteRawMaterial(context))" Disabled="@(!canEditRecipe)" />
+                                    <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
+                                                  OnClick="@(() => OnEditRawMaterialUsage(context))" Disabled="@(!canEditRecipe)" />
+                                </TemplateColumn>
+                            }
+                            <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
+                            <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
+                            <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" Title="Quantity" />
+                            <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
+                        </FluentDataGrid>
+                    </div>
+                </main>
+                @* save btn *@
+                <div class="d-flex justify-content-between align-items-start w-100 mt-2">
+                    <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
+                    <FluentButton Appearance="Appearance.Accent" OnClick="@OnSaveRecipe" Disabled="@(!canEditRecipe)">Save Recipe</FluentButton>
                 </div>
-                <div class="align-content-start border rounded" style="height: 450px; overflow:auto;">
-                    <FluentDataGrid Items="@rawMaterialUsageList.AsQueryable()" GenerateHeader="GenerateHeaderOption.Sticky">
-                        @if (canEditRecipe)
-                        {
-                            <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
-                                <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                                              OnClick="@(() => OnDeleteRawMaterial(context))" Disabled="@(!canEditRecipe)" />
-                                <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
-                                              OnClick="@(() => OnEditRawMaterialUsage(context))" Disabled="@(!canEditRecipe)" />
-                            </TemplateColumn>
-                        }
-                        <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
-                        <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
-                        <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" Title="Quantity" />
-                        <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
-                    </FluentDataGrid>
-                </div>
-            </main>
-            @* save btn *@
-            <div class="d-flex justify-content-between align-items-start w-100 mt-2">
-                <p class="text-danger" style="font-size: small; margin-left: 1rem; margin-top: 0.5rem;">@errorMessage</p>
-                <FluentButton Appearance="Appearance.Accent" OnClick="@OnSaveRecipe" Disabled="@(!canEditRecipe)">Save Recipe</FluentButton>
-            </div>
             </FluentCard>
         </div>
 
@@ -200,10 +204,10 @@
 @if (isEditing)
 {
 
-    <div class="login-overlay">
+    <div class="overlay">
 
         <FluentCard Width="600px" Height="280px" AreaRestricted=false>
-            <h2 class="fs-6 fw-bold m-0 p-0">Edit RM Usage</h2>
+            <h2 class="fs-6 fw-bold m-0 p-0">Edit Raw material usage</h2>
             <p class="text-danger fs-6">@errorMessage</p>
             <div class="row row-cols-2 align-content-center">
                 <div class="col gy-2">
@@ -321,6 +325,10 @@
             if (CopyId != 0)
             {
                 await LoadRecipeForCopy(CopyId);
+            }
+            if (RecipeId != null && CopyId != null)
+            {
+                canEditRecipe = true;
             }
         }
         catch (Exception ex)
@@ -473,7 +481,7 @@
     public async void OnSaveRecipe()
     {
         isLoading = true;
-        if (selectedRecipeCategory.Count() ==0)
+        if (selectedRecipeCategory.Count() == 0)
         {
             ToastService.ShowError("Please select a recipe category");
             isLoading = false;
@@ -538,6 +546,7 @@
         if (response.Success)
         {
             ToastService.ShowSuccess("Recipe updated successfully");
+            navigationManager.NavigateTo("/recipe");
         }
         else
         {

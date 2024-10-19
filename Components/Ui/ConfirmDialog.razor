@@ -1,0 +1,50 @@
+﻿@if (ShowDialog)
+{
+    
+<div class="overlay">
+
+    <FluentCard Width="600px" Height="200px" AreaRestricted=false>
+        <h2 class="fs-5 fw-bold m-0 p-0">@ConfirmationTitle</h2>
+        <p class="text-gray-100 fs-6 mt-4">@ConfirmationMessage</p>
+            <div class="col text-end col-6 w-100 mt-5">
+                <FluentButton Appearance="Appearance.Outline" OnClick="@OnCancle" Class="w-25 ml-4">
+                    Cancel
+                </FluentButton>
+                <FluentButton Appearance="Appearance.Accent" OnClick="@OnConfirm" Class="w-25 ml-4" >
+                    Confirm
+                </FluentButton>
+            </div>
+
+    </FluentCard>
+</div>
+}
+
+@code {
+
+
+
+    [Parameter]
+    public string ConfirmationTitle { get; set; } = "Confirm Action";
+
+    [Parameter]
+    public string ConfirmationMessage { get; set; } = "Are you sure you want to proceed?";
+
+    [Parameter]
+    public bool ShowDialog { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<bool> ConfirmationChanged { get; set; }
+
+    public async Task OnConfirm()
+    {
+        await ConfirmationChanged.InvokeAsync(true);
+
+    }
+
+    public async Task OnCancle()
+    {
+        await ConfirmationChanged.InvokeAsync(false);
+
+    }
+  
+}

@@ -14,7 +14,7 @@
 @attribute [StreamRendering(true)]
 @rendermode @(new InteractiveServerRenderMode(prerender:false))
 
-<PageTitle>Recepies</PageTitle>
+<PageTitle>Recipe Category</PageTitle>
 
 <FluentCard Width="100%" Height="600px" style="box-shadow: none;">
     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -24,7 +24,7 @@
         </FluentButton>
     </div>
     <div class="d-flex justify-content-end align-items-center mb-1">
-        <FluentSearch Placeholder="Search users..." Icon="Search" IconPosition="IconPosition.Start"
+        <FluentSearch Placeholder="Search recipe category..." Icon="Search" IconPosition="IconPosition.Start"
             @bind-Value=searchTerm @bind-Value:after=SearchRecipe Immediate=true />
     </div>
     @if (recipes is null)
@@ -37,7 +37,7 @@
             <FluentDataGrid Items="@recipes" GenerateHeader="GenerateHeaderOption.Sticky">
                 <TemplateColumn Title="Actions" Align="@Align.Start" Width="100px">
                     <FluentButton aria-label="Delete item" IconEnd="@(new Icons.Regular.Size16.Delete())"
-                                  OnClick="@(() => DeleteRecipeCategory(context))" />
+                                  OnClick="@(() => HandleDelete(context))" />
                     <FluentButton aria-label="Edit item" IconEnd="@(new Icons.Regular.Size16.Edit())"
                                   OnClick="@(()=>EditRecipeCategory(context))" />
                 </TemplateColumn>
@@ -45,10 +45,9 @@
             </FluentDataGrid>
         </div>
     }
-
-
-
 </FluentCard>
+
+<ConfirmDialog ConfirmationChanged="@HandleConfirmation" ShowDialog="@showDialog" />
 
 
 @code {
@@ -56,6 +55,8 @@
     private IQueryable<RecipeCategoryDto> originalRecipes;
     string errorMessage = string.Empty;
     string searchTerm = string.Empty;
+    RecipeCategoryDto ctx = new RecipeCategoryDto();
+    bool showDialog = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -100,7 +101,6 @@
         }
     }
 
-
     private async Task LoadRecipeCategories()
     {
         var response = await recipeCategoryService.GetRecipeCategoriesAsync();
@@ -114,4 +114,25 @@
             errorMessage = response.ErrorMessage;
         }
     }
+   
+    private void HandleDelete(RecipeCategoryDto recipeCategoryDto)
+    {
+        ctx = recipeCategoryDto;
+        showDialog = true;
+    }
+
+    private void HandleConfirmation(bool confirmed)
+    {
+        if (confirmed)
+        {
+            DeleteRecipeCategory(ctx);
+            showDialog = false;
+        }
+        else
+        {
+            showDialog = false;
+        }
+    }
+
+
 }
