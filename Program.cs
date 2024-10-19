@@ -51,7 +51,8 @@ builder.Services.AddDbContext<NavamiDevContext>(options =>
             errorNumbersToAdd: null
         );
     });
-}
+},
+ServiceLifetime.Transient
 );
 
 builder.Services.AddAutoMapper(typeof(NavamiProfile));

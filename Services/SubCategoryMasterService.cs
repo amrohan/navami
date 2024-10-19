@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using navami.Components.Pages.Category;
 using navami.Dto;
 using navami.Models;
 
@@ -15,54 +16,12 @@ namespace navami
             _mapper = mapper;
         }
 
-        // get all
-        // public ApiResponse<List<SubCategoryDto>> GetSubCategoryMaster()
-        // {
-        //     try
-        //     {
-        //         // var subCategoryMaster = dbContext.SubCategoryMasters.Where(u => u.IsActive != true).ToList();
-        //         //  join table use linq and return the list of SubCategoryMasters as SubCategoryDto objects use mapper
-        //         var subCategoryMaster = (from subCategory in dbContext.SubCategoryMasters
-        //                                  join category in dbContext.CategoryMasters on subCategory.CategoryId equals category.CategoryId
-        //                                  select new SubCategoryDto
-        //                                  {
-        //                                      SubCategoryId = subCategory.SubCategoryId,
-        //                                      SubCategoryName = subCategory.SubCategoryName,
-        //                                      IsActive = subCategory.IsActive,
-        //                                      CategoryId = subCategory.CategoryId,
-        //                                      CategoryName = category.CategoryName,
-        //                                      CreatedBy = subCategory.CreatedBy.ToString(),
-        //                                      UpdatedBy = subCategory.UpdatedBy.ToString(),
-        //                                      CreatedDate = subCategory.CreatedDate.ToString("dd/MM/yyyy"),
-        //                                  }).ToList();
 
-
-        //         // return the list of SubCategoryMasters as SubCategoryDto objects use mapper
-        //         return new ApiResponse<List<SubCategoryDto>>(_mapper.Map<List<SubCategoryDto>>(subCategoryMaster));
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return new ApiResponse<List<SubCategoryDto>>(ex.Message);
-        //     }
-        // }
         public async Task<ApiResponse<List<SubCategoryDto>>> GetSubCategoryMasterAsync()
         {
             try
             {
-                //var subCategoryMasters = await (from subCategory in dbContext.SubCategories
-                //                                join category in dbContext.SubCategories on subCategory.CategoryId equals category.CategoryId
-                //                                where !subCategory.IsActive
-                //                                select new SubCategoryDto
-                //                                {
-                //                                    SubCategoryId = subCategory.SubCategoryId,
-                //                                    SubCategoryName = subCategory.SubCategoryName,
-                //                                    IsActive = subCategory.IsActive,
-                //                                    CategoryId = subCategory.CategoryId,
-                //                                    CategoryName = category.CategoryName,
-                //                                    CreatedBy = subCategory.CreatedBy,
-                //                                    CreatedAt = subCategory.CreatedAt,
-                //                                }).ToListAsync();
-                var subCategoryMasters = await dbContext.SubCategories
+                var subCategoryMasters = await dbContext.SubCategories.Include(i=>i.Category)
                     .Where(u => !u.IsActive)
                     .Select(subCategory => new SubCategoryDto
                     {
@@ -70,6 +29,7 @@ namespace navami
                         SubCategoryName = subCategory.SubCategoryName,
                         IsActive = subCategory.IsActive,
                         CategoryId = subCategory.CategoryId,
+                        CategoryName = subCategory.Category.CategoryName,
                         CreatedBy = subCategory.CreatedBy,
                         CreatedAt = subCategory.CreatedAt,
                         UpdatedAt = subCategory.UpdatedAt,
@@ -79,7 +39,7 @@ namespace navami
             }
             catch (Exception ex)
             {
-                // Log the exception (consider using a logging framework)
+
                 Console.WriteLine(ex); // Replace with proper logging
                 return new ApiResponse<List<SubCategoryDto>>(ex.Message);
             }
