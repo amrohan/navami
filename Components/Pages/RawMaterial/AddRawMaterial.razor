@@ -44,12 +44,14 @@
                 <FluentSelect Height="300px" TOption="CategoryDto" Items="@categoryList"
                               @bind-Value="rawMaterial.CategoryName" Label="Category" Placeholder="Select Category"
                               OptionText="@(c => c.CategoryName)" OptionValue="@(c =>c.CategoryName)" Class="w-100"
+                              OptionSelected="@(c => c.CategoryName == rawMaterial.CategoryName)"
                               @onchange="OnCategoryChange" />
             </div>
             <div class="col mt-2">
                 <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
                               @bind-Value="rawMaterial.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
-                              OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100" />
+                              OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
+                              OptionSelected="@(c => c.SubCategoryName == rawMaterial.SubCategoryName)" />
             </div>
             <div class="col-sm-8 mt-2">
                 <FluentTextArea @bind-Value=rawMaterial.Description Label="Description" Placeholder="Enter description"
