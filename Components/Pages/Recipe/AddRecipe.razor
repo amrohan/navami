@@ -71,31 +71,35 @@
                         <div class="col"></div>
                     </div>
 
-                    <div class="row row-cols-2 align-content-center mt-4">
-                        <div class="col">
-                            <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
-                                          @bind-Value="rawMaterialUsageDto.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
-                                          OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
-                                          @onchange="OnSubCategoryChange" />
+                    <div style="display:flex; justify-content:center;align-items:center; gap:10px;margin-top:10px;flex-direction:column;">
+                        <div  style="display:flex; justify-content:space-between;align-items:center; gap:10px">
+                            <div class="col">
+                                <FluentSelect Height="300px" TOption="SubCategoryDto" Items="@subCategoryList"
+                                              @bind-Value="rawMaterialUsageDto.SubCategoryName" Label="Sub Category" Placeholder="Select Sub Category"
+                                              OptionText="@(c => c.SubCategoryName)" OptionValue="@(c =>c.SubCategoryName)" Class="w-100"
+                                              @onchange="OnSubCategoryChange" />
+                            </div>
+                            <div class="col">
+                                <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
+                                              @bind-Value="rawMaterialUsageDto.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
+                                              OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
+                                              @onchange="OnRawMaterialChange">
+                                    <OptionTemplate>
+                                        <div class="d-flex justify-content-start align-items-center gap-1">
+                                            @context.RawMaterialCode
+                                            <FluentDivider Orientation="Orientation.Vertical" Role="DividerRole.Presentation" Style="height: 20px; background-color:black" />
+                                            @context.RawMaterialName
+                                        </div>
+                                    </OptionTemplate>
+                                </FluentSelect>
+                            </div>
                         </div>
-                        <div class="col">
-                            <FluentSelect Height="300px" TOption="RawMaterialsDto" Items="@rawMaterialList"
-                                          @bind-Value="rawMaterialUsageDto.RawMaterialName" Label="Raw Material" Placeholder="Select Raw Material"
-                                          OptionText="@(c => c.RawMaterialName)" OptionValue="@(c =>c.RawMaterialName)" Class="w-100"
-                                          @onchange="OnRawMaterialChange">
-                                <OptionTemplate>
-                                    <div class="d-flex justify-content-start align-items-center gap-1">
-                                        @context.RawMaterialCode
-                                        <FluentDivider Orientation="Orientation.Vertical" Role="DividerRole.Presentation" Style="height: 20px; background-color:black" />
-                                        @context.RawMaterialName
-                                    </div>
-                                </OptionTemplate>
-                            </FluentSelect>
-                        </div>
-                        <div class="col mt-2">
+                      
+                     @*    <div class="col mt-2">
                             <FluentNumberField Label="Cost" @bind-Value="rawMaterialDto.Price" Placeholder="Enter quantity"
                                                Class="w-100" ReadOnly="true" />
-                        </div>
+                        </div> *@
+                    <div style="display:flex; justify-content:space-between;align-items:center; gap:10px;width:100%;">
                         <div class="col mt-2">
                             <FluentNumberField Label="Quantity" @bind-Value="rawMaterialUsageDto.Quantity" Placeholder="Enter quantity" Class="w-100" @oninput="ValidateDecimalPlaces" />
                             @if (!isValid)
@@ -103,10 +107,11 @@
                                 <div class="text-danger" style="font-size:smaller">Please enter a value with up to four decimal places.</div>
                             }
                         </div>
-                        <div class="col">
+                        <div class="col w-100">
                             <FluentButton Appearance="Appearance.Accent" OnClick="@OnAddRawMaterial" Class="w-25 mt-4 ml-4" Disabled="@(!canEditRecipe)">
                                 Add
                             </FluentButton>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -162,12 +167,12 @@
                             </span>
                         </p>
                         <div style="display:flex;justify-content: space-between; align-items: end;font-size: small; gap:10px">
-                            <p>
+@*                             <p>
                                 Cost
                                 <span class="fw-bold">
                                     Rs.@(Math.Round(rawMaterialUsageList.Sum(item => item.Cost), 2))
                                 </span>
-                            </p>
+                            </p> *@
                         </div>
                     </div>
                     <div class="align-content-start border rounded" style="height: 450px; overflow:auto;">
@@ -184,7 +189,7 @@
                             <PropertyColumn Property="@(u => u.RawMaterialName)" Sortable="true" Title="Raw material" />
                             <PropertyColumn Property="@(u => u.SubCategoryName)" Sortable="true" Title="Sub Category" />
                             <PropertyColumn Property="@(u => u.Quantity)" Sortable="true" Title="Quantity" />
-                            <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" />
+                           @*  <PropertyColumn Property="@(u => u.Cost)" Title="@($"Cost (Rs.{(rawMaterialUsageList.Sum(item => item.Cost))})")" Sortable="true" /> *@
                         </FluentDataGrid>
                     </div>
                 </main>
