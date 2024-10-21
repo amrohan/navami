@@ -38,7 +38,7 @@ namespace navami
             try
             {
                 var rawMaterial = await dbContext.RawMaterials
-                    .Where(u => u.RawMaterialId == id && !u.IsActive) // Use !u.IsActive for clarity
+                    .Where(u => u.RawMaterialId == id && !u.IsActive) 
                     .Include(u => u.Category)
                     .Include(u => u.SubCategory)
                     .Select(rm => new
@@ -49,7 +49,7 @@ namespace navami
                             .OrderByDescending(pm => pm.AddedOn)
                             .FirstOrDefault()
                     })
-                    .FirstOrDefaultAsync(); // Use FirstOrDefaultAsync for asynchronous execution
+                    .FirstOrDefaultAsync();
 
                 if (rawMaterial == null)
                 {
@@ -59,6 +59,7 @@ namespace navami
                 var rawMaterialDto = _mapper.Map<RawMaterialsDto>(rawMaterial.Rm);
                 rawMaterialDto.CategoryName = rawMaterial.Rm.Category?.CategoryName;
                 rawMaterialDto.SubCategoryName = rawMaterial.Rm.SubCategory?.SubCategoryName;
+                rawMaterialDto.Party = rawMaterial.PriceInfo.Party;
 
                 if (rawMaterial.PriceInfo != null)
                 {
@@ -185,7 +186,7 @@ namespace navami
                     {
                         RawMaterialId = rawMaterial.RawMaterialId,
                         VendorId = 0,
-                        SupplierName = rawMaterial.Party ?? "Unknown",
+                        SupplierName = rawMaterialDto.Party ?? "Unknown",
                         Price = rawMaterial.Price.Value,
                         CreatedAt = rawMaterial.PriceDate ?? DateTime.Now,
                         CreatedBy = rawMaterial.AddedBy
@@ -220,12 +221,11 @@ namespace navami
                 }
                 if (rawMaterial.Price != rawMaterialDto.Price)
                 {
-                    if (rawMaterial.VendorId.HasValue && rawMaterial.Price.HasValue)
+                    if (rawMaterial.Price.HasValue)
                     {
                         var price = new RawMaterialPrice
                         {
                             RawMaterialId = rawMaterial.RawMaterialId,
-                            VendorId = rawMaterial.VendorId.Value,
                             SupplierName = rawMaterial.Party ?? "Unknown",
                             Price = rawMaterialDto.Price,
                             CreatedAt = rawMaterial.PriceDate ?? DateTime.Now,
